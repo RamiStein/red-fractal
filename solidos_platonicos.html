@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Red Humana Fractal · Geometría Sagrada y Espacio Digital 3D</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Import Map para Three.js y OrbitControls locales -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three.module.js",
+      "three/addons/controls/OrbitControls.js": "./vendor/OrbitControls.js"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Lienzo 3D -->
+  <div id="canvas-container"></div>
+
+  <!-- Tooltip 3D -->
+  <div id="tooltip-3d"></div>
+
+  <!-- Barra Superior de Controles -->
+  <header id="top-bar">
+    <div class="brand">
+      <div class="brand-icon">✨</div>
+      <div class="brand-text">
+        <h1>RED HUMANA FRACTAL</h1>
+        <span>Sólidos Platónicos & Red de la Nueva Era</span>
+      </div>
+    </div>
+
+    <!-- Navegación de la Suite -->
+    <nav style="display:flex; gap:4px; background:rgba(255,255,255,0.04); padding:3px 6px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
+      <a href="red_comunitaria_2d.html" style="color:#ffd32a; text-decoration:none; font-size:10px; font-weight:700; padding:4px 8px; border-radius:5px; background:rgba(255,211,42,0.15); border:1px solid rgba(255,211,42,0.3);" title="Red Comunitaria Fractal 2D: 5 Elementos y Membresías">🌱 Red Comunitaria 2D</a>
+      <a href="espacio_3d.html" style="color:var(--text-muted); text-decoration:none; font-size:10px; font-weight:600; padding:4px 8px;" title="Espacio Digital 3D">🌌 Espacio 3D</a>
+      <a href="micelio_grafos_2d.html" style="color:var(--text-muted); text-decoration:none; font-size:10px; font-weight:600; padding:4px 8px;" title="Micelio 2D">🍄 Micelio 2D</a>
+      <a href="index.html" style="color:var(--text-muted); text-decoration:none; font-size:10px; font-weight:600; padding:4px 8px;" title="Matriz Cristal">💎 Matriz Cristal</a>
+    </nav>
+
+    <div class="controls-group">
+      <!-- Selector de Geometría Platónica -->
+      <div class="control-item">
+        <label for="solid-select">Geometría:</label>
+        <select id="solid-select">
+          <option value="dodecahedron" selected>🌌 Dodecaedro (Éter - Red de Redes)</option>
+          <option value="icosahedron">💧 Icosaedro (Agua - Cohesión & Relaciones)</option>
+          <option value="cube">🟩 Cubo (Tierra - Estructura & Hábitat)</option>
+          <option value="octahedron">🔶 Octaedro (Aire - Comunicación & Mente)</option>
+          <option value="tetrahedron">🔺 Tetraedro (Fuego - Voluntad & Impulso)</option>
+          <option value="merkaba">🔯 Merkaba (Luz - Unión de Polaridades)</option>
+        </select>
+      </div>
+
+      <!-- Nivel de Profundidad Fractal -->
+      <div class="control-item">
+        <label for="depth-select">Nivel Fractal:</label>
+        <select id="depth-select">
+          <option value="0">Nivel 0 (Semilla Primigenia)</option>
+          <option value="1" selected>Nivel 1 (Círculos Comunitarios)</option>
+          <option value="2">Nivel 2 (Red Planetaria Fractal)</option>
+        </select>
+      </div>
+
+      <!-- Botones de Acción y Visualización -->
+      <button id="btn-toggle-rotation" class="btn" title="Alternar rotación cósmica automática">
+        🔄 Rotación: <span id="rot-status">ON</span>
+      </button>
+
+      <button id="btn-toggle-pulse" class="btn" title="Alternar pulsaciones de energía armónica">
+        ⚡ Pulsos: <span id="pulse-status">ON</span>
+      </button>
+
+      <button id="btn-toggle-labels" class="btn" title="Mostrar/Ocultar etiquetas 3D">
+        🏷️ Nombres: <span id="labels-status">OFF</span>
+      </button>
+
+      <button id="btn-export" class="btn btn-primary" title="Exportar la red humana diseñada en JSON">
+        💾 Exportar Red
+      </button>
+
+      <button id="btn-import" class="btn" title="Cargar archivo de red en formato JSON">
+        📂 Cargar Red
+      </button>
+
+      <button id="btn-snapshot" class="btn" title="Tomar captura de imagen PNG de la geometría">
+        📸 Captura
+      </button>
+
+      <button id="btn-help" class="btn btn-icon" title="Filosofía matemática y guía de uso">
+        ℹ️
+      </button>
+
+      <!-- Input invisible para importar JSON -->
+      <input type="file" id="file-input" accept=".json" style="display: none;">
+    </div>
+  </header>
+
+  <!-- Panel HUD de Estadísticas y Filtros (Izquierda) -->
+  <aside id="stats-hud">
+    <h3>
+      <span>Geometría Sagrada</span>
+      <span id="hud-archetype" style="font-size: 11px; color: var(--accent-cyan);">Éter</span>
+    </h3>
+
+    <div class="stat-row">
+      <span class="stat-label">Sólido Base:</span>
+      <span class="stat-value" id="hud-solid-name">Dodecaedro</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Profundidad Fractal:</span>
+      <span class="stat-value" id="hud-depth">Nivel 1</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Nodos Vivos (V):</span>
+      <span class="stat-value" id="hud-nodes-count">420</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Puentes Armónicos (E):</span>
+      <span class="stat-value" id="hud-links-count">650</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Proporción Áurea (ϕ):</span>
+      <span class="stat-value">1.618034</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Euler (V - E + F = 2):</span>
+      <span class="stat-value" id="hud-euler">2 (Verificado)</span>
+    </div>
+
+    <!-- Categorías / Roles de la Red -->
+    <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">
+        Roles & Categorías
+      </span>
+      <button id="btn-add-category" class="btn" style="padding: 2px 8px; font-size: 10px;">+ Nueva</button>
+    </div>
+
+    <div class="category-pills" id="category-pills-list">
+      <!-- Inyectado dinámicamente -->
+    </div>
+  </aside>
+
+  <!-- Panel Inspector y Editor de Nodos (Derecha) -->
+  <aside id="node-inspector">
+    <div class="inspector-header">
+      <h2>
+        <span id="inspector-color-dot" style="width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: var(--accent-cyan); box-shadow: 0 0 8px currentColor;"></span>
+        <span id="inspector-title">Detalles del Nodo</span>
+      </h2>
+      <button id="btn-close-inspector" class="close-btn" title="Cerrar panel">&times;</button>
+    </div>
+
+    <div class="inspector-body">
+      <!-- Nombre Asignable -->
+      <div class="form-field">
+        <label for="node-name-input">Nombre del Nodo / Círculo:</label>
+        <input type="text" id="node-name-input" placeholder="Ej. Círculo Semilla de Sabiduría">
+      </div>
+
+      <!-- Categoría Asignable -->
+      <div class="form-field">
+        <label for="node-category-select">Categoría / Rol Humano:</label>
+        <select id="node-category-select">
+          <!-- Opciones inyectadas dinámicamente -->
+        </select>
+      </div>
+
+      <!-- Color Personalizado del Nodo -->
+      <div class="form-field">
+        <label>Color Resonante:</label>
+        <div class="color-picker-wrapper">
+          <input type="color" id="node-color-picker" value="#00e5ff">
+          <span id="node-color-label" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">#00e5ff</span>
+        </div>
+      </div>
+
+      <!-- Frecuencia de Resonancia -->
+      <div class="form-field">
+        <label for="node-resonance-slider">
+          Resonancia Armónica: <span id="resonance-val">100%</span>
+        </label>
+        <input type="range" id="node-resonance-slider" min="0" max="1" step="0.05" value="1">
+      </div>
+
+      <!-- Coordenadas Espaciales 3D -->
+      <div class="form-field">
+        <label>Coordenadas Espaciales 3D [X, Y, Z]:</label>
+        <div class="coords-box" id="node-coords-display">
+          <span>X: 0.000</span>
+          <span>Y: 0.000</span>
+          <span>Z: 0.000</span>
+        </div>
+      </div>
+
+      <!-- Nivel Fractal y Arquetipo -->
+      <div style="display: flex; gap: 8px;">
+        <div class="form-field" style="flex: 1;">
+          <label>Nivel Fractal:</label>
+          <input type="text" id="node-level-display" readonly style="background: rgba(0,0,0,0.2);">
+        </div>
+        <div class="form-field" style="flex: 1;">
+          <label>Arquetipo Sagrado:</label>
+          <input type="text" id="node-archetype-display" readonly style="background: rgba(0,0,0,0.2);">
+        </div>
+      </div>
+
+      <!-- Propósito / Descripción -->
+      <div class="form-field">
+        <label for="node-desc-input">Propósito & Acuerdos del Nodo:</label>
+        <textarea id="node-desc-input" placeholder="Describe la función humana, acuerdos, visión o personas asignadas a este punto de la red..."></textarea>
+      </div>
+
+      <!-- Nodos Vecinos Conectados -->
+      <div class="form-field">
+        <label>Nodos Conectados (<span id="connections-count">0</span>):</label>
+        <div class="connections-list" id="connections-list">
+          <!-- Inyectado dinámicamente -->
+        </div>
+      </div>
+    </div>
+
+    <div class="inspector-footer">
+      <button id="btn-save-node" class="btn btn-primary" style="flex: 1;">
+        💾 Guardar Cambios
+      </button>
+    </div>
+  </aside>
+
+  <!-- Barra Inferior de Navegación y Ayuda Rápida -->
+  <footer id="bottom-bar">
+    <span>Navegación 3D:</span>
+    <span><span class="key-hint">Click Izq + Arrastrar</span> Rotar</span>
+    <span><span class="key-hint">Click Der + Arrastrar</span> Desplazar</span>
+    <span><span class="key-hint">Rueda del Ratón</span> Zoom</span>
+    <span><span class="key-hint">Click en Nodo</span> Inspeccionar & Editar</span>
+  </footer>
+
+  <!-- Modal de Filosofía y Guía -->
+  <div class="modal-overlay" id="help-modal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2>La Red Humana Fractal y los Sólidos Platónicos</h2>
+        <button id="btn-close-modal" class="close-btn">&times;</button>
+      </div>
+      <p>
+        Esta plataforma modela la auto-organización de la red humana en la nueva era como una estructura geométrica fractal viva, donde cada individuo, círculo y comunidad ocupa un lugar armónico en el espacio relacional.
+      </p>
+      <h3 style="color: var(--accent-cyan); font-size: 14px; margin: 12px 0 6px;">Los 5 Sólidos y sus Arquetipos en la Red:</h3>
+      <ul>
+        <li><strong>🔺 Tetraedro (Fuego):</strong> 4 nodos. La semilla de la voluntad, liderazgo emergente y transformación activa.</li>
+        <li><strong>🔶 Octaedro (Aire):</strong> 6 nodos. Comunicación ágil, integración mental, puentes y difusión de saberes.</li>
+        <li><strong>🟩 Cubo (Tierra):</strong> 8 nodos. Manifestación material, biorregiones, hábitats y recursos regenerativos.</li>
+        <li><strong>💧 Icosaedro (Agua):</strong> 12 nodos (proporción áurea $\phi$). Cohesión vincular, empatía, arte y salud comunitaria.</li>
+        <li><strong>🌌 Dodecaedro (Éter):</strong> 20 nodos. Conciencia de red global, gobernanza distribuida y visión cósmica.</li>
+      </ul>
+      <h3 style="color: var(--accent-cyan); font-size: 14px; margin: 12px 0 6px;">Principios Fractales:</h3>
+      <p>
+        Mediante la constante áurea \(\phi = \frac{1 + \sqrt{5}}{2} \approx 1.618\), cada vértice de un sólido reproduce armónicamente la geometría a una escala menor, permitiendo que la red crezca indefinidamente sin perder su coherencia original ni su centro.
+      </p>
+      <h3 style="color: var(--accent-cyan); font-size: 14px; margin: 12px 0 6px;">Cómo usar este espacio digital:</h3>
+      <ul>
+        <li>Selecciona cualquier sólido o activa la recursión fractal con el selector de <em>Nivel Fractal</em>.</li>
+        <li>Haz clic sobre cualquier esfera/nodo en 3D para renombrarlo, asignarle categorías y redactar su propósito.</li>
+        <li>Exporta el estado de tu red diseñada con el botón <em>Exportar Red</em> para preservarla y compartirla.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Script Principal de la Aplicación -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>

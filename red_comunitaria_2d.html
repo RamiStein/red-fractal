@@ -1,0 +1,2475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Red Comunitaria Fractal 2D · 5 Elementos, Propuestas & Membresía de Sostén</title>
+  <style>
+    :root {
+      --bg: #030611;
+      --card-bg: rgba(9, 16, 32, 0.92);
+      --card-hover: rgba(18, 30, 58, 0.95);
+      --border: rgba(255, 255, 255, 0.12);
+      --border-bright: rgba(255, 255, 255, 0.25);
+      --accent-fuego: #ff4757;
+      --accent-tierra: #2ed573;
+      --accent-aire: #ffa502;
+      --accent-agua: #1e90ff;
+      --accent-eter: #9b59b6;
+      --accent-gold: #ffd32a;
+      --accent-cyan: #00e5ff;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+    body {
+      width: 100vw; height: 100vh; overflow: hidden;
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    }
+
+    #canvas-network {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: block; cursor: grab;
+    }
+    #canvas-network:active { cursor: grabbing; }
+
+    /* Barra Superior de Navegación & Controles */
+    #top-bar {
+      position: absolute; top: 12px; left: 12px; right: 12px; z-index: 30;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 8px 16px;
+      background: var(--card-bg); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border); border-radius: 14px;
+      box-shadow: 0 10px 32px rgba(0,0,0,0.7); flex-wrap: wrap;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .brand-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, #ff4757, #ffa502, #2ed573, #1e90ff, #9b59b6);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; box-shadow: 0 0 16px rgba(255, 211, 42, 0.4);
+      animation: pulseBrand 6s infinite ease-in-out;
+    }
+    @keyframes pulseBrand {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.05); filter: brightness(1.25); }
+    }
+    .brand-title {
+      font-size: 13px; font-weight: 800; letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #fff, #ffd32a);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .brand-sub { font-size: 9.5px; color: var(--text-muted); }
+
+    /* Enlaces de la Suite */
+    .suite-nav {
+      display: flex; align-items: center; gap: 4px;
+      background: rgba(255,255,255,0.04); padding: 3px 6px; border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .suite-nav a {
+      color: var(--text-muted); text-decoration: none; font-size: 10px; font-weight: 600;
+      padding: 4px 8px; border-radius: 6px; transition: all 0.2s;
+    }
+    .suite-nav a:hover, .suite-nav a.active {
+      color: #fff; background: rgba(255,255,255,0.14);
+    }
+    .suite-nav a.active {
+      border: 1px solid var(--accent-gold); color: var(--accent-gold);
+    }
+
+    /* Selector de Niveles */
+    .level-selector {
+      display: flex; align-items: center; gap: 4px;
+      background: rgba(0,0,0,0.35); padding: 3px 5px; border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .level-btn {
+      background: transparent; border: none; color: var(--text-muted);
+      font-size: 10.5px; font-weight: 700; padding: 5px 9px; border-radius: 7px;
+      cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .level-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
+    .level-btn.active {
+      background: linear-gradient(135deg, rgba(255,211,42,0.22), rgba(0,229,255,0.22));
+      color: #fff; border: 1px solid var(--accent-gold); box-shadow: 0 0 10px rgba(255,211,42,0.3);
+    }
+
+    /* Botones de acción */
+    .action-group { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    button, select, input, textarea {
+      background: rgba(255,255,255,0.08); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 5px 10px; font-size: 11px;
+      outline: none; transition: all 0.2s;
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--accent-gold); box-shadow: 0 0 10px rgba(255,211,42,0.3);
+    }
+    button {
+      cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;
+    }
+    button:hover {
+      background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3);
+      transform: translateY(-1px);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, rgba(255,211,42,0.25), rgba(255,165,2,0.35));
+      border-color: var(--accent-gold); color: #fff;
+    }
+    .btn-gold:hover {
+      box-shadow: 0 0 14px rgba(255,211,42,0.5);
+    }
+    .btn-cyan {
+      background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(30,144,255,0.3));
+      border-color: var(--accent-cyan); color: #fff;
+    }
+
+    /* Botonera de Capas */
+    .layers-bar {
+      display: flex; align-items: center; gap: 4px;
+    }
+    .layer-chip {
+      font-size: 10px; padding: 3px 8px; border-radius: 6px; cursor: pointer;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      color: var(--text-muted); transition: all 0.2s;
+    }
+    .layer-chip.on {
+      background: rgba(0, 229, 255, 0.18); border-color: var(--accent-cyan); color: #fff;
+    }
+
+    /* Portal del Vacío (Nivel 0: La Nada) */
+    #void-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 15;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease;
+    }
+    #void-overlay.hidden { opacity: 0; pointer-events: none; }
+    .void-card {
+      pointer-events: auto;
+      max-width: 500px; text-align: center; padding: 32px;
+      background: rgba(9, 16, 32, 0.88); backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 211, 42, 0.3); border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(255,211,42,0.15);
+      animation: floatVoid 4s ease-in-out infinite;
+    }
+    @keyframes floatVoid {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .void-glyph {
+      font-size: 54px; margin-bottom: 12px;
+      filter: drop-shadow(0 0 20px rgba(255,211,42,0.6));
+    }
+    .void-title {
+      font-size: 20px; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px;
+      background: linear-gradient(90deg, #fff, #ffd32a, #00e5ff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .void-desc {
+      font-size: 12.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 22px;
+    }
+    .btn-genesis {
+      font-size: 13px; font-weight: 700; padding: 12px 24px; border-radius: 12px;
+      background: linear-gradient(135deg, #ffd32a, #ff4757, #9b59b6);
+      color: #030611; border: none; box-shadow: 0 0 30px rgba(255,211,42,0.6);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-genesis:hover {
+      transform: scale(1.06); box-shadow: 0 0 45px rgba(255,211,42,0.9);
+      color: #000;
+    }
+
+    /* Panel Izquierdo: Diagnóstico Comunitario & 5 Elementos */
+    #left-panel {
+      position: absolute; top: 68px; left: 12px; bottom: 16px; width: 310px;
+      z-index: 25; background: var(--card-bg); backdrop-filter: blur(18px);
+      border: 1px solid var(--border); border-radius: 14px; padding: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: flex; flex-direction: column;
+      gap: 12px; overflow-y: auto;
+    }
+    .panel-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border); padding-bottom: 8px;
+    }
+    .panel-title {
+      font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--accent-gold); display: flex; align-items: center; gap: 6px;
+    }
+
+    /* Métricas Vitales */
+    .metric-card-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .m-card {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px; padding: 8px 10px;
+    }
+    .m-card-title { font-size: 9.5px; color: var(--text-muted); text-transform: uppercase; }
+    .m-card-val { font-size: 17px; font-weight: 800; color: #fff; margin-top: 2px; }
+    .m-card-sub { font-size: 9px; color: var(--accent-gold); }
+
+    /* Barra de Vitalidad General */
+    .vitality-box {
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .vit-head { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; }
+    .vit-bar-bg {
+      width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;
+    }
+    .vit-bar-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #ff4757, #ffa502, #2ed573, #00e5ff);
+      transition: width 0.4s ease; border-radius: 4px;
+    }
+
+    /* 5 Elementos Lista */
+    .elements-status-list {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .elem-row {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px; padding: 6px 9px; cursor: pointer; transition: all 0.2s;
+    }
+    .elem-row:hover {
+      background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.2);
+    }
+    .elem-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .elem-row-name { font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+    .elem-row-val { font-size: 10px; font-family: monospace; font-weight: 700; }
+    .elem-bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+    .elem-bar-fill { height: 100%; width: 0%; border-radius: 2px; transition: width 0.3s ease; }
+
+    /* Lista de Integrantes Sostenedores */
+    .members-summary-list {
+      flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;
+      padding-right: 2px;
+    }
+    .member-mini-card {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 8px; border-radius: 8px; background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05); font-size: 10.5px; cursor: pointer;
+    }
+    .member-mini-card:hover { background: rgba(255,255,255,0.08); }
+    .m-avatar {
+      width: 22px; height: 22px; border-radius: 6px; display: inline-flex;
+      align-items: center; justify-content: center; font-size: 11px;
+      background: rgba(255,255,255,0.1); margin-right: 6px;
+    }
+
+    /* Panel Derecho: Inspector & Editor */
+    #inspector-panel {
+      position: absolute; top: 68px; right: 12px; bottom: 16px; width: 330px;
+      z-index: 25; background: var(--card-bg); backdrop-filter: blur(18px);
+      border: 1px solid var(--border); border-radius: 14px; padding: 14px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 10px;
+      transform: translateX(370px); opacity: 0; pointer-events: none;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+      overflow-y: auto;
+    }
+    #inspector-panel.open {
+      transform: translateX(0); opacity: 1; pointer-events: auto;
+    }
+    .insp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border); padding-bottom: 6px;
+    }
+    .insp-title { font-size: 12.5px; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px; }
+    .close-btn {
+      background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; padding: 0 4px;
+    }
+    .close-btn:hover { color: #fff; }
+
+    .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+    .form-group label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; }
+
+    /* Modales */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(10px);
+      z-index: 100; display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-card {
+      background: rgba(11, 20, 42, 0.96); border: 1px solid var(--border-bright);
+      border-radius: 18px; width: 440px; max-width: 90vw; padding: 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8); display: flex; flex-direction: column; gap: 14px;
+    }
+    .modal-title { font-size: 14px; font-weight: 700; color: var(--accent-gold); display: flex; align-items: center; gap: 8px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+    /* Tooltip */
+    #tooltip {
+      position: absolute; z-index: 50; pointer-events: none;
+      background: rgba(9, 16, 32, 0.96); border: 1px solid var(--accent-gold);
+      padding: 6px 12px; border-radius: 8px; font-size: 11px;
+      display: none; transform: translate(-50%, -130%);
+      white-space: nowrap; box-shadow: 0 4px 20px rgba(255, 211, 42, 0.35);
+    }
+
+    /* Barra Inferior de Información y Zoom */
+    #bottom-bar {
+      position: absolute; bottom: 12px; left: 334px; right: 354px; z-index: 25;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: 6px 14px;
+      background: var(--card-bg); backdrop-filter: blur(12px);
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 11px; color: var(--text-muted);
+    }
+    .key-hint {
+      background: rgba(255,255,255,0.12); padding: 2px 6px; border-radius: 4px;
+      color: #fff; font-family: monospace; font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Lienzo 2D Principal -->
+  <canvas id="canvas-network"></canvas>
+  <div id="tooltip"></div>
+
+  <!-- Overlay: El Vacío Primordial (La Nada) -->
+  <div id="void-overlay" class="hidden">
+    <div class="void-card">
+      <div class="void-glyph">🌌</div>
+      <h2 class="void-title">EL VACÍO PRIMORDIAL</h2>
+      <p class="void-desc">
+        Te encuentras en lo más alto de la red, en la calma del espacio antes de la manifestación.
+        Desde la nada se engendra la estructura. Al manifestar la primera semilla comunitaria, florecerán
+        los 5 elementos sagrados y comenzará el tejido fractal.
+      </p>
+      <button class="btn-genesis" id="btn-genesis-seed">
+        ✦ MANIFESTAR ELEMENTO (SEMILLA COMUNITARIA) ✦
+      </button>
+    </div>
+  </div>
+
+  <!-- Barra Superior de Navegación & Control Multinivel -->
+  <header id="top-bar">
+    <div class="brand" id="brand-home" title="Centrar cámara en la red">
+      <div class="brand-icon">🌱</div>
+      <div>
+        <div class="brand-title">RED COMUNITARIA FRACTAL 2D</div>
+        <div class="brand-sub">5 Elementos · Propuestas · Membresías de Sostén</div>
+      </div>
+    </div>
+
+    <!-- Navegador de la Suite -->
+    <nav class="suite-nav">
+      <a href="red_comunitaria_2d.html" class="active" title="Red Comunitaria 2D (Actual)">🌱 Red 2D</a>
+      <a href="espacio_3d.html" title="Espacio Digital 3D de Nodos">🌌 Espacio 3D</a>
+      <a href="micelio_grafos_2d.html" title="Micelio & Algoritmos Bio-Inspirados">🍄 Micelio 2D</a>
+      <a href="solidos_platonicos.html" title="Sólidos Platónicos y Geometría">🔮 Sólidos</a>
+      <a href="index.html" title="Matriz Cristal Sincrónica">💎 Matriz Cristal</a>
+    </nav>
+
+    <!-- Selector de Niveles de Profundidad -->
+    <div class="level-selector">
+      <button class="level-btn" data-level="0" id="btn-lvl-0" title="Nivel 0: El Vacío Primordial / La Nada">
+        🌌 Nivel 0: Vacío
+      </button>
+      <button class="level-btn active" data-level="1" id="btn-lvl-1" title="Nivel 1: Célula Comunitaria y 5 Elementos">
+        🌱 Nivel 1: Comunidad
+      </button>
+      <button class="level-btn" data-level="2" id="btn-lvl-2" title="Nivel 2: Propuestas e Iniciativas en curso">
+        📋 Nivel 2: Propuestas
+      </button>
+      <button class="level-btn" data-level="3" id="btn-lvl-3" title="Nivel 3: Integrantes & Membresías de Sostén">
+        💎 Nivel 3: Membresías
+      </button>
+    </div>
+
+    <!-- Conmutador de Capas -->
+    <div class="layers-bar">
+      <div class="layer-chip on" data-layer="geometry" title="Geometría sagrada y pentagrama áureo">🌀 Geometría</div>
+      <div class="layer-chip on" data-layer="elements" title="Los 5 Elementos (Fuego, Tierra, Aire, Agua, Éter)">🔥 Elementos</div>
+      <div class="layer-chip on" data-layer="proposals" title="Satélites de propuestas activas">📋 Propuestas</div>
+      <div class="layer-chip on" data-layer="members" title="Nodos de integrantes de la comunidad">👥 Miembros</div>
+      <div class="layer-chip on" data-layer="sustainFlow" title="Flujo de energía y vitalidad">⚡ Flujo Sostén</div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="action-group">
+      <button id="btn-open-prop-modal" class="btn-gold" title="Crear propuesta en un elemento">+ Propuesta</button>
+      <button id="btn-open-member-modal" class="btn-cyan" title="Sumar integrante a la red con membresía">+ Miembro</button>
+      <button id="btn-load-preset" title="Cargar comunidad modelo floreciente">🌟 Semilla Viva</button>
+      <button id="btn-reset-void" title="Regresar a La Nada (Vacío primordial)">🌌 Vacío</button>
+      <button id="btn-export-json" title="Descargar red fractal en JSON">💾 JSON</button>
+      <button id="btn-import-json" title="Importar archivo JSON">📂</button>
+      <input type="file" id="inp-import-file" accept=".json" style="display:none;">
+    </div>
+  </header>
+
+  <!-- Panel Lateral Izquierdo: Diagnóstico Comunitario & 5 Elementos -->
+  <aside id="left-panel">
+    <div class="panel-header">
+      <div class="panel-title">🌿 Diagnóstico Comunitario</div>
+      <button id="btn-new-comm" class="btn-gold" style="font-size:10px; padding:3px 7px;">+ Comunidad</button>
+    </div>
+
+    <!-- Selector de Comunidad Activa -->
+    <div class="form-group" style="margin-bottom:2px;">
+      <label>Comunidad en Enfoque:</label>
+      <select id="sel-community"></select>
+    </div>
+
+    <!-- Tarjetas de Métricas -->
+    <div class="metric-card-grid">
+      <div class="m-card">
+        <div class="m-card-title">Membresías</div>
+        <div class="m-card-val" id="metric-members">0</div>
+        <div class="m-card-sub" id="metric-sustain-pts">0 pts sostén</div>
+      </div>
+      <div class="m-card">
+        <div class="m-card-title">Propuestas</div>
+        <div class="m-card-val" id="metric-proposals">0</div>
+        <div class="m-card-sub" id="metric-energy-req">0 energía req.</div>
+      </div>
+    </div>
+
+    <!-- Barra de Vitalidad General -->
+    <div class="vitality-box">
+      <div class="vit-head">
+        <span>Índice de Vitalidad:</span>
+        <span id="txt-vitality" style="color:var(--accent-gold);">0%</span>
+      </div>
+      <div class="vit-bar-bg">
+        <div class="vit-bar-fill" id="bar-vitality"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:9.5px; color:var(--text-muted); margin-top:2px;">
+        <span>Sostén: <b id="txt-sustain-ratio" style="color:#fff;">0%</b></span>
+        <span>Balance Áureo: <b id="txt-pentagonal-bal" style="color:#fff;">0%</b></span>
+      </div>
+    </div>
+
+    <!-- Estado de los 5 Elementos -->
+    <div class="panel-title" style="font-size:10.5px; margin-top:2px;">⚡ Armonía de los 5 Elementos</div>
+    <div class="elements-status-list" id="elements-list"></div>
+
+    <!-- Lista Rápida de Sostenedores -->
+    <div class="panel-title" style="font-size:10.5px; margin-top:4px;">👥 Sostenedores de la Red</div>
+    <div class="members-summary-list" id="members-list"></div>
+  </aside>
+
+  <!-- Panel Lateral Derecho: Inspector & Editor -->
+  <aside id="inspector-panel">
+    <div class="insp-header">
+      <div class="insp-title" id="insp-title">🔍 Inspector de Nodo</div>
+      <button class="close-btn" id="btn-close-inspector">&times;</button>
+    </div>
+    <div id="insp-content">
+      <p style="font-size:11px; color:var(--text-muted);">Toca cualquier elemento, propuesta o miembro para ver y editar sus capacidades.</p>
+    </div>
+  </aside>
+
+  <!-- Barra Inferior de Navegación & Atajos -->
+  <footer id="bottom-bar">
+    <div>
+      <span class="key-hint">Arrastrar</span> Mover lienzo ·
+      <span class="key-hint">Rueda</span> Zoom ·
+      <span class="key-hint">Clic</span> Inspeccionar ·
+      <span class="key-hint">Arrastrar Nodo</span> Reposicionar
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span id="zoom-indicator">Zoom: 100%</span>
+      <button id="btn-zoom-in" style="padding:2px 7px;">+</button>
+      <button id="btn-zoom-out" style="padding:2px 7px;">-</button>
+      <button id="btn-zoom-reset" style="padding:2px 7px;">Centrar</button>
+    </div>
+  </footer>
+
+  <!-- Modal: Crear Propuesta -->
+  <div class="modal-overlay" id="modal-proposal">
+    <div class="modal-card">
+      <div class="modal-title">📋 Crear Nueva Propuesta en Elemento</div>
+      <div class="form-group">
+        <label>Elemento Arquetípico:</label>
+        <select id="prop-elem-select">
+          <option value="fuego">🔥 Fuego (Iniciación & Voluntad)</option>
+          <option value="tierra">🌱 Tierra (Sostén & Recursos)</option>
+          <option value="aire">💨 Aire (Comunicación & Red)</option>
+          <option value="agua">💧 Agua (Cohesión & Relaciones)</option>
+          <option value="eter">✨ Éter (Gobernanza & Visión)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Título de la Propuesta:</label>
+        <input type="text" id="prop-title-input" placeholder="Ej: Círculo de Semillas / Taller Solar">
+      </div>
+      <div class="form-group">
+        <label>Propósito & Descripción:</label>
+        <textarea id="prop-desc-input" rows="3" placeholder="¿Qué aporta esta propuesta al desarrollo de la comunidad?"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Energía / Sostén Requerido (pts):</label>
+        <input type="number" id="prop-energy-input" value="10" min="1" max="100">
+      </div>
+      <div class="modal-actions">
+        <button id="btn-cancel-prop">Cancelar</button>
+        <button id="btn-save-prop" class="btn-gold">Guardar Propuesta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Sumar Integrante con Membresía -->
+  <div class="modal-overlay" id="modal-member">
+    <div class="modal-card">
+      <div class="modal-title">👥 Integrar Miembro con Membresía de Sostén</div>
+      <div class="form-group">
+        <label>Nombre del Integrante:</label>
+        <input type="text" id="mem-name-input" placeholder="Nombre o Ser">
+      </div>
+      <div class="form-group">
+        <label>Rol Comunitario:</label>
+        <input type="text" id="mem-role-input" placeholder="Ej: Guardián de Semillas / Facilitador">
+      </div>
+      <div class="form-group">
+        <label>Tipo de Membresía (Pilar de Sostén):</label>
+        <select id="mem-tier-select">
+          <option value="semilla">🌱 Semilla (Bienvenida & Presencia - 2 pts sostén)</option>
+          <option value="colaborador" selected>⚡ Colaborador Activo (Tareas & Tiempo - 5 pts sostén)</option>
+          <option value="pilar">💎 Pilar Sostén (Recurrente & Compromiso - 10 pts sostén)</option>
+          <option value="guardian">🛡️ Guardián del Círculo (Custodio de Visión - 15 pts sostén)</option>
+          <option value="resonante">🔮 Nodo Resonante (Puente Inter-comunitario - 8 pts sostén)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Resonancia con Elemento Principal:</label>
+        <select id="mem-elem-select">
+          <option value="fuego">🔥 Fuego</option>
+          <option value="tierra" selected>🌱 Tierra</option>
+          <option value="aire">💨 Aire</option>
+          <option value="agua">💧 Agua</option>
+          <option value="eter">✨ Éter</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Aporte de Sostén:</label>
+        <input type="text" id="mem-contrib-input" value="10 hrs/mes + Presencia en asambleas">
+      </div>
+      <div class="modal-actions">
+        <button id="btn-cancel-mem">Cancelar</button>
+        <button id="btn-save-mem" class="btn-cyan">Activar Membresía</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Crear Nueva Comunidad -->
+  <div class="modal-overlay" id="modal-community">
+    <div class="modal-card">
+      <div class="modal-title">✨ Manifestar Nueva Comunidad Fractal</div>
+      <div class="form-group">
+        <label>Nombre de la Comunidad:</label>
+        <input type="text" id="comm-name-input" placeholder="Ej: Aldea Aurora / Nodo Síntesis">
+      </div>
+      <div class="form-group">
+        <label>Visión & Propósito:</label>
+        <textarea id="comm-vision-input" rows="3" placeholder="¿Cuál es el corazón y la intención evolutiva de esta célula?"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button id="btn-cancel-comm">Cancelar</button>
+        <button id="btn-save-comm" class="btn-gold">Manifestar en el Plano</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lógica de la Aplicación (100% Autocontenida: funciona con doble clic file:// y también con http://) -->
+  <script>
+    // =========================================================================
+    // MODELO DE RED COMUNITARIA FRACTAL 2D (INLINE PARA COMPATIBILIDAD FILE://)
+    // =========================================================================
+    const SACRED_ELEMENTS = {
+      fuego: {
+        id: 'fuego',
+        name: 'Fuego',
+        archetype: 'Iniciación & Voluntad',
+        icon: '🔥',
+        color: '#ff4757',
+        glowColor: 'rgba(255, 71, 87, 0.45)',
+        description: 'Chispa creadora, activación de proyectos, toma de acción, coraje y energía transformadora.',
+        defaultProposals: [
+          { title: 'Taller de Iniciación Comunitaria', description: 'Activación de nuevos proyectos e impulso creador para la red.', energyNeeded: 10 }
+        ]
+      },
+      tierra: {
+        id: 'tierra',
+        name: 'Tierra',
+        archetype: 'Sostén & Estructura',
+        icon: '🌱',
+        color: '#2ed573',
+        glowColor: 'rgba(46, 213, 115, 0.45)',
+        description: 'Hábitat, recursos materiales, huertos comunitarios, bio-construcción y sostenibilidad económica.',
+        defaultProposals: [
+          { title: 'Huerto & Banco de Semillas', description: 'Soberanía alimentaria y custodia de semillas ancestrales.', energyNeeded: 15 }
+        ]
+      },
+      aire: {
+        id: 'aire',
+        name: 'Aire',
+        archetype: 'Comunicación & Red',
+        icon: '💨',
+        color: '#ffa502',
+        glowColor: 'rgba(255, 165, 2, 0.45)',
+        description: 'Saberes compartidos, red de comunicación, difusión libre, pedagogía y pensamiento claro.',
+        defaultProposals: [
+          { title: 'Círculo de Saberes y Difusión Abierta', description: 'Talleres libres, podcast comunitario y puente de información.', energyNeeded: 8 }
+        ]
+      },
+      agua: {
+        id: 'agua',
+        name: 'Agua',
+        archetype: 'Cohesión & Relaciones',
+        icon: '💧',
+        color: '#1e90ff',
+        glowColor: 'rgba(30, 144, 255, 0.45)',
+        description: 'Empatía vincular, cuidado afectivo, arte, celebraciones grupales y armonía emocional.',
+        defaultProposals: [
+          { title: 'Círculo de Cuidado & Encuentros de Arte', description: 'Espacio de escucha activa, contención emocional y música compartida.', energyNeeded: 12 }
+        ]
+      },
+      eter: {
+        id: 'eter',
+        name: 'Éter',
+        archetype: 'Gobernanza & Sabiduría',
+        icon: '✨',
+        color: '#9b59b6',
+        glowColor: 'rgba(155, 89, 182, 0.45)',
+        description: 'Propósito trascendente, visión holística, asamblea de consensos y conexión cósmica.',
+        defaultProposals: [
+          { title: 'Asamblea de Visión & Acuerdos Éticos', description: 'Gobernanza distribuida, decisiones por consentimiento y brújula evolutiva.', energyNeeded: 10 }
+        ]
+      }
+    };
+
+    const MEMBERSHIP_TIERS = {
+      semilla: {
+        id: 'semilla',
+        name: 'Semilla',
+        badge: '🌱',
+        color: '#a4b0be',
+        sustainPoints: 2,
+        description: 'Integrante nuevo en fase de exploración y resonancia. Aporta presencia y energía de bienvenida.'
+      },
+      colaborador: {
+        id: 'colaborador',
+        name: 'Colaborador Activo',
+        badge: '⚡',
+        color: '#70a1ff',
+        sustainPoints: 5,
+        description: 'Participa activamente en propuestas de los elementos con tiempo, habilidades concretas y esfuerzo.'
+      },
+      pilar: {
+        id: 'pilar',
+        name: 'Pilar Sostén',
+        badge: '💎',
+        color: '#2ed573',
+        sustainPoints: 10,
+        description: 'Sostenedor troncal que brinda recursos recurrentes, estabilidad y custodia continua a la comunidad.'
+      },
+      guardian: {
+        id: 'guardian',
+        name: 'Guardián del Círculo',
+        badge: '🛡️',
+        color: '#eccc68',
+        sustainPoints: 15,
+        description: 'Responsable de cuidar la coherencia del elemento, facilitación de acuerdos y guía de nuevos integrantes.'
+      },
+      resonante: {
+        id: 'resonante',
+        name: 'Nodo Resonante',
+        badge: '🔮',
+        color: '#ff6b81',
+        sustainPoints: 8,
+        description: 'Enlace inter-comunitario que conecta esta comunidad con otros nodos de la red fractal planetaria.'
+      }
+    };
+
+    class CommunityFractalModel {
+      constructor() {
+        this.communities = [];
+        this.selectedNode = null;
+        this.activeLevel = 0;
+        this.listeners = new Set();
+        this.storageKey = 'red_fractal_comunitaria_v1';
+      }
+
+      subscribe(callback) {
+        this.listeners.add(callback);
+        return () => this.listeners.delete(callback);
+      }
+
+      notify() {
+        for (const cb of this.listeners) {
+          try { cb(this); } catch (e) { console.error('Error en suscriptor:', e); }
+        }
+      }
+
+      resetToVoid() {
+        this.communities = [];
+        this.selectedNode = null;
+        this.activeLevel = 0;
+        this.notify();
+        this.saveToStorage();
+        return this;
+      }
+
+      createCommunity({
+        name = 'Comunidad Semilla',
+        vision = 'Célula de regeneración y florecimiento humano en la nueva era.',
+        x = 0,
+        y = 0,
+        initProposals = true
+      } = {}) {
+        const id = 'comm_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+        const elements = {};
+        const elementKeys = ['eter', 'aire', 'tierra', 'agua', 'fuego'];
+        const radius = 180;
+
+        elementKeys.forEach((key, index) => {
+          const angle = (-Math.PI / 2) + (index * 2 * Math.PI / 5);
+          const def = SACRED_ELEMENTS[key];
+          const elementNode = {
+            id: `${id}_elem_${key}`,
+            key,
+            name: def.name,
+            archetype: def.archetype,
+            icon: def.icon,
+            color: def.color,
+            glowColor: def.glowColor,
+            description: def.description,
+            relativeX: Math.cos(angle) * radius,
+            relativeY: Math.sin(angle) * radius,
+            proposals: []
+          };
+
+          if (initProposals && def.defaultProposals) {
+            def.defaultProposals.forEach((pDef, pIdx) => {
+              elementNode.proposals.push({
+                id: `${id}_prop_${key}_${pIdx + 1}`,
+                elementKey: key,
+                title: pDef.title,
+                description: pDef.description,
+                energyNeeded: pDef.energyNeeded,
+                status: 'activa',
+                createdAt: new Date().toISOString(),
+                memberIds: []
+              });
+            });
+          }
+
+          elements[key] = elementNode;
+        });
+
+        const newCommunity = {
+          id,
+          name,
+          vision,
+          x,
+          y,
+          radius: 46,
+          createdAt: new Date().toISOString(),
+          elements,
+          members: []
+        };
+
+        this.communities.push(newCommunity);
+        this.activeLevel = 1;
+        this.selectedNode = { type: 'community', data: newCommunity, communityId: id };
+        this.notify();
+        this.saveToStorage();
+        return newCommunity;
+      }
+
+      getCommunity(id) {
+        return this.communities.find(c => c.id === id);
+      }
+
+      addProposal(communityId, elementKey, {
+        title,
+        description = '',
+        energyNeeded = 10,
+        status = 'activa'
+      }) {
+        const comm = this.getCommunity(communityId);
+        if (!comm || !comm.elements[elementKey]) return null;
+
+        const propId = `prop_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+        const newProposal = {
+          id: propId,
+          elementKey,
+          title: title.trim(),
+          description: description.trim(),
+          energyNeeded: Math.max(1, Number(energyNeeded) || 10),
+          status,
+          createdAt: new Date().toISOString(),
+          memberIds: []
+        };
+
+        comm.elements[elementKey].proposals.push(newProposal);
+        this.notify();
+        this.saveToStorage();
+        return newProposal;
+      }
+
+      updateProposal(communityId, proposalId, updates) {
+        const comm = this.getCommunity(communityId);
+        if (!comm) return false;
+
+        for (const elemKey of Object.keys(comm.elements)) {
+          const elem = comm.elements[elemKey];
+          const prop = elem.proposals.find(p => p.id === proposalId);
+          if (prop) {
+            if (updates.title !== undefined) prop.title = updates.title.trim();
+            if (updates.description !== undefined) prop.description = updates.description.trim();
+            if (updates.energyNeeded !== undefined) prop.energyNeeded = Math.max(1, Number(updates.energyNeeded));
+            if (updates.status !== undefined) prop.status = updates.status;
+            this.notify();
+            this.saveToStorage();
+            return true;
+          }
+        }
+        return false;
+      }
+
+      removeProposal(communityId, proposalId) {
+        const comm = this.getCommunity(communityId);
+        if (!comm) return false;
+
+        for (const elemKey of Object.keys(comm.elements)) {
+          const elem = comm.elements[elemKey];
+          const idx = elem.proposals.findIndex(p => p.id === proposalId);
+          if (idx !== -1) {
+            elem.proposals.splice(idx, 1);
+            comm.members.forEach(m => {
+              m.proposalIds = m.proposalIds.filter(pid => pid !== proposalId);
+            });
+            this.notify();
+            this.saveToStorage();
+            return true;
+          }
+        }
+        return false;
+      }
+
+      addMember(communityId, {
+        name,
+        role = 'Colaborador',
+        tierKey = 'colaborador',
+        resonanceElement = 'fuego',
+        contributionType = 'Horas y Presencia',
+        contributionValue = '10 hrs/mes',
+        proposalIds = []
+      }) {
+        const comm = this.getCommunity(communityId);
+        if (!comm) return null;
+
+        const tier = MEMBERSHIP_TIERS[tierKey] || MEMBERSHIP_TIERS.semilla;
+        const memberId = `member_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+        const newMember = {
+          id: memberId,
+          name: name.trim(),
+          role: role.trim(),
+          tierKey,
+          tierName: tier.name,
+          tierBadge: tier.badge,
+          sustainPoints: tier.sustainPoints,
+          resonanceElement: resonanceElement || 'fuego',
+          contributionType,
+          contributionValue,
+          proposalIds: Array.isArray(proposalIds) ? [...proposalIds] : [],
+          joinedAt: new Date().toISOString()
+        };
+
+        comm.members.push(newMember);
+
+        newMember.proposalIds.forEach(pId => {
+          this.linkMemberToProposal(communityId, memberId, pId);
+        });
+
+        this.notify();
+        this.saveToStorage();
+        return newMember;
+      }
+
+      updateMember(communityId, memberId, updates) {
+        const comm = this.getCommunity(communityId);
+        if (!comm) return false;
+
+        const member = comm.members.find(m => m.id === memberId);
+        if (!member) return false;
+
+        if (updates.name !== undefined) member.name = updates.name.trim();
+        if (updates.role !== undefined) member.role = updates.role.trim();
+        if (updates.tierKey !== undefined && MEMBERSHIP_TIERS[updates.tierKey]) {
+          member.tierKey = updates.tierKey;
+          member.tierName = MEMBERSHIP_TIERS[updates.tierKey].name;
+          member.tierBadge = MEMBERSHIP_TIERS[updates.tierKey].badge;
+          member.sustainPoints = MEMBERSHIP_TIERS[updates.tierKey].sustainPoints;
+        }
+        if (updates.resonanceElement !== undefined) member.resonanceElement = updates.resonanceElement;
+        if (updates.contributionType !== undefined) member.contributionType = updates.contributionType;
+        if (updates.contributionValue !== undefined) member.contributionValue = updates.contributionValue;
+
+        this.notify();
+        this.saveToStorage();
+        return true;
+      }
+
+      linkMemberToProposal(communityId, memberId, proposalId) {
+        const comm = this.getCommunity(communityId);
+        if (!comm) return false;
+
+        const member = comm.members.find(m => m.id === memberId);
+        if (!member) return false;
+
+        if (!member.proposalIds.includes(proposalId)) {
+          member.proposalIds.push(proposalId);
+        }
+
+        for (const elemKey of Object.keys(comm.elements)) {
+          const prop = comm.elements[elemKey].proposals.find(p => p.id === proposalId);
+          if (prop && !prop.memberIds.includes(memberId)) {
+            prop.memberIds.push(memberId);
+            break;
+          }
+        }
+
+        this.notify();
+        this.saveToStorage();
+        return true;
+      }
+
+      unlinkMemberFromProposal(communityId, memberId, proposalId) {
+        const comm = this.getCommunity(communityId);
+        if (!comm) return false;
+
+        const member = comm.members.find(m => m.id === memberId);
+        if (member) {
+          member.proposalIds = member.proposalIds.filter(id => id !== proposalId);
+        }
+
+        for (const elemKey of Object.keys(comm.elements)) {
+          const prop = comm.elements[elemKey].proposals.find(p => p.id === proposalId);
+          if (prop) {
+            prop.memberIds = prop.memberIds.filter(id => id !== memberId);
+            break;
+          }
+        }
+
+        this.notify();
+        this.saveToStorage();
+        return true;
+      }
+
+      removeMember(communityId, memberId) {
+        const comm = this.getCommunity(communityId);
+        if (!comm) return false;
+
+        const idx = comm.members.findIndex(m => m.id === memberId);
+        if (idx === -1) return false;
+
+        comm.members.splice(idx, 1);
+
+        for (const elemKey of Object.keys(comm.elements)) {
+          comm.elements[elemKey].proposals.forEach(prop => {
+            prop.memberIds = prop.memberIds.filter(id => id !== memberId);
+          });
+        }
+
+        this.notify();
+        this.saveToStorage();
+        return true;
+      }
+
+      getCommunityMetrics(communityId) {
+        const comm = this.getCommunity(communityId);
+        if (!comm) {
+          return {
+            totalMembers: 0,
+            totalProposals: 0,
+            sustainPoints: 0,
+            energyDemand: 0,
+            sustainRatio: 0,
+            pentagonalBalance: 0,
+            vitalityScore: 0,
+            elementStats: {}
+          };
+        }
+
+        const totalMembers = comm.members.length;
+        let sustainPoints = 0;
+        comm.members.forEach(m => { sustainPoints += (m.sustainPoints || 0); });
+
+        let totalProposals = 0;
+        let energyDemand = 0;
+        const elementStats = {};
+
+        Object.keys(comm.elements).forEach(key => {
+          const elem = comm.elements[key];
+          const propCount = elem.proposals.length;
+          let elemEnergyDemand = 0;
+          let elemMembersAttached = 0;
+          let elemSustainInflow = 0;
+
+          elem.proposals.forEach(p => {
+            elemEnergyDemand += (p.energyNeeded || 0);
+          });
+
+          comm.members.forEach(m => {
+            const isInProposal = m.proposalIds.some(pid => elem.proposals.some(p => p.id === pid));
+            const isResonant = m.resonanceElement === key;
+            if (isInProposal || isResonant) {
+              elemMembersAttached++;
+              elemSustainInflow += m.sustainPoints;
+            }
+          });
+
+          totalProposals += propCount;
+          energyDemand += elemEnergyDemand;
+
+          const coverage = elemEnergyDemand > 0 ? (elemSustainInflow / elemEnergyDemand) : (elemMembersAttached > 0 ? 1 : 0.5);
+          const elemVitality = Math.min(100, Math.round(coverage * 100));
+
+          elementStats[key] = {
+            name: elem.name,
+            color: elem.color,
+            proposalsCount: propCount,
+            energyDemand: elemEnergyDemand,
+            membersCount: elemMembersAttached,
+            sustainInflow: elemSustainInflow,
+            vitality: elemVitality
+          };
+        });
+
+        const rawSustainRatio = energyDemand > 0 ? (sustainPoints / energyDemand) : (totalMembers > 0 ? 1 : 0);
+        const sustainRatio = Math.min(100, Math.round(rawSustainRatio * 100));
+
+        const vitalities = Object.values(elementStats).map(s => s.vitality);
+        const meanVitality = vitalities.reduce((a, b) => a + b, 0) / 5;
+        const variance = vitalities.reduce((acc, v) => acc + Math.pow(v - meanVitality, 2), 0) / 5;
+        const stdDev = Math.sqrt(variance);
+        const pentagonalBalance = Math.max(0, Math.min(100, Math.round(100 - (stdDev * 1.2))));
+
+        const vitalityScore = Math.round((sustainRatio * 0.6) + (pentagonalBalance * 0.4));
+
+        return {
+          totalMembers,
+          totalProposals,
+          sustainPoints,
+          energyDemand,
+          sustainRatio,
+          pentagonalBalance,
+          vitalityScore,
+          elementStats
+        };
+      }
+
+      loadLivingCommunityPreset() {
+        this.communities = [];
+        const comm = this.createCommunity({
+          name: 'Comunidad Fractal Avalon',
+          vision: 'Laboratorio vivo de regeneración comunitaria basado en los 5 elementos y economía de sostén mutuo.',
+          x: 0,
+          y: 0,
+          initProposals: true
+        });
+
+        this.addProposal(comm.id, 'fuego', {
+          title: 'Hackathon Tecnológico de la Nueva Era',
+          description: 'Creación de software libre y herramientas descentralizadas para la comunidad.',
+          energyNeeded: 15
+        });
+
+        this.addProposal(comm.id, 'tierra', {
+          title: 'Domos Geodésicos & Bioconstrucción',
+          description: 'Construcción con materiales locales y arquitectura bioclimática.',
+          energyNeeded: 20
+        });
+
+        this.addProposal(comm.id, 'agua', {
+          title: 'Festival Solsticial de Música y Sanación',
+          description: 'Encuentro ceremonial de arte, música consciente y nutrición comunitaria.',
+          energyNeeded: 14
+        });
+
+        const m1 = this.addMember(comm.id, {
+          name: 'Elena Solari',
+          role: 'Guardián del Fuego & Facilitadora',
+          tierKey: 'guardian',
+          resonanceElement: 'fuego',
+          contributionType: 'Dedicación y Guía',
+          contributionValue: '25 hrs/mes'
+        });
+
+        const m2 = this.addMember(comm.id, {
+          name: 'Mateo Raíz',
+          role: 'Permacultor & Cuidador de Tierra',
+          tierKey: 'pilar',
+          resonanceElement: 'tierra',
+          contributionType: 'Bio-recursos y Huerto',
+          contributionValue: '30 hrs/mes + Semillas'
+        });
+
+        const m3 = this.addMember(comm.id, {
+          name: 'Sofia Aetherea',
+          role: 'Coordinadora de Visión & Éter',
+          tierKey: 'guardian',
+          resonanceElement: 'eter',
+          contributionType: 'Gobernanza y Ética',
+          contributionValue: '20 hrs/mes'
+        });
+
+        const m4 = this.addMember(comm.id, {
+          name: 'Lucas Viento',
+          role: 'Comunicador & Podcaster',
+          tierKey: 'colaborador',
+          resonanceElement: 'aire',
+          contributionType: 'Diseño y Difusión',
+          contributionValue: '15 hrs/mes'
+        });
+
+        const m5 = this.addMember(comm.id, {
+          name: 'Maya Cristal',
+          role: 'Terapeuta & Arte Vinculante',
+          tierKey: 'pilar',
+          resonanceElement: 'agua',
+          contributionType: 'Cuidado Afectivo',
+          contributionValue: '18 hrs/mes'
+        });
+
+        const m6 = this.addMember(comm.id, {
+          name: 'Nahuel Cordillera',
+          role: 'Enlace Biorregional',
+          tierKey: 'resonante',
+          resonanceElement: 'tierra',
+          contributionType: 'Puente con Eco-aldeas',
+          contributionValue: '10 hrs/mes'
+        });
+
+        const m7 = this.addMember(comm.id, {
+          name: 'Clara Amanecer',
+          role: 'Exploradora Creativa',
+          tierKey: 'semilla',
+          resonanceElement: 'agua',
+          contributionType: 'Presencia en círculos',
+          contributionValue: '5 hrs/mes'
+        });
+
+        const fProps = comm.elements.fuego.proposals;
+        if (fProps[0] && m1) this.linkMemberToProposal(comm.id, m1.id, fProps[0].id);
+        const tProps = comm.elements.tierra.proposals;
+        if (tProps[0] && m2) this.linkMemberToProposal(comm.id, m2.id, tProps[0].id);
+        const aProps = comm.elements.agua.proposals;
+        if (aProps[0] && m5) this.linkMemberToProposal(comm.id, m5.id, aProps[0].id);
+        const eProps = comm.elements.eter.proposals;
+        if (eProps[0] && m3) this.linkMemberToProposal(comm.id, m3.id, eProps[0].id);
+        const airProps = comm.elements.aire.proposals;
+        if (airProps[0] && m4) this.linkMemberToProposal(comm.id, m4.id, airProps[0].id);
+
+        this.activeLevel = 1;
+        this.selectedNode = { type: 'community', data: comm, communityId: comm.id };
+        this.notify();
+        this.saveToStorage();
+        return comm;
+      }
+
+      exportJSON() {
+        return JSON.stringify({
+          version: '1.0.0',
+          type: 'RedComunitariaFractal',
+          exportedAt: new Date().toISOString(),
+          communities: this.communities
+        }, null, 2);
+      }
+
+      importJSON(jsonString) {
+        try {
+          const data = JSON.parse(jsonString);
+          if (!data.communities || !Array.isArray(data.communities)) {
+            throw new Error('Formato JSON incompatible.');
+          }
+          this.communities = data.communities;
+          this.activeLevel = this.communities.length > 0 ? 1 : 0;
+          this.selectedNode = this.communities.length > 0 
+            ? { type: 'community', data: this.communities[0], communityId: this.communities[0].id }
+            : null;
+          this.notify();
+          this.saveToStorage();
+          return true;
+        } catch (err) {
+          console.error('Error al importar JSON:', err);
+          return false;
+        }
+      }
+
+      saveToStorage() {
+        try {
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(this.storageKey, this.exportJSON());
+          }
+        } catch (e) {}
+      }
+
+      loadFromStorage() {
+        try {
+          if (typeof localStorage !== 'undefined') {
+            const raw = localStorage.getItem(this.storageKey);
+            if (raw) {
+              return this.importJSON(raw);
+            }
+          }
+        } catch (e) {}
+        return false;
+      }
+    }
+
+    // Instancia del Modelo
+    const model = new CommunityFractalModel();
+
+    // Estado del Renderizador 2D y Cámara
+    const camera = {
+      x: 0,
+      y: 0,
+      zoom: 1,
+      targetZoom: 1,
+      isDragging: false,
+      dragStartX: 0,
+      dragStartY: 0,
+      lastMouseX: 0,
+      lastMouseY: 0
+    };
+
+    // Estado de Capas
+    const layers = {
+      geometry: true,
+      elements: true,
+      proposals: true,
+      members: true,
+      sustainFlow: true
+    };
+
+    // Partículas de Fondo y Flujo de Sostén
+    const particles = [];
+    for (let i = 0; i < 90; i++) {
+      particles.push({
+        x: (Math.random() - 0.5) * 2000,
+        y: (Math.random() - 0.5) * 2000,
+        size: Math.random() * 1.8 + 0.5,
+        alpha: Math.random() * 0.6 + 0.2,
+        speed: Math.random() * 0.3 + 0.1
+      });
+    }
+
+    // Partículas vivas de flujo de sostén (vuelan de miembros a propuestas y al núcleo)
+    const sustainParticles = [];
+    function spawnSustainParticles() {
+      if (!layers.sustainFlow) return;
+      model.communities.forEach(comm => {
+        comm.members.forEach(mem => {
+          if (Math.random() < 0.2) {
+            // Encuentra posición de origen (miembro)
+            const memPos = getMemberWorldPos(comm, mem);
+            // Destino: si tiene propuesta, viaja a la propuesta, luego al elemento, luego a la comunidad
+            let targetPos = { x: comm.x, y: comm.y };
+            if (mem.proposalIds && mem.proposalIds.length > 0) {
+              const pId = mem.proposalIds[0];
+              const pPos = getProposalWorldPos(comm, pId);
+              if (pPos) targetPos = pPos;
+            } else if (comm.elements[mem.resonanceElement]) {
+              const elem = comm.elements[mem.resonanceElement];
+              targetPos = { x: comm.x + elem.relativeX, y: comm.y + elem.relativeY };
+            }
+
+            sustainParticles.push({
+              x: memPos.x,
+              y: memPos.y,
+              startX: memPos.x,
+              startY: memPos.y,
+              targetX: targetPos.x,
+              targetY: targetPos.y,
+              progress: 0,
+              speed: 0.015 + (mem.sustainPoints * 0.002),
+              color: '#ffd32a'
+            });
+          }
+        });
+      });
+    }
+
+    // Elementos del DOM
+    const canvas = document.getElementById('canvas-network');
+    const ctx = canvas.getContext('2d');
+    const tooltip = document.getElementById('tooltip');
+    const voidOverlay = document.getElementById('void-overlay');
+    const inspectorPanel = document.getElementById('inspector-panel');
+    const inspTitle = document.getElementById('insp-title');
+    const inspContent = document.getElementById('insp-content');
+
+    let draggedNode = null; // Para arrastre de nodos individuales
+    let hoveredNode = null;
+
+    // Inicialización del Lienzo y Eventos de Ventana
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Intentar cargar desde Storage o cargar por defecto el Vacío
+    if (!model.loadFromStorage() || model.communities.length === 0) {
+      model.resetToVoid();
+    }
+
+    // =========================================================================
+    // TRANSFORMACIONES DE COORDENADAS (Mundo <-> Pantalla)
+    // =========================================================================
+    function screenToWorld(sx, sy) {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      return {
+        x: (sx - cx - camera.x) / camera.zoom,
+        y: (sy - cy - camera.y) / camera.zoom
+      };
+    }
+
+    function worldToScreen(wx, wy) {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      return {
+        x: (wx * camera.zoom) + cx + camera.x,
+        y: (wy * camera.zoom) + cy + camera.y
+      };
+    }
+
+    // Posiciones de Nodos
+    function getMemberWorldPos(comm, member) {
+      const elem = comm.elements[member.resonanceElement] || comm.elements.eter;
+      const elemWorldX = comm.x + elem.relativeX;
+      const elemWorldY = comm.y + elem.relativeY;
+      
+      const membersInElem = comm.members.filter(m => m.resonanceElement === member.resonanceElement);
+      const idx = membersInElem.findIndex(m => m.id === member.id);
+      const count = Math.max(1, membersInElem.length);
+      const angle = (idx / count) * Math.PI * 2;
+      const orbitR = 95;
+
+      return {
+        x: elemWorldX + Math.cos(angle) * orbitR,
+        y: elemWorldY + Math.sin(angle) * orbitR
+      };
+    }
+
+    function getProposalWorldPos(comm, proposalId) {
+      for (const elemKey of Object.keys(comm.elements)) {
+        const elem = comm.elements[elemKey];
+        const idx = elem.proposals.findIndex(p => p.id === proposalId);
+        if (idx !== -1) {
+          const count = elem.proposals.length;
+          const angle = (idx / count) * Math.PI * 2 - (Math.PI / 2);
+          const orbitR = 54;
+          return {
+            x: comm.x + elem.relativeX + Math.cos(angle) * orbitR,
+            y: comm.y + elem.relativeY + Math.sin(angle) * orbitR
+          };
+        }
+      }
+      return null;
+    }
+
+    // =========================================================================
+    // BUCLE DE RENDERIZADO 2D
+    // =========================================================================
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Suavizado de zoom
+      camera.zoom += (camera.targetZoom - camera.zoom) * 0.15;
+      document.getElementById('zoom-indicator').textContent = `Zoom: ${Math.round(camera.zoom * 100)}%`;
+
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      // Fondo Cósmico y Rejilla
+      drawCosmicBackground(w, h);
+
+      // Si no hay comunidades o estamos en Nivel 0, mostramos overlay de La Nada
+      if (model.communities.length === 0 || model.activeLevel === 0) {
+        voidOverlay.classList.remove('hidden');
+      } else {
+        voidOverlay.classList.add('hidden');
+      }
+
+      ctx.save();
+      const cx = w / 2;
+      const cy = h / 2;
+      ctx.translate(cx + camera.x, cy + camera.y);
+      ctx.scale(camera.zoom, camera.zoom);
+
+      // Dibujar Comunidades
+      model.communities.forEach(comm => {
+        drawCommunity(comm);
+      });
+
+      // Dibujar Partículas de Sostén animadas
+      drawSustainParticles();
+
+      ctx.restore();
+
+      // Generar nuevas partículas de sostén periódicamente
+      if (Math.random() < 0.3) {
+        spawnSustainParticles();
+      }
+    }
+
+    // Fondo Cósmico & Partículas Estelares
+    function drawCosmicBackground(w, h) {
+      // Degradado radial sutil
+      const grad = ctx.createRadialGradient(w/2, h/2, 50, w/2, h/2, Math.max(w, h));
+      grad.addColorStop(0, '#060c20');
+      grad.addColorStop(1, '#02040a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Estrellas / polvo cuántico
+      ctx.save();
+      const cx = w / 2;
+      const cy = h / 2;
+      ctx.translate(cx + camera.x * 0.3, cy + camera.y * 0.3);
+
+      particles.forEach(p => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha * 0.6})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        p.y += p.speed * 0.3;
+        if (p.y > 1000) p.y = -1000;
+      });
+      ctx.restore();
+    }
+
+    // Dibujo de una Comunidad y sus 5 Elementos
+    function drawCommunity(comm) {
+      const isSelected = model.selectedNode && model.selectedNode.type === 'community' && model.selectedNode.data.id === comm.id;
+
+      // 1. Capa Geometría Sagrada (Pentagrama Áureo y Vínculos de los 5 Elementos)
+      if (layers.geometry) {
+        drawSacredGeometry(comm);
+      }
+
+      // 2. Enlaces centrales desde la Comunidad hacia sus 5 Elementos
+      Object.keys(comm.elements).forEach(key => {
+        const elem = comm.elements[key];
+        const ex = comm.x + elem.relativeX;
+        const ey = comm.y + elem.relativeY;
+
+        ctx.strokeStyle = elem.glowColor;
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(comm.x, comm.y);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      });
+
+      // 3. Capa de Propuestas (Nivel >= 2)
+      if (layers.proposals && model.activeLevel >= 2) {
+        Object.keys(comm.elements).forEach(key => {
+          const elem = comm.elements[key];
+          const ex = comm.x + elem.relativeX;
+          const ey = comm.y + elem.relativeY;
+
+          elem.proposals.forEach((prop, pIdx) => {
+            const pPos = getProposalWorldPos(comm, prop.id);
+            if (pPos) {
+              // Enlace elemento -> propuesta
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+              ctx.lineWidth = 1.5;
+              ctx.beginPath();
+              ctx.moveTo(ex, ey);
+              ctx.lineTo(pPos.x, pPos.y);
+              ctx.stroke();
+
+              drawProposalNode(prop, pPos, elem.color);
+            }
+          });
+        });
+      }
+
+      // 4. Capa de Miembros & Membresías (Nivel >= 3)
+      if (layers.members && model.activeLevel >= 3) {
+        comm.members.forEach(mem => {
+          const mPos = getMemberWorldPos(comm, mem);
+          const elem = comm.elements[mem.resonanceElement] || comm.elements.eter;
+          const ex = comm.x + elem.relativeX;
+          const ey = comm.y + elem.relativeY;
+
+          // Hilo de membresía con su elemento
+          ctx.strokeStyle = 'rgba(255, 211, 42, 0.35)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(ex, ey);
+          ctx.lineTo(mPos.x, mPos.y);
+          ctx.stroke();
+
+          // Hilo hacia sus propuestas activas
+          if (mem.proposalIds) {
+            mem.proposalIds.forEach(pId => {
+              const pPos = getProposalWorldPos(comm, pId);
+              if (pPos) {
+                ctx.strokeStyle = 'rgba(255, 211, 42, 0.45)';
+                ctx.lineWidth = 1.2;
+                ctx.setLineDash([2, 3]);
+                ctx.beginPath();
+                ctx.moveTo(mPos.x, mPos.y);
+                ctx.lineTo(pPos.x, pPos.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+              }
+            });
+          }
+
+          drawMemberNode(mem, mPos);
+        });
+      }
+
+      // 5. Capa de los 5 Elementos
+      if (layers.elements) {
+        Object.keys(comm.elements).forEach(key => {
+          const elem = comm.elements[key];
+          drawElementNode(comm, elem);
+        });
+      }
+
+      // 6. Nodo Central de la Comunidad (Semilla Raíz)
+      drawCentralCommunityNode(comm, isSelected);
+    }
+
+    // Dibujo de Geometría Sagrada (Pentagrama Áureo que une los 5 elementos)
+    function drawSacredGeometry(comm) {
+      const keys = ['eter', 'aire', 'tierra', 'agua', 'fuego'];
+      const pts = keys.map(k => {
+        const e = comm.elements[k];
+        return { x: comm.x + e.relativeX, y: comm.y + e.relativeY };
+      });
+
+      // Círculo armónico exterior
+      ctx.strokeStyle = 'rgba(255, 211, 42, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(comm.x, comm.y, 180, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Círculo armónico áureo menor
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.12)';
+      ctx.beginPath();
+      ctx.arc(comm.x, comm.y, 180 * 0.618, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Pentágono exterior
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (let i = 0; i < pts.length; i++) {
+        const p1 = pts[i];
+        const p2 = pts[(i + 1) % pts.length];
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+      }
+      ctx.stroke();
+
+      // Pentagrama áureo interior (estrella de 5 puntas)
+      ctx.strokeStyle = 'rgba(255, 211, 42, 0.2)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (let i = 0; i < pts.length; i++) {
+        const p1 = pts[i];
+        const p2 = pts[(i + 2) % pts.length];
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+      }
+      ctx.stroke();
+    }
+
+    // Nodo Central de la Comunidad
+    function drawCentralCommunityNode(comm, isSelected) {
+      const rad = comm.radius || 46;
+
+      // Halo pulsante
+      const halo = ctx.createRadialGradient(comm.x, comm.y, rad * 0.5, comm.x, comm.y, rad * 2.2);
+      halo.addColorStop(0, 'rgba(255, 211, 42, 0.35)');
+      halo.addColorStop(1, 'rgba(255, 211, 42, 0)');
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(comm.x, comm.y, rad * 2.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cuerpo del nodo
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(comm.x, comm.y, rad, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Borde dorado
+      ctx.strokeStyle = isSelected ? '#fff' : '#ffd32a';
+      ctx.lineWidth = isSelected ? 4 : 2.5;
+      ctx.stroke();
+
+      // Ícono y Nombre
+      ctx.font = '22px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🌱', comm.x, comm.y - 6);
+
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillStyle = '#fff';
+      ctx.fillText(comm.name, comm.x, comm.y + 18);
+    }
+
+    // Nodo de Elemento (Fuego, Tierra, Aire, Agua, Éter)
+    function drawElementNode(comm, elem) {
+      const ex = comm.x + elem.relativeX;
+      const ey = comm.y + elem.relativeY;
+      const rad = 28;
+      const isSelected = model.selectedNode && model.selectedNode.type === 'element' && model.selectedNode.data.id === elem.id;
+
+      // Halo elemental
+      const aura = ctx.createRadialGradient(ex, ey, rad * 0.4, ex, ey, rad * 2.4);
+      aura.addColorStop(0, elem.glowColor);
+      aura.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = aura;
+      ctx.beginPath();
+      ctx.arc(ex, ey, rad * 2.4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Anillo de Vitalidad del Elemento
+      const metrics = model.getCommunityMetrics(comm.id);
+      const elemStat = metrics.elementStats[elem.key] || { vitality: 50 };
+      const vitalityPct = (elemStat.vitality || 50) / 100;
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(ex, ey, rad + 4, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = elem.color;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(ex, ey, rad + 4, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * vitalityPct));
+      ctx.stroke();
+
+      // Núcleo del Elemento
+      ctx.fillStyle = '#091020';
+      ctx.beginPath();
+      ctx.arc(ex, ey, rad, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = isSelected ? '#fff' : elem.color;
+      ctx.lineWidth = isSelected ? 3.5 : 2;
+      ctx.stroke();
+
+      // Glifo del Elemento
+      ctx.font = '16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(elem.icon, ex, ey - 4);
+
+      // Etiqueta
+      ctx.font = 'bold 9.5px sans-serif';
+      ctx.fillStyle = '#fff';
+      ctx.fillText(elem.name, ex, ey + 12);
+    }
+
+    // Nodo de Propuesta
+    function drawProposalNode(prop, pos, elemColor) {
+      const rad = 14;
+      const isSelected = model.selectedNode && model.selectedNode.type === 'proposal' && model.selectedNode.data.id === prop.id;
+
+      ctx.fillStyle = '#0b1426';
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, rad, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = isSelected ? '#ffd32a' : elemColor;
+      ctx.lineWidth = isSelected ? 3 : 1.8;
+      ctx.stroke();
+
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('📋', pos.x, pos.y);
+
+      // Título truncado abajo
+      ctx.font = '9px sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      const shortTitle = prop.title.length > 14 ? prop.title.substring(0, 12) + '…' : prop.title;
+      ctx.fillText(shortTitle, pos.x, pos.y + 20);
+    }
+
+    // Nodo de Miembro & Membresía
+    function drawMemberNode(mem, pos) {
+      const rad = 13;
+      const isSelected = model.selectedNode && model.selectedNode.type === 'member' && model.selectedNode.data.id === mem.id;
+      const tier = MEMBERSHIP_TIERS[mem.tierKey] || MEMBERSHIP_TIERS.semilla;
+
+      // Halo áureo de sostén
+      ctx.fillStyle = 'rgba(255, 211, 42, 0.15)';
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, rad * 1.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#091020';
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, rad, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = isSelected ? '#fff' : tier.color;
+      ctx.lineWidth = isSelected ? 3 : 2;
+      ctx.stroke();
+
+      // Badge de Membresía
+      ctx.font = '11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(tier.badge, pos.x, pos.y);
+
+      // Nombre del integrante
+      ctx.font = '8.5px sans-serif';
+      ctx.fillStyle = '#ffd32a';
+      const shortName = mem.name.length > 12 ? mem.name.substring(0, 10) + '…' : mem.name;
+      ctx.fillText(shortName, pos.x, pos.y + 18);
+    }
+
+    // Partículas de Sostén viajeras
+    function drawSustainParticles() {
+      for (let i = sustainParticles.length - 1; i >= 0; i--) {
+        const p = sustainParticles[i];
+        p.progress += p.speed;
+        if (p.progress >= 1) {
+          sustainParticles.splice(i, 1);
+          continue;
+        }
+
+        const currX = p.startX + (p.targetX - p.startX) * p.progress;
+        const currY = p.startY + (p.targetY - p.startY) * p.progress;
+
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = '#ffd32a';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(currX, currY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    // =========================================================================
+    // DETECCIÓN DE ELEMENTOS BAJO EL PUNTERO (Hit-Testing)
+    // =========================================================================
+    function findNodeAt(worldX, worldY) {
+      for (const comm of model.communities) {
+        // 1. Centro Comunidad
+        const dComm = Math.hypot(worldX - comm.x, worldY - comm.y);
+        if (dComm <= (comm.radius || 46)) {
+          return { type: 'community', data: comm, communityId: comm.id };
+        }
+
+        // 2. Elementos
+        for (const elemKey of Object.keys(comm.elements)) {
+          const elem = comm.elements[elemKey];
+          const ex = comm.x + elem.relativeX;
+          const ey = comm.y + elem.relativeY;
+          if (Math.hypot(worldX - ex, worldY - ey) <= 32) {
+            return { type: 'element', data: elem, communityId: comm.id };
+          }
+        }
+
+        // 3. Propuestas (si nivel >= 2)
+        if (model.activeLevel >= 2) {
+          for (const elemKey of Object.keys(comm.elements)) {
+            const elem = comm.elements[elemKey];
+            for (const prop of elem.proposals) {
+              const pPos = getProposalWorldPos(comm, prop.id);
+              if (pPos && Math.hypot(worldX - pPos.x, worldY - pPos.y) <= 16) {
+                return { type: 'proposal', data: prop, communityId: comm.id };
+              }
+            }
+          }
+        }
+
+        // 4. Miembros (si nivel >= 3)
+        if (model.activeLevel >= 3) {
+          for (const mem of comm.members) {
+            const mPos = getMemberWorldPos(comm, mem);
+            if (Math.hypot(worldX - mPos.x, worldY - mPos.y) <= 16) {
+              return { type: 'member', data: mem, communityId: comm.id };
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    // =========================================================================
+    // INTERACCIÓN CON EL RATÓN / PANTALLA TÁCTIL
+    // =========================================================================
+    canvas.addEventListener('mousedown', (e) => {
+      const worldPos = screenToWorld(e.clientX, e.clientY);
+      const hit = findNodeAt(worldPos.x, worldPos.y);
+
+      if (hit) {
+        draggedNode = hit;
+        model.selectedNode = hit;
+        renderInspector(hit);
+        model.notify();
+      } else {
+        camera.isDragging = true;
+        camera.dragStartX = e.clientX - camera.x;
+        camera.dragStartY = e.clientY - camera.y;
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (camera.isDragging) {
+        camera.x = e.clientX - camera.dragStartX;
+        camera.y = e.clientY - camera.dragStartY;
+      } else if (draggedNode) {
+        const worldPos = screenToWorld(e.clientX, e.clientY);
+        if (draggedNode.type === 'community') {
+          draggedNode.data.x = worldPos.x;
+          draggedNode.data.y = worldPos.y;
+        } else if (draggedNode.type === 'element') {
+          const comm = model.getCommunity(draggedNode.communityId);
+          if (comm) {
+            draggedNode.data.relativeX = worldPos.x - comm.x;
+            draggedNode.data.relativeY = worldPos.y - comm.y;
+          }
+        }
+      } else {
+        // Hover tooltip
+        const worldPos = screenToWorld(e.clientX, e.clientY);
+        hoveredNode = findNodeAt(worldPos.x, worldPos.y);
+        if (hoveredNode) {
+          showTooltip(e.clientX, e.clientY, hoveredNode);
+        } else {
+          hideTooltip();
+        }
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (draggedNode) {
+        model.saveToStorage();
+      }
+      camera.isDragging = false;
+      draggedNode = null;
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
+      camera.targetZoom = Math.max(0.2, Math.min(3.5, camera.targetZoom * zoomFactor));
+    }, { passive: false });
+
+    // Tooltip
+    function showTooltip(sx, sy, hit) {
+      tooltip.style.left = sx + 'px';
+      tooltip.style.top = sy + 'px';
+      tooltip.style.display = 'block';
+
+      if (hit.type === 'community') {
+        tooltip.innerHTML = `<b>🌱 ${hit.data.name}</b><br><span style="color:#ffd32a;">Semilla Comunitaria</span>`;
+      } else if (hit.type === 'element') {
+        tooltip.innerHTML = `<b>${hit.data.icon} ${hit.data.name}</b><br><span style="color:${hit.data.color};">${hit.data.archetype}</span>`;
+      } else if (hit.type === 'proposal') {
+        tooltip.innerHTML = `<b>📋 ${hit.data.title}</b><br><span style="color:#00e5ff;">Energía: ${hit.data.energyNeeded} pts</span>`;
+      } else if (hit.type === 'member') {
+        tooltip.innerHTML = `<b>${hit.data.tierBadge} ${hit.data.name}</b><br><span style="color:#ffd32a;">${hit.data.tierName} (+${hit.data.sustainPoints} pts)</span>`;
+      }
+    }
+    function hideTooltip() { tooltip.style.display = 'none'; }
+
+    // =========================================================================
+    // NAVEGACIÓN POR NIVELES
+    // =========================================================================
+    function setLevel(lvl) {
+      model.activeLevel = Number(lvl);
+      document.querySelectorAll('.level-btn').forEach(btn => {
+        btn.classList.toggle('active', Number(btn.dataset.level) === model.activeLevel);
+      });
+
+      // Animación de cámara según el nivel
+      if (model.activeLevel === 0) {
+        camera.targetZoom = 0.65;
+      } else if (model.activeLevel === 1) {
+        camera.targetZoom = 1.0;
+        centerOnActiveCommunity();
+      } else if (model.activeLevel === 2) {
+        camera.targetZoom = 1.35;
+        centerOnActiveCommunity();
+      } else if (model.activeLevel === 3) {
+        camera.targetZoom = 1.7;
+        centerOnActiveCommunity();
+      }
+      model.notify();
+    }
+
+    document.querySelectorAll('.level-btn').forEach(btn => {
+      btn.addEventListener('click', () => setLevel(btn.dataset.level));
+    });
+
+    function centerOnActiveCommunity() {
+      const activeCommId = document.getElementById('sel-community').value;
+      const comm = model.getCommunity(activeCommId) || model.communities[0];
+      if (comm) {
+        camera.x = -comm.x * camera.targetZoom;
+        camera.y = -comm.y * camera.targetZoom;
+      } else {
+        camera.x = 0;
+        camera.y = 0;
+      }
+    }
+
+    // =========================================================================
+    // CONMUTADOR DE CAPAS (TOGGLES)
+    // =========================================================================
+    document.querySelectorAll('.layer-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const layerKey = chip.dataset.layer;
+        layers[layerKey] = !layers[layerKey];
+        chip.classList.toggle('on', layers[layerKey]);
+      });
+    });
+
+    // =========================================================================
+    // ACTUALIZACIÓN DE UI REACTIVA (Suscriptor del Modelo)
+    // =========================================================================
+    model.subscribe(() => {
+      updateLeftPanel();
+    });
+
+    function updateLeftPanel() {
+      // 1. Selector de Comunidades
+      const sel = document.getElementById('sel-community');
+      const currentVal = sel.value;
+      sel.innerHTML = '';
+
+      if (model.communities.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = '(Sin comunidades manifestadas)';
+        sel.appendChild(opt);
+        renderMetricsEmpty();
+        return;
+      }
+
+      model.communities.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = `🌱 ${c.name}`;
+        sel.appendChild(opt);
+      });
+
+      if (currentVal && model.getCommunity(currentVal)) {
+        sel.value = currentVal;
+      } else {
+        sel.value = model.communities[0].id;
+      }
+
+      const activeComm = model.getCommunity(sel.value);
+      if (!activeComm) return;
+
+      // 2. Métricas Holísticas
+      const metrics = model.getCommunityMetrics(activeComm.id);
+      document.getElementById('metric-members').textContent = metrics.totalMembers;
+      document.getElementById('metric-sustain-pts').textContent = `${metrics.sustainPoints} pts sostén`;
+      document.getElementById('metric-proposals').textContent = metrics.totalProposals;
+      document.getElementById('metric-energy-req').textContent = `${metrics.energyDemand} energía req.`;
+
+      document.getElementById('txt-vitality').textContent = `${metrics.vitalityScore}%`;
+      document.getElementById('bar-vitality').style.width = `${metrics.vitalityScore}%`;
+      document.getElementById('txt-sustain-ratio').textContent = `${metrics.sustainRatio}%`;
+      document.getElementById('txt-pentagonal-bal').textContent = `${metrics.pentagonalBalance}%`;
+
+      // 3. Lista de los 5 Elementos
+      const elemContainer = document.getElementById('elements-list');
+      elemContainer.innerHTML = '';
+      Object.keys(activeComm.elements).forEach(key => {
+        const elem = activeComm.elements[key];
+        const stat = metrics.elementStats[key] || { vitality: 50, proposalsCount: 0, membersCount: 0 };
+
+        const row = document.createElement('div');
+        row.className = 'elem-row';
+        row.innerHTML = `
+          <div class="elem-row-top">
+            <span class="elem-row-name" style="color:${elem.color};">${elem.icon} ${elem.name}</span>
+            <span class="elem-row-val" style="color:${elem.color};">${stat.vitality}% (${stat.proposalsCount} prop · ${stat.membersCount} m.)</span>
+          </div>
+          <div class="elem-bar-bg">
+            <div class="elem-bar-fill" style="width:${stat.vitality}%; background:${elem.color};"></div>
+          </div>
+        `;
+        row.addEventListener('click', () => {
+          model.selectedNode = { type: 'element', data: elem, communityId: activeComm.id };
+          renderInspector(model.selectedNode);
+          // Enfocar cámara en el elemento
+          camera.x = -(activeComm.x + elem.relativeX) * camera.zoom;
+          camera.y = -(activeComm.y + elem.relativeY) * camera.zoom;
+        });
+        elemContainer.appendChild(row);
+      });
+
+      // 4. Lista de Miembros Sostenedores
+      const membersContainer = document.getElementById('members-list');
+      membersContainer.innerHTML = '';
+      if (activeComm.members.length === 0) {
+        membersContainer.innerHTML = '<div style="font-size:10px; color:var(--text-muted); padding:6px;">Aún no hay integrantes con membresía activa. Pulsa "+ Miembro".</div>';
+      } else {
+        activeComm.members.forEach(mem => {
+          const card = document.createElement('div');
+          card.className = 'member-mini-card';
+          card.innerHTML = `
+            <div style="display:flex; align-items:center;">
+              <span class="m-avatar">${mem.tierBadge}</span>
+              <div>
+                <b style="color:#fff;">${mem.name}</b>
+                <div style="font-size:9px; color:var(--text-muted);">${mem.role} · ${mem.tierName}</div>
+              </div>
+            </div>
+            <span style="font-size:9.5px; font-weight:700; color:var(--accent-gold);">+${mem.sustainPoints}p</span>
+          `;
+          card.addEventListener('click', () => {
+            model.selectedNode = { type: 'member', data: mem, communityId: activeComm.id };
+            renderInspector(model.selectedNode);
+          });
+          membersContainer.appendChild(card);
+        });
+      }
+    }
+
+    function renderMetricsEmpty() {
+      document.getElementById('metric-members').textContent = '0';
+      document.getElementById('metric-sustain-pts').textContent = '0 pts';
+      document.getElementById('metric-proposals').textContent = '0';
+      document.getElementById('metric-energy-req').textContent = '0';
+      document.getElementById('txt-vitality').textContent = '0%';
+      document.getElementById('bar-vitality').style.width = '0%';
+      document.getElementById('txt-sustain-ratio').textContent = '0%';
+      document.getElementById('txt-pentagonal-bal').textContent = '0%';
+      document.getElementById('elements-list').innerHTML = '';
+      document.getElementById('members-list').innerHTML = '';
+    }
+
+    document.getElementById('sel-community').addEventListener('change', () => {
+      updateLeftPanel();
+      centerOnActiveCommunity();
+    });
+
+    // =========================================================================
+    // PANEL INSPECTOR Y EDITOR DERECHO
+    // =========================================================================
+    function renderInspector(hit) {
+      if (!hit) {
+        inspectorPanel.classList.remove('open');
+        return;
+      }
+      inspectorPanel.classList.add('open');
+
+      if (hit.type === 'community') {
+        const comm = hit.data;
+        inspTitle.innerHTML = `🌱 ${comm.name}`;
+        inspContent.innerHTML = `
+          <div class="form-group">
+            <label>Nombre:</label>
+            <input type="text" id="edit-comm-name" value="${comm.name}">
+          </div>
+          <div class="form-group">
+            <label>Visión:</label>
+            <textarea id="edit-comm-vision" rows="3">${comm.vision}</textarea>
+          </div>
+          <div style="font-size:10.5px; color:var(--text-muted); margin-top:6px;">
+            Creada: ${new Date(comm.createdAt).toLocaleDateString()}<br>
+            Total Miembros: ${comm.members.length}
+          </div>
+          <div style="display:flex; gap:6px; margin-top:10px;">
+            <button id="btn-save-comm-edit" class="btn-gold" style="flex:1;">Guardar Cambios</button>
+            <button id="btn-del-comm" style="border-color:#ff4757; color:#ff4757;">Eliminar</button>
+          </div>
+        `;
+
+        document.getElementById('btn-save-comm-edit').onclick = () => {
+          comm.name = document.getElementById('edit-comm-name').value.trim();
+          comm.vision = document.getElementById('edit-comm-vision').value.trim();
+          model.notify();
+          model.saveToStorage();
+        };
+
+        document.getElementById('btn-del-comm').onclick = () => {
+          if (confirm(`¿Eliminar la comunidad "${comm.name}"?`)) {
+            const idx = model.communities.findIndex(c => c.id === comm.id);
+            if (idx !== -1) {
+              model.communities.splice(idx, 1);
+              inspectorPanel.classList.remove('open');
+              model.notify();
+              model.saveToStorage();
+            }
+          }
+        };
+
+      } else if (hit.type === 'element') {
+        const elem = hit.data;
+        const comm = model.getCommunity(hit.communityId);
+        inspTitle.innerHTML = `<span style="color:${elem.color}">${elem.icon} Elemento ${elem.name}</span>`;
+        inspContent.innerHTML = `
+          <div style="font-size:11px; color:#fff; font-weight:700; margin-bottom:4px;">${elem.archetype}</div>
+          <p style="font-size:11px; color:var(--text-muted); line-height:1.5; margin-bottom:10px;">${elem.description}</p>
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:11px; font-weight:700; color:var(--accent-gold);">Propuestas (${elem.proposals.length}):</span>
+            <button id="btn-add-prop-here" class="btn-gold" style="font-size:10px; padding:2px 8px;">+ Propuesta</button>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:5px; max-height:180px; overflow-y:auto;">
+            ${elem.proposals.map(p => `
+              <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:6px 8px; font-size:10.5px;">
+                <b style="color:#fff;">${p.title}</b>
+                <div style="color:var(--text-muted); font-size:9.5px;">${p.description}</div>
+                <div style="font-size:9px; color:${elem.color}; margin-top:2px;">Energía: ${p.energyNeeded} pts · Miembros: ${p.memberIds.length}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+
+        document.getElementById('btn-add-prop-here').onclick = () => {
+          document.getElementById('prop-elem-select').value = elem.key;
+          document.getElementById('modal-proposal').classList.add('open');
+        };
+
+      } else if (hit.type === 'proposal') {
+        const prop = hit.data;
+        const comm = model.getCommunity(hit.communityId);
+        inspTitle.innerHTML = `📋 Propuesta`;
+        inspContent.innerHTML = `
+          <div class="form-group">
+            <label>Título:</label>
+            <input type="text" id="edit-prop-title" value="${prop.title}">
+          </div>
+          <div class="form-group">
+            <label>Descripción:</label>
+            <textarea id="edit-prop-desc" rows="3">${prop.description}</textarea>
+          </div>
+          <div class="form-group">
+            <label>Energía / Sostén Requerido (pts):</label>
+            <input type="number" id="edit-prop-energy" value="${prop.energyNeeded}">
+          </div>
+          <div class="form-group">
+            <label>Estado:</label>
+            <select id="edit-prop-status">
+              <option value="brote" ${prop.status === 'brote' ? 'selected' : ''}>🌱 Brote</option>
+              <option value="activa" ${prop.status === 'activa' ? 'selected' : ''}>⚡ Activa</option>
+              <option value="nutrida" ${prop.status === 'nutrida' ? 'selected' : ''}>💎 Nutrida</option>
+              <option value="completada" ${prop.status === 'completada' ? 'selected' : ''}>🏆 Completada</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:6px; margin-top:8px;">
+            <button id="btn-save-prop-edit" class="btn-gold" style="flex:1;">Guardar Cambios</button>
+            <button id="btn-del-prop" style="border-color:#ff4757; color:#ff4757;">Eliminar</button>
+          </div>
+        `;
+
+        document.getElementById('btn-save-prop-edit').onclick = () => {
+          model.updateProposal(hit.communityId, prop.id, {
+            title: document.getElementById('edit-prop-title').value,
+            description: document.getElementById('edit-prop-desc').value,
+            energyNeeded: Number(document.getElementById('edit-prop-energy').value),
+            status: document.getElementById('edit-prop-status').value
+          });
+        };
+
+        document.getElementById('btn-del-prop').onclick = () => {
+          if (confirm(`¿Eliminar la propuesta "${prop.title}"?`)) {
+            model.removeProposal(hit.communityId, prop.id);
+            inspectorPanel.classList.remove('open');
+          }
+        };
+
+      } else if (hit.type === 'member') {
+        const mem = hit.data;
+        const comm = model.getCommunity(hit.communityId);
+        inspTitle.innerHTML = `${mem.tierBadge} ${mem.name}`;
+        inspContent.innerHTML = `
+          <div class="form-group">
+            <label>Nombre:</label>
+            <input type="text" id="edit-mem-name" value="${mem.name}">
+          </div>
+          <div class="form-group">
+            <label>Rol Comunitario:</label>
+            <input type="text" id="edit-mem-role" value="${mem.role}">
+          </div>
+          <div class="form-group">
+            <label>Tipo de Membresía (Pilar de Sostén):</label>
+            <select id="edit-mem-tier">
+              ${Object.keys(MEMBERSHIP_TIERS).map(k => {
+                const t = MEMBERSHIP_TIERS[k];
+                return `<option value="${k}" ${mem.tierKey === k ? 'selected' : ''}>${t.badge} ${t.name} (${t.sustainPoints} pts)</option>`;
+              }).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Resonancia con Elemento:</label>
+            <select id="edit-mem-elem">
+              <option value="fuego" ${mem.resonanceElement === 'fuego' ? 'selected' : ''}>🔥 Fuego</option>
+              <option value="tierra" ${mem.resonanceElement === 'tierra' ? 'selected' : ''}>🌱 Tierra</option>
+              <option value="aire" ${mem.resonanceElement === 'aire' ? 'selected' : ''}>💨 Aire</option>
+              <option value="agua" ${mem.resonanceElement === 'agua' ? 'selected' : ''}>💧 Agua</option>
+              <option value="eter" ${mem.resonanceElement === 'eter' ? 'selected' : ''}>✨ Éter</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Aporte de Sostén:</label>
+            <input type="text" id="edit-mem-contrib" value="${mem.contributionValue}">
+          </div>
+
+          <div style="margin-top:4px;">
+            <label style="font-size:10px; color:var(--text-muted); font-weight:700;">Propuestas donde colabora:</label>
+            <div style="display:flex; flex-direction:column; gap:4px; max-height:120px; overflow-y:auto; margin-top:4px;">
+              ${Object.keys(comm.elements).map(ek => comm.elements[ek].proposals.map(p => `
+                <label style="font-size:10px; display:flex; align-items:center; gap:6px;">
+                  <input type="checkbox" class="prop-link-chk" data-pid="${p.id}" ${mem.proposalIds.includes(p.id) ? 'checked' : ''}>
+                  <span>${p.title} (${comm.elements[ek].name})</span>
+                </label>
+              `).join('')).join('')}
+            </div>
+          </div>
+
+          <div style="display:flex; gap:6px; margin-top:10px;">
+            <button id="btn-save-mem-edit" class="btn-cyan" style="flex:1;">Guardar Cambios</button>
+            <button id="btn-del-mem" style="border-color:#ff4757; color:#ff4757;">Eliminar</button>
+          </div>
+        `;
+
+        document.getElementById('btn-save-mem-edit').onclick = () => {
+          model.updateMember(hit.communityId, mem.id, {
+            name: document.getElementById('edit-mem-name').value,
+            role: document.getElementById('edit-mem-role').value,
+            tierKey: document.getElementById('edit-mem-tier').value,
+            resonanceElement: document.getElementById('edit-mem-elem').value,
+            contributionValue: document.getElementById('edit-mem-contrib').value
+          });
+
+          // Actualizar enlaces con propuestas
+          document.querySelectorAll('.prop-link-chk').forEach(chk => {
+            const pId = chk.dataset.pid;
+            if (chk.checked) {
+              model.linkMemberToProposal(hit.communityId, mem.id, pId);
+            } else {
+              model.unlinkMemberFromProposal(hit.communityId, mem.id, pId);
+            }
+          });
+        };
+
+        document.getElementById('btn-del-mem').onclick = () => {
+          if (confirm(`¿Eliminar al integrante "${mem.name}" de la comunidad?`)) {
+            model.removeMember(hit.communityId, mem.id);
+            inspectorPanel.classList.remove('open');
+          }
+        };
+      }
+    }
+
+    document.getElementById('btn-close-inspector').onclick = () => {
+      inspectorPanel.classList.remove('open');
+      model.selectedNode = null;
+    };
+
+    // =========================================================================
+    // MODALES & CREACIÓN DE ELEMENTOS
+    // =========================================================================
+
+    // 1. Genesis / Crear Comunidad
+    function openCommunityModal() {
+      document.getElementById('comm-name-input').value = 'Comunidad Fractal ' + (model.communities.length + 1);
+      document.getElementById('comm-vision-input').value = 'Célula viva de regeneración, soberanía comunitaria y despertar de la conciencia.';
+      document.getElementById('modal-community').classList.add('open');
+    }
+
+    document.getElementById('btn-genesis-seed').onclick = openCommunityModal;
+    document.getElementById('btn-new-comm').onclick = openCommunityModal;
+
+    document.getElementById('btn-cancel-comm').onclick = () => {
+      document.getElementById('modal-community').classList.remove('open');
+    };
+
+    document.getElementById('btn-save-comm').onclick = () => {
+      const name = document.getElementById('comm-name-input').value.trim() || 'Comunidad Semilla';
+      const vision = document.getElementById('comm-vision-input').value.trim();
+      
+      // Desplazamiento radial armónico si ya hay comunidades
+      const angle = (model.communities.length * 2 * Math.PI) / 5;
+      const dist = model.communities.length === 0 ? 0 : 420;
+
+      model.createCommunity({
+        name,
+        vision,
+        x: Math.cos(angle) * dist,
+        y: Math.sin(angle) * dist,
+        initProposals: true
+      });
+
+      document.getElementById('modal-community').classList.remove('open');
+      setLevel(1);
+    };
+
+    // 2. Crear Propuesta
+    document.getElementById('btn-open-prop-modal').onclick = () => {
+      if (model.communities.length === 0) {
+        alert('Primero manifiesta una comunidad en el plano.');
+        return;
+      }
+      document.getElementById('prop-title-input').value = '';
+      document.getElementById('prop-desc-input').value = '';
+      document.getElementById('prop-energy-input').value = '10';
+      document.getElementById('modal-proposal').classList.add('open');
+    };
+
+    document.getElementById('btn-cancel-prop').onclick = () => {
+      document.getElementById('modal-proposal').classList.remove('open');
+    };
+
+    document.getElementById('btn-save-prop').onclick = () => {
+      const commId = document.getElementById('sel-community').value;
+      const elemKey = document.getElementById('prop-elem-select').value;
+      const title = document.getElementById('prop-title-input').value.trim();
+      const description = document.getElementById('prop-desc-input').value.trim();
+      const energyNeeded = Number(document.getElementById('prop-energy-input').value);
+
+      if (!title) {
+        alert('Por favor indica un título para la propuesta.');
+        return;
+      }
+
+      model.addProposal(commId, elemKey, { title, description, energyNeeded });
+      document.getElementById('modal-proposal').classList.remove('open');
+      setLevel(2);
+    };
+
+    // 3. Sumar Miembro con Membresía de Sostén
+    document.getElementById('btn-open-member-modal').onclick = () => {
+      if (model.communities.length === 0) {
+        alert('Primero manifiesta una comunidad en el plano.');
+        return;
+      }
+      document.getElementById('mem-name-input').value = '';
+      document.getElementById('mem-role-input').value = '';
+      document.getElementById('modal-member').classList.add('open');
+    };
+
+    document.getElementById('btn-cancel-mem').onclick = () => {
+      document.getElementById('modal-member').classList.remove('open');
+    };
+
+    document.getElementById('btn-save-mem').onclick = () => {
+      const commId = document.getElementById('sel-community').value;
+      const name = document.getElementById('mem-name-input').value.trim();
+      const role = document.getElementById('mem-role-input').value.trim() || 'Colaborador';
+      const tierKey = document.getElementById('mem-tier-select').value;
+      const resonanceElement = document.getElementById('mem-elem-select').value;
+      const contributionValue = document.getElementById('mem-contrib-input').value.trim();
+
+      if (!name) {
+        alert('Por favor indica el nombre del integrante.');
+        return;
+      }
+
+      model.addMember(commId, {
+        name,
+        role,
+        tierKey,
+        resonanceElement,
+        contributionValue
+      });
+
+      document.getElementById('modal-member').classList.remove('open');
+      setLevel(3);
+    };
+
+    // Preset "Semilla Viva"
+    document.getElementById('btn-load-preset').onclick = () => {
+      model.loadLivingCommunityPreset();
+      setLevel(1);
+    };
+
+    // Volver al Vacío
+    document.getElementById('btn-reset-void').onclick = () => {
+      if (confirm('¿Deseas disolver la manifestación y regresar a La Nada (El Vacío Primordial)?')) {
+        model.resetToVoid();
+        setLevel(0);
+      }
+    };
+
+    // Exportar / Importar JSON
+    document.getElementById('btn-export-json').onclick = () => {
+      const jsonStr = model.exportJSON();
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `red_fractal_comunitaria_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    document.getElementById('btn-import-json').onclick = () => {
+      document.getElementById('inp-import-file').click();
+    };
+
+    document.getElementById('inp-import-file').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        if (model.importJSON(evt.target.result)) {
+          alert('¡Red comunitaria importada con éxito!');
+          setLevel(1);
+        } else {
+          alert('Error al leer el archivo JSON.');
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    // Controles de Cámara en Barra Inferior
+    document.getElementById('btn-zoom-in').onclick = () => {
+      camera.targetZoom = Math.min(3.5, camera.targetZoom * 1.25);
+    };
+    document.getElementById('btn-zoom-out').onclick = () => {
+      camera.targetZoom = Math.max(0.2, camera.targetZoom * 0.8);
+    };
+    document.getElementById('btn-zoom-reset').onclick = () => {
+      camera.targetZoom = 1;
+      centerOnActiveCommunity();
+    };
+    document.getElementById('brand-home').onclick = () => {
+      camera.targetZoom = 1;
+      centerOnActiveCommunity();
+    };
+
+    // Iniciar Bucle de Animación y UI inicial
+    updateLeftPanel();
+    animate();
+  </script>
+</body>
+</html>

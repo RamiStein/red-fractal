@@ -1,0 +1,3389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matriz Cristal Sincrónica · Territorios, Líneas Ley & Ciudades Intraterrenas</title>
+  <style>
+    :root {
+      --bg: #030610;
+      --card-bg: rgba(9, 16, 32, 0.94);
+      --border: rgba(255, 255, 255, 0.14);
+      --accent-cyan: #00e5ff;
+      --accent-gold: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-blue: #3a86ff;
+      --accent-purple: #b366ff;
+      --accent-rose: #f43f5e;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      width: 100vw; height: 100vh; overflow: hidden;
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    #canvas-globe {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: block; cursor: grab;
+    }
+    #canvas-globe:active { cursor: grabbing; }
+
+    /* Barra Superior */
+    #top-bar {
+      position: absolute; top: 12px; left: 12px; right: 12px;
+      z-index: 20; display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 8px 14px;
+      background: var(--card-bg); backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7); flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; }
+    .brand-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #00e5ff, #3a86ff);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; box-shadow: 0 0 14px rgba(0,229,255,0.4);
+    }
+    .brand-title {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #fff, #00e5ff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .brand-sub { font-size: 9px; color: var(--text-muted); }
+
+    .controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    select, button, input, textarea {
+      background: rgba(255,255,255,0.08); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 5px 10px; font-size: 11px;
+      outline: none; transition: all 0.2s;
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--accent-cyan); box-shadow: 0 0 10px rgba(0,229,255,0.25);
+    }
+    select option { background: #0f172a; color: #fff; }
+    button {
+      cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;
+    }
+    button:hover {
+      background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(0,229,255,0.25), rgba(58,134,255,0.35));
+      border-color: var(--accent-cyan); color: #fff;
+    }
+    .btn-active {
+      background: rgba(0, 229, 255, 0.22) !important;
+      border-color: var(--accent-cyan) !important;
+      color: #fff !important;
+    }
+
+    #search-box { width: 140px; font-size: 11px; padding: 4px 8px; }
+
+    /* Panel Lateral Izquierdo: Directorio Multicapa */
+    #directory-panel {
+      position: absolute; top: 68px; left: 12px; bottom: 16px; width: 310px;
+      z-index: 20; background: var(--card-bg); backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 14px; padding: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: flex; flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Pestañas del Directorio */
+    .dir-tabs {
+      display: flex; gap: 4px; border-bottom: 1px solid var(--border); padding-bottom: 6px;
+    }
+    .dir-tab {
+      flex: 1; padding: 6px 4px; font-size: 10px; font-weight: 700; text-align: center;
+      border-radius: 6px; background: rgba(255,255,255,0.05); color: var(--text-muted);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .dir-tab.active {
+      background: rgba(0,229,255,0.2); color: #fff; border: 1px solid var(--accent-cyan);
+    }
+
+    .dir-list {
+      flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;
+      padding-right: 2px;
+    }
+    .item-card {
+      padding: 7px 9px; border-radius: 8px; background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: all 0.2s;
+    }
+    .item-card:hover {
+      background: rgba(0,229,255,0.1); border-color: var(--accent-cyan);
+      transform: translateX(3px);
+    }
+    .item-card.active {
+      background: rgba(0,229,255,0.18); border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0,229,255,0.25);
+    }
+    .item-card-top {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;
+    }
+    .item-card-name { font-size: 11px; font-weight: 700; color: #fff; }
+    .item-card-badge {
+      font-size: 9px; padding: 1px 5px; border-radius: 4px; background: rgba(255,255,255,0.1);
+      font-weight: 600;
+    }
+    .item-card-sub {
+      font-size: 9.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* Panel Inspector y Editor Derecho */
+    #inspector-panel {
+      position: absolute; top: 68px; right: 12px; bottom: 16px; width: 340px;
+      z-index: 20; background: var(--card-bg); backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 14px; padding: 14px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      display: flex; flex-direction: column; gap: 8px;
+      transform: translateX(380px); opacity: 0; pointer-events: none;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+      overflow-y: auto;
+    }
+    #inspector-panel.open {
+      transform: translateX(0); opacity: 1; pointer-events: auto;
+    }
+    .insp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border); padding-bottom: 6px;
+    }
+    .insp-title { font-size: 13px; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px; }
+    .close-btn { background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; }
+    .close-btn:hover { color: #fff; }
+
+    .insp-section {
+      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px;
+    }
+    .insp-sec-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--accent-gold); display: flex; align-items: center; gap: 4px;
+    }
+    .insp-sec-content { font-size: 11px; line-height: 1.45; color: #e2e8f0; }
+
+    .geo-coords {
+      background: rgba(0,0,0,0.35); padding: 5px 8px; border-radius: 6px;
+      font-family: monospace; font-size: 10.5px; color: var(--accent-cyan);
+      display: flex; justify-content: space-between;
+    }
+    .connections-box {
+      display: flex; flex-wrap: wrap; gap: 4px; max-height: 65px; overflow-y: auto;
+    }
+    .conn-tag {
+      padding: 3px 6px; background: rgba(255,255,255,0.08); border-radius: 4px;
+      font-size: 9.5px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .conn-tag:hover { background: var(--accent-cyan); color: #000; }
+
+    /* Barra Inferior */
+    #bottom-bar {
+      position: absolute; bottom: 12px; left: 334px; z-index: 20;
+      display: flex; align-items: center; gap: 8px; padding: 4px 12px;
+      background: var(--card-bg); backdrop-filter: blur(10px);
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 10.5px; color: var(--text-muted);
+    }
+    .key {
+      background: rgba(255,255,255,0.12); padding: 2px 5px; border-radius: 4px;
+      color: #fff; font-family: monospace;
+    }
+
+    #tooltip {
+      position: absolute; z-index: 30; pointer-events: none;
+      background: rgba(9,16,32,0.96); border: 1px solid var(--accent-cyan);
+      padding: 6px 10px; border-radius: 8px; font-size: 11px;
+      display: none; transform: translate(-50%, -120%);
+      white-space: nowrap; box-shadow: 0 4px 16px rgba(0,229,255,0.4);
+    }
+
+    /* Trigger Flotante del Asistente */
+    #floating-chat-trigger {
+      position: absolute; bottom: 20px; right: 20px; z-index: 35;
+      display: flex; align-items: center; gap: 8px; padding: 9px 16px;
+      background: linear-gradient(135deg, rgba(0,229,255,0.92), rgba(179,102,255,0.92));
+      color: #030610; font-weight: 700; font-size: 11.5px; border-radius: 30px;
+      cursor: pointer; box-shadow: 0 8px 30px rgba(0,229,255,0.45);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+    #floating-chat-trigger:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 12px 36px rgba(0,229,255,0.65);
+    }
+    .pulse-ring {
+      position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px;
+      border: 2px solid #00e5ff; border-radius: 34px;
+      animation: pulseAnim 2.4s infinite ease-out; pointer-events: none; opacity: 0.6;
+    }
+    @keyframes pulseAnim {
+      0% { transform: scale(0.98); opacity: 0.8; }
+      70% { transform: scale(1.08); opacity: 0; }
+      100% { transform: scale(1.08); opacity: 0; }
+    }
+
+    /* Panel de Diálogo con el Asistente */
+    #assistant-dialog-panel {
+      position: absolute; bottom: 20px; right: 20px; width: 390px; height: 570px;
+      max-height: calc(100vh - 86px); max-width: calc(100vw - 36px);
+      z-index: 50; background: rgba(8, 14, 30, 0.96); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--accent-cyan); border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.85), 0 0 24px rgba(0,229,255,0.25);
+      display: flex; flex-direction: column; overflow: hidden;
+      transform: scale(0.85) translateY(40px); opacity: 0; pointer-events: none;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+    }
+    #assistant-dialog-panel.open {
+      transform: scale(1) translateY(0); opacity: 1; pointer-events: auto;
+    }
+
+    .ast-header {
+      padding: 11px 14px; background: rgba(0,0,0,0.45);
+      border-bottom: 1px solid var(--border); display: flex;
+      align-items: center; justify-content: space-between;
+    }
+    .ast-title-box { display: flex; align-items: center; gap: 8px; }
+    .ast-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #00e5ff, #b366ff);
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      box-shadow: 0 0 12px rgba(0,229,255,0.5);
+    }
+    .ast-title { font-size: 12px; font-weight: 700; color: #fff; }
+    .ast-sub { font-size: 9.5px; color: var(--accent-cyan); }
+    .ast-header-actions { display: flex; align-items: center; gap: 6px; }
+    .ast-icon-btn {
+      background: none; border: none; font-size: 14px; color: var(--text-muted);
+      cursor: pointer; padding: 2px 6px; border-radius: 4px;
+    }
+    .ast-icon-btn:hover { color: #fff; background: rgba(255,255,255,0.12); }
+
+    .ast-messages {
+      flex: 1; overflow-y: auto; padding: 12px; display: flex;
+      flex-direction: column; gap: 10px; font-size: 11px;
+    }
+    .ast-msg {
+      max-width: 90%; display: flex; flex-direction: column; gap: 4px;
+      animation: msgAppear 0.2s ease-out;
+    }
+    @keyframes msgAppear {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .ast-msg.assistant { align-self: flex-start; }
+    .ast-msg.user { align-self: flex-end; }
+
+    .ast-bubble {
+      padding: 8px 12px; border-radius: 12px; line-height: 1.45;
+    }
+    .ast-msg.assistant .ast-bubble {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      color: #e2e8f0; border-top-left-radius: 2px;
+    }
+    .ast-msg.user .ast-bubble {
+      background: linear-gradient(135deg, rgba(0,229,255,0.25), rgba(58,134,255,0.35));
+      border: 1px solid var(--accent-cyan); color: #fff; border-top-right-radius: 2px;
+    }
+
+    .ast-card {
+      background: rgba(0, 229, 255, 0.08); border: 1px solid var(--accent-cyan);
+      border-radius: 8px; padding: 8px 10px; margin-top: 5px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .ast-card-title {
+      font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: space-between; font-size: 11px;
+    }
+    .ast-card-badge {
+      font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 600;
+    }
+    .ast-card-info { font-size: 10px; color: #cbd5e1; line-height: 1.35; }
+    .ast-card-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+    .ast-card-btn {
+      padding: 4px 8px; font-size: 10px; font-weight: 600; border-radius: 5px;
+      background: rgba(0,229,255,0.18); border: 1px solid var(--accent-cyan);
+      color: #fff; cursor: pointer; transition: all 0.15s;
+    }
+    .ast-card-btn:hover { background: var(--accent-cyan); color: #000; }
+
+    .ast-form-inline {
+      background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px; padding: 8px; margin-top: 6px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .ast-form-row { display: flex; gap: 6px; }
+    .ast-form-inline input, .ast-form-inline select {
+      font-size: 10.5px; padding: 4px 8px; border-radius: 6px;
+      background: rgba(255,255,255,0.08); border: 1px solid var(--border);
+      color: #fff; outline: none; flex: 1;
+    }
+
+    .ast-suggestions {
+      padding: 6px 10px; display: flex; gap: 5px; overflow-x: auto;
+      border-top: 1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.25);
+    }
+    .ast-chip {
+      white-space: nowrap; font-size: 9.5px; padding: 3px 8px; border-radius: 12px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .ast-chip:hover {
+      background: rgba(0,229,255,0.22); border-color: var(--accent-cyan); color: #fff;
+    }
+
+    .ast-input-area {
+      padding: 8px 10px; border-top: 1px solid var(--border);
+      background: rgba(0,0,0,0.4); display: flex; gap: 6px;
+    }
+    #ast-input {
+      flex: 1; font-size: 11px; padding: 7px 10px; border-radius: 8px;
+      background: rgba(255,255,255,0.08); border: 1px solid var(--border);
+      color: #fff; outline: none;
+    }
+    #ast-input:focus {
+      border-color: var(--accent-cyan); box-shadow: 0 0 10px rgba(0,229,255,0.3);
+    }
+    .ast-send-btn {
+      padding: 0 13px; background: linear-gradient(135deg, #00e5ff, #3a86ff);
+      border: none; border-radius: 8px; color: #030610; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+    }
+    .ast-send-btn:hover { transform: scale(1.05); }
+
+    /* Barra Flotante de Regulación de Zoom */
+    #zoom-control-bar {
+      position: absolute; bottom: 46px; left: 334px; z-index: 25;
+      display: flex; align-items: center; gap: 8px; padding: 6px 14px;
+      background: var(--card-bg); backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      font-size: 11px; color: var(--text);
+    }
+    .zoom-btn {
+      width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.08); border: 1px solid var(--border);
+      color: #fff; border-radius: 6px; font-weight: 700; cursor: pointer;
+      font-size: 13px; line-height: 1; transition: all 0.15s; padding: 0;
+    }
+    .zoom-btn:hover {
+      background: rgba(0,229,255,0.25); border-color: var(--accent-cyan);
+      transform: scale(1.08);
+    }
+    .zoom-slider-range {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 120px; height: 6px;
+      background: rgba(255,255,255,0.14);
+      border-radius: 4px; outline: none;
+      cursor: pointer;
+    }
+    .zoom-slider-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0,229,255,0.8);
+      cursor: pointer; transition: transform 0.15s;
+    }
+    .zoom-slider-range::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+    }
+    .zoom-slider-range::-moz-range-thumb {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0,229,255,0.8);
+      cursor: pointer; border: none;
+    }
+    #zoom-level-text {
+      font-size: 10.5px; font-weight: 700; color: var(--accent-cyan);
+      min-width: 36px; text-align: right; font-family: monospace;
+    }
+
+    /* Estilos de Multiselección y Enlaces Telúricos */
+    #btn-toggle-multisel.btn-active {
+      background: linear-gradient(135deg, rgba(179,102,255,0.4), rgba(0,229,255,0.4)) !important;
+      border-color: var(--accent-purple) !important;
+      color: #fff !important;
+      box-shadow: 0 0 12px rgba(179,102,255,0.5) !important;
+    }
+    .item-card.multiselected {
+      border-color: var(--accent-purple) !important;
+      background: rgba(179,102,255,0.16) !important;
+      box-shadow: 0 0 14px rgba(179,102,255,0.35) !important;
+    }
+    .item-card-order-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 17px; height: 17px; border-radius: 50%;
+      background: var(--accent-purple); color: #fff;
+      font-size: 9.5px; font-weight: 700; margin-right: 5px; flex-shrink: 0;
+    }
+
+    /* Barra Flotante de Acción de Multiselección */
+    #multisel-action-bar {
+      position: absolute; bottom: 84px; left: 334px; z-index: 26;
+      display: flex; align-items: center; gap: 10px; padding: 7px 14px;
+      background: rgba(9, 16, 35, 0.94); backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(0,229,255,0.45); border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.7), 0 0 18px rgba(0,229,255,0.25);
+      font-size: 11px; color: var(--text);
+      animation: fadeIn 0.25s ease;
+    }
+    .multisel-tags-container {
+      display: flex; gap: 5px; max-width: 440px; overflow-x: auto;
+      padding: 2px 0;
+    }
+    .multisel-tags-container::-webkit-scrollbar { height: 4px; }
+    .multisel-tags-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+    .multisel-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 7px; border-radius: 12px;
+      background: rgba(255,255,255,0.08); border: 1px solid var(--border);
+      font-size: 9.5px; white-space: nowrap; color: #fff;
+    }
+    .multisel-pill-remove {
+      cursor: pointer; opacity: 0.7; transition: opacity 0.15s; font-size: 11px; margin-left: 2px;
+    }
+    .multisel-pill-remove:hover { opacity: 1; color: #ff5555; }
+
+    /* Drawer de Configuración de Gemini API */
+    .ast-settings-drawer {
+      padding: 10px 12px; background: rgba(13, 22, 45, 0.95);
+      border-bottom: 1px solid var(--border);
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Animación del Spinner de IA */
+    .thinking-spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(0,229,255,0.3);
+      border-top-color: var(--accent-cyan);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Widgets Inyectados por el Motor de Auto-Mejora */
+    #synchro-clock-widget {
+      position: absolute; top: 58px; right: 334px; z-index: 24;
+      display: flex; align-items: center; gap: 8px; padding: 5px 12px;
+      background: rgba(9, 16, 35, 0.92); backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,211,42,0.45); border-radius: 10px;
+      font-size: 10.5px; color: #ffd32a; font-family: monospace;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      animation: fadeIn 0.3s ease;
+    }
+    #hud-resonance-bar {
+      position: absolute; top: 58px; left: 334px; z-index: 24;
+      display: flex; align-items: center; gap: 10px; padding: 5px 12px;
+      background: rgba(9, 16, 35, 0.92); backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(0,229,255,0.45); border-radius: 10px;
+      font-size: 10.5px; color: #00e5ff; font-family: monospace;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      animation: fadeIn 0.3s ease;
+    }
+    .meditation-mode-active #directory-panel,
+    .meditation-mode-active #inspector-panel,
+    .meditation-mode-active #top-bar .brand-sub {
+      opacity: 0.18; filter: blur(2px); transition: all 0.6s ease;
+    }
+    .meditation-mode-active #directory-panel:hover,
+    .meditation-mode-active #inspector-panel:hover {
+      opacity: 1; filter: blur(0);
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="canvas-globe"></canvas>
+  <div id="tooltip"></div>
+
+  <!-- Barra Superior de Navegación -->
+  <header id="top-bar">
+    <div class="brand">
+      <div class="brand-icon">✨</div>
+      <div>
+        <div class="brand-title">MATRIZ CRISTAL SINCRÓNICA</div>
+        <div class="brand-sub">Biorregiones · Líneas Ley · Ciudades Intraterrenas (ERKS)</div>
+      </div>
+    </div>
+
+    <!-- Navegación de la Suite -->
+    <nav style="display:flex; gap:4px; background:rgba(255,255,255,0.04); padding:3px 6px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
+      <a href="red_comunitaria_2d.html" style="color:#ffd32a; text-decoration:none; font-size:10px; font-weight:700; padding:4px 8px; border-radius:5px; background:rgba(255,211,42,0.15); border:1px solid rgba(255,211,42,0.3);" title="Red Comunitaria Fractal 2D: 5 Elementos y Membresías">🌱 Red Comunitaria 2D</a>
+      <a href="espacio_3d.html" style="color:var(--text-muted); text-decoration:none; font-size:10px; font-weight:600; padding:4px 8px;" title="Espacio Digital 3D">🌌 Espacio 3D</a>
+      <a href="micelio_grafos_2d.html" style="color:var(--text-muted); text-decoration:none; font-size:10px; font-weight:600; padding:4px 8px;" title="Micelio 2D">🍄 Micelio 2D</a>
+      <a href="solidos_platonicos.html" style="color:var(--text-muted); text-decoration:none; font-size:10px; font-weight:600; padding:4px 8px;" title="Sólidos Platónicos">🔮 Sólidos</a>
+    </nav>
+
+    <!-- Buscador en Vivo -->
+    <input type="text" id="search-box" placeholder="🔍 Buscar (ERKS, Andes...)">
+
+    <div class="controls">
+      <!-- Selector de Modo de Visión -->
+      <button id="btn-view-mode" class="btn-primary" title="Alternar entre Globo 3D y Mapa Plano 2D">
+        🌐 Modo: <span id="txt-view-mode">Globo 3D</span>
+      </button>
+
+      <!-- Conmutadores de Capas -->
+      <button id="btn-toggle-intra" class="btn-active" title="Mostrar/ocultar Ciudades Intraterrenas (ERKS, Aurora, Isidris, etc.)">
+        🏛️ Intraterrenas: <span id="txt-intra">ON</span>
+      </button>
+
+      <button id="btn-toggle-sacred" class="btn-active" title="Mostrar/ocultar Vórtices Sagrados del Agua y la Tierra (San Agustín, Kusiyaku, Iguazú...)">
+        💧 Agua Sagrada: <span id="txt-sacred">ON</span>
+      </button>
+
+      <button id="btn-toggle-ley" class="btn-active" title="Mostrar/ocultar Grandes Líneas Ley y Flujos Telúricos">
+        ⚡ Líneas Ley: <span id="txt-ley">ON</span>
+      </button>
+
+      <button id="btn-toggle-conv" class="btn-active" title="Mostrar/ocultar Puntos de Convergencia de Máxima Resonancia">
+        🎯 Convergencias: <span id="txt-conv">ON</span>
+      </button>
+
+      <button id="btn-toggle-earth" class="btn-active" title="Mostrar/ocultar geografía del Planeta Tierra">
+        🌍 Tierra: <span id="txt-earth">ON</span>
+      </button>
+
+      <button id="btn-toggle-labels" class="btn-active" title="Mostrar/ocultar etiquetas flotantes">
+        🏷️ Nombres: <span id="txt-labels">ON</span>
+      </button>
+
+      <button id="btn-toggle-rot" title="Alternar rotación automática">
+        🔄 Rotación: <span id="txt-rot">ON</span>
+      </button>
+
+      <!-- Control de Zoom en Barra Superior -->
+      <div class="zoom-top-box" style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.06); padding:3px 8px; border-radius:8px; border:1px solid var(--border);" title="Regular zoom de la esfera / mapa">
+        <span style="font-size:10px; color:var(--text-muted); font-weight:600;">🔍 Zoom:</span>
+        <button id="btn-top-zoom-out" style="padding:1px 5px; font-size:11px; min-width:18px; border-radius:4px;">−</button>
+        <input type="range" id="top-zoom-slider" class="zoom-slider-range" min="100" max="700" value="240" step="5" style="width:75px;">
+        <button id="btn-top-zoom-in" style="padding:1px 5px; font-size:11px; min-width:18px; border-radius:4px;">+</button>
+        <span id="top-zoom-level" style="font-size:10px; font-weight:700; color:var(--accent-cyan); min-width:32px; font-family:monospace;">100%</span>
+      </div>
+
+      <!-- Modo de Multiselección para Enlazar Territorios -->
+      <button id="btn-toggle-multisel" title="Activar/desactivar modo de selección múltiple (o usa Shift+Clic) para analizar vínculos telúricos entre varios territorios">
+        🔮 Multiselección: <span id="txt-multisel">OFF</span>
+      </button>
+
+      <!-- Diálogo / Asistente IA de la Matriz -->
+      <button id="btn-toggle-assistant" style="background:linear-gradient(135deg, rgba(0,229,255,0.25), rgba(179,102,255,0.35)); border-color:#00e5ff; font-weight:700; color:#fff;" title="Abrir diálogo para agregar y conectar puntos clave en lenguaje natural">
+        ✨ Diálogo con Asistente
+      </button>
+
+      <!-- Descarga / Carga / Captura -->
+      <button id="btn-export" class="btn-primary" title="Descargar matriz en JSON a tu notebook">
+        💾 Descargar JSON
+      </button>
+      <button id="btn-import" title="Cargar archivo JSON desde tu notebook">
+        📂 Cargar
+      </button>
+      <button id="btn-snap" title="Descargar imagen PNG">
+        📸 Captura
+      </button>
+      <input type="file" id="inp-file" accept=".json" style="display:none;">
+    </div>
+  </header>
+
+  <!-- Panel Lateral Izquierdo: Directorio Multicapa -->
+  <aside id="directory-panel">
+    <!-- Pestañas de Navegación -->
+    <div class="dir-tabs">
+      <div class="dir-tab active" id="tab-bioregions">🗺️ Biorregiones</div>
+      <div class="dir-tab" id="tab-intraterrenas">🏛️ Intraterrenas</div>
+      <div class="dir-tab" id="tab-sacred">💧 Agua Sagrada</div>
+      <div class="dir-tab" id="tab-leylines">⚡ Líneas Ley</div>
+    </div>
+
+    <!-- Lista Desplazable de Elementos -->
+    <div class="dir-list" id="dir-items-list"></div>
+  </aside>
+
+  <!-- Panel Inspector Derecho: Propósito, Territorio e Interconexiones -->
+  <aside id="inspector-panel">
+    <div class="insp-header">
+      <div class="insp-title">
+        <span id="insp-dot" style="width:10px; height:10px; border-radius:50%; background:var(--accent-cyan);"></span>
+        <span id="insp-node-title">Detalles del Vórtice</span>
+      </div>
+      <button class="close-btn" id="btn-close-insp">&times;</button>
+    </div>
+
+    <!-- 1. Identificación y Ubicación -->
+    <div class="insp-section">
+      <div class="insp-sec-title">📍 Ubicación & Categoría</div>
+      <div class="insp-sec-content">
+        <strong id="txt-entity-name" style="font-size:12px; color:#fff;">Nombre</strong><br>
+        <span id="txt-entity-location" style="color:var(--text-muted); font-size:10.5px;">Ubicación</span>
+      </div>
+      <div class="geo-coords">
+        <span id="coord-lat">Lat: 0.00°</span>
+        <span id="coord-lon">Lon: 0.00°</span>
+        <span id="txt-entity-freq" style="color:var(--accent-gold);">432 Hz</span>
+      </div>
+    </div>
+
+    <!-- 2. Propósito y Misión Biocultural / Energética -->
+    <div class="insp-section">
+      <div class="insp-sec-title">🎯 Propósito & Misión</div>
+      <div class="insp-sec-content" id="txt-entity-purpose">
+        Propósito del vórtice...
+      </div>
+    </div>
+
+    <!-- 3. Interconexiones y Flujos Telúricos -->
+    <div class="insp-section">
+      <div class="insp-sec-title">⚡ Interconexiones & Flujos Telúricos</div>
+      <div class="insp-sec-content" id="txt-interconn-desc">
+        Canales telúricos hacia otros vórtices...
+      </div>
+      <div class="interconn-box" id="box-conns"></div>
+      <div style="font-size:9.5px; color:var(--text-muted); margin-top:5px;">
+        Nodos hermanos vinculados: <span id="txt-conn-count" style="color:var(--accent-cyan); font-weight:700;">0</span>
+      </div>
+    </div>
+
+    <!-- 4. Fábrica del Agua y Ecosistema (Para Sitios Sagrados / Biorregiones) -->
+    <div class="insp-section" id="sec-water-details" style="display:none;">
+      <div class="insp-sec-title">💧 Fábrica del Agua & Ecosistema</div>
+      <div class="insp-sec-content">
+        <div id="txt-entity-ecosystem"></div>
+        <div id="txt-entity-rivers" style="margin-top:4px; color:var(--accent-cyan);"></div>
+      </div>
+    </div>
+
+    <!-- 5. Frecuencia y Rayo -->
+    <div class="insp-section">
+      <div class="insp-sec-title">✨ Frecuencia, Rayo & Custodia</div>
+      <div class="insp-sec-content">
+        <div><strong>Rayo / Elemento:</strong> <span id="txt-ray-element" style="color:var(--accent-cyan);">Rayo Azul</span></div>
+        <div><strong>Círculo Custodio:</strong> <span id="txt-custodians" style="color:var(--text-muted);">Guardianes Locales</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Barra Flotante de Acción de Multiselección -->
+  <div id="multisel-action-bar" style="display:none;">
+    <div style="display:flex; align-items:center; gap:6px;">
+      <span style="font-size:14px;">🔮</span>
+      <span id="multisel-count-text" style="font-weight:600; color:#fff; white-space:nowrap;"><strong>0</strong> seleccionados</span>
+    </div>
+    <div id="multisel-tags" class="multisel-tags-container"></div>
+    <div style="display:flex; gap:6px; margin-left:auto; align-items:center;">
+      <button id="btn-multisel-analyze" class="btn-primary" style="background:linear-gradient(135deg, #00e5ff, #b366ff); border-color:#00e5ff; font-weight:700; font-size:11px; padding:5px 12px; border-radius:8px; white-space:nowrap;" title="Analizar vínculo telúrico, distancias geodésicas, continuo hidro-energético y frecuencias">
+        ⚡ Analizar Vínculo Telúrico
+      </button>
+      <button id="btn-multisel-clear" style="background:rgba(255,255,255,0.08); border:1px solid var(--border); color:var(--text-muted); font-size:10px; padding:4px 8px; border-radius:6px; cursor:pointer;" title="Limpiar selección múltiple">
+        ✕ Limpiar
+      </button>
+    </div>
+  </div>
+
+  <!-- Barra Flotante de Regulación de Zoom -->
+  <div id="zoom-control-bar">
+    <span style="color:var(--accent-cyan); font-weight:700; font-size:10px; display:flex; align-items:center; gap:3px;">🔍 ZOOM</span>
+    <button id="btn-zoom-out" class="zoom-btn" title="Alejar (−)">−</button>
+    <input type="range" id="zoom-slider" class="zoom-slider-range" min="100" max="700" value="240" step="5" title="Deslizar para regular nivel de zoom">
+    <button id="btn-zoom-in" class="zoom-btn" title="Acercar (+)">+</button>
+    <span id="zoom-level-text">100%</span>
+    <button id="btn-zoom-reset" class="zoom-btn" title="Restablecer zoom predeterminado (100%)">↺</button>
+  </div>
+
+  <!-- Barra Inferior -->
+  <footer id="bottom-bar">
+    <span>Navegación:</span>
+    <span><span class="key">Clic</span> Enfocar</span>
+    <span><span class="key">Shift + Clic / 🔮 Multiselección</span> Enlazar Territorios</span>
+    <span><span class="key">Arrastrar</span> Rotar</span>
+    <span><span class="key">Barra o Rueda</span> Zoom</span>
+  </footer>
+
+  <!-- Botón Flotante para Abrir Diálogo -->
+  <div id="floating-chat-trigger" title="Abrir Diálogo con el Asistente Sincrónico">
+    <span class="pulse-ring"></span>
+    <span style="font-size:14px;">✨</span>
+    <span>Diálogo con Asistente</span>
+  </div>
+
+  <!-- Modal / Ventana de Diálogo con el Asistente -->
+  <aside id="assistant-dialog-panel">
+    <div class="ast-header">
+      <div class="ast-title-box">
+        <div class="ast-avatar">✨</div>
+        <div>
+          <div class="ast-title">Asistente Sincrónico de la Red</div>
+          <div class="ast-sub">Diálogo para tejer nuevos puntos clave y vínculos</div>
+        </div>
+      </div>
+      <div class="ast-header-actions">
+        <button id="btn-ast-settings" title="Configurar Google Gemini API" class="ast-icon-btn">⚙️</button>
+        <button id="btn-ast-clear" title="Reiniciar conversación" class="ast-icon-btn">🔄</button>
+        <button id="btn-ast-minimize" title="Cerrar diálogo" class="ast-icon-btn">&times;</button>
+      </div>
+    </div>
+
+    <!-- Cajón Desplegable de Configuración de Gemini API -->
+    <div id="ast-settings-drawer" class="ast-settings-drawer" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <span style="font-size:11px; font-weight:700; color:var(--accent-cyan);">⚙️ Configuración Gemini AI</span>
+        <button id="btn-close-settings" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px; line-height:1;">&times;</button>
+      </div>
+      <p style="font-size:10px; color:var(--text-muted); margin:0 0 6px 0; line-height:1.35;">
+        El asistente opera 100% offline con el motor telúrico local. Si deseas además razonamiento poético y oracular con <strong>Google Gemini (gemini-2.5-flash)</strong>, pega tu API Key (se guarda sólo en tu navegador):
+      </p>
+      <div style="display:flex; gap:6px; margin-bottom:6px;">
+        <input type="password" id="inp-gemini-key" placeholder="Pega tu Gemini API Key (AIzaSy...)" style="flex:1; font-size:10.5px; padding:5px 8px; border-radius:6px; background:rgba(0,0,0,0.5); border:1px solid var(--border); color:#fff; outline:none;">
+        <button id="btn-toggle-key-vis" title="Ver/Ocultar clave" style="padding:4px 8px; border-radius:6px; background:rgba(255,255,255,0.08); border:1px solid var(--border); color:#fff; cursor:pointer; font-size:10px;">👁️</button>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="txt-gemini-status" style="font-size:9.5px; color:var(--accent-gold);">⚪ Motor Local Offline Activo</span>
+        <div style="display:flex; gap:6px;">
+          <button id="btn-clear-gemini-key" style="background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text-muted); font-size:10px; padding:3px 8px; border-radius:6px; cursor:pointer;">Usar Local</button>
+          <button id="btn-save-gemini-key" style="background:var(--accent-cyan); border:none; color:#030610; font-weight:700; font-size:10px; padding:3px 10px; border-radius:6px; cursor:pointer;">Guardar Clave</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Área de Mensajes del Diálogo -->
+    <div id="ast-messages" class="ast-messages"></div>
+
+    <!-- Sugerencias Rápidas / Chips -->
+    <div class="ast-suggestions" id="ast-suggestions">
+      <div class="ast-chip" id="chip-analyze-multisel" data-action="analyze-link" style="border-color:var(--accent-purple); color:#fff; background:rgba(179,102,255,0.18);">⚡ Analizar Vínculos Seleccionados</div>
+      <div class="ast-chip" data-query="Acelerá la rotación del planeta al doble" style="border-color:#06d6a0; color:#06d6a0; background:rgba(6,214,160,0.12);">🛠️ Acelerar Rotación</div>
+      <div class="ast-chip" data-query="Cambiá el fondo a azul cósmico" style="border-color:#00e5ff; color:#00e5ff;">🎨 Fondo Azul Cósmico</div>
+      <div class="ast-chip" data-query="Activá el modo meditación" style="border-color:#b366ff; color:#b366ff;">🧘 Modo Meditación</div>
+      <div class="ast-chip" data-query="Agregá un reloj sincrónico planetario" style="border-color:#ffd32a; color:#ffd32a;">⏱️ Reloj Sincrónico</div>
+      <div class="ast-chip" data-query="Silenciá el sonido">🔇 Mutear Audio</div>
+      <div class="ast-chip" data-query="¿Qué mejoras tenés aplicadas?">📋 Ver Mejoras</div>
+      <div class="ast-chip" data-query="Agregá el Monte Kailash en Tíbet">🏔️ Monte Kailash</div>
+      <div class="ast-chip" data-query="Agregá las Pirámides de Palenque en México">🏛️ Palenque</div>
+      <div class="ast-chip" data-query="Agregá el Cerro Champaquí en Córdoba">⛰️ Cerro Champaquí</div>
+      <div class="ast-chip" data-query="Agregá Stonehenge en Inglaterra">🌀 Stonehenge</div>
+      <div class="ast-chip" data-query="Agregá el Volcán Licancabur en Atacama">🌋 Licancabur</div>
+      <div class="ast-chip" data-query="Agregá el Lago Baikal en Siberia">🌊 Lago Baikal</div>
+      <div class="ast-chip" data-query="Agregá Uluru en Australia">🪨 Uluru</div>
+      <div class="ast-chip" data-query="Agregá las Pirámides de Giza en Egipto">☀️ Giza</div>
+    </div>
+
+    <!-- Área de Entrada / Input -->
+    <form id="ast-form" class="ast-input-area" onsubmit="return false;">
+      <input type="text" id="ast-input" placeholder="Ej: ¿Qué vínculo hay entre los territorios seleccionados? o Agregá Monte Kailash..." autocomplete="off">
+      <button type="submit" id="btn-ast-send" class="ast-send-btn" title="Enviar solicitud">
+        <span>➤</span>
+      </button>
+    </form>
+  </aside>
+
+  <script>
+    // =========================================================================
+    // BASE DE DATOS MAESTRA: BIORREGIONES, INTRATERRENAS Y LÍNEAS LEY
+    // =========================================================================
+
+    // 1. Biorregiones Principales
+    const BIOREGIONS = [
+      {
+        id: 'bio_andes',
+        name: 'Biorregión Andina & Altiplano',
+        shortName: '🏔️ Andes & Altiplano',
+        category: 'bioregion',
+        territory: 'Cordillera de los Andes / Valle Sagrado',
+        region: 'Sudamérica',
+        lat: -26.565, lon: -72.0,
+        color: '#b366ff',
+        freq: '432 Hz',
+        ray: 'Éter & Fuego Blanco',
+        circle: 'Guardianes del Agua Andina',
+        purpose: 'Siembra y cosecha de agua de altura, custodia de glaciares milenarios y anclaje de la columna vertebral energética de América del Sur.',
+        interconnectionsDesc: 'Nutre hidrológicamente a la Amazonía y a la Cuenca del Plata; puente telúrico directo con el Templo del Titicaca, Isidris y ERKS.',
+        connectedIds: ['bio_amazonas', 'bio_plata', 'intra_titicaca', 'intra_isidris', 'intra_erks']
+      },
+      {
+        id: 'bio_amazonas',
+        name: 'Biorregión Cuenca Amazónica',
+        shortName: '🌳 Cuenca Amazónica',
+        category: 'bioregion',
+        territory: 'Gran Selva Amazónica / Río Madre',
+        region: 'Sudamérica',
+        lat: -3.465, lon: -62.215,
+        color: '#10b981',
+        freq: '528 Hz',
+        ray: 'Rayo Verde Esmeralda & Agua',
+        circle: 'Círculo del Pulmón Planetario',
+        purpose: 'Generación de los "Ríos Voladores" que transportan humedad continental, custodia de la mayor biodiversidad viva y pulmón fotosintético de la Tierra.',
+        interconnectionsDesc: 'Emite ríos aéreos de humedad hacia la Cuenca del Plata y el Acuífero Guaraní; anclada al santuario solar intraterreno de Paititi.',
+        connectedIds: ['bio_andes', 'bio_plata', 'intra_paititi', 'intra_tayos', 'intra_aurora']
+      },
+      {
+        id: 'bio_plata',
+        name: 'Biorregión Cuenca del Plata & Pampas',
+        shortName: '🌾 Cuenca del Plata',
+        category: 'bioregion',
+        territory: 'Humedales del Delta / Cuenca del Paraná / Acuífero Guaraní',
+        region: 'Sudamérica',
+        lat: -34.603, lon: -58.381,
+        color: '#f59e0b',
+        freq: '7.83 Hz',
+        ray: 'Rayo Dorado de la Fertilidad & Tierra',
+        circle: 'Red de Soberanía del Plata',
+        purpose: 'Regeneración de suelos vivos fértiles, custodia de los humedales del Delta y captación de aguas profundas del Acuífero Guaraní.',
+        interconnectionsDesc: 'Receptor de los ríos voladores amazónicos; conectado con los centros intraterrenos de Aurora (Salto) y ERKS (Córdoba).',
+        connectedIds: ['bio_amazonas', 'bio_andes', 'intra_aurora', 'intra_erks', 'bio_patagonia']
+      },
+      {
+        id: 'bio_patagonia',
+        name: 'Biorregión Patagonia Austral & Hielo',
+        shortName: '❄️ Patagonia Austral',
+        category: 'bioregion',
+        territory: 'Campos de Hielo Sur / Selva Valdiviana / Estepa Austral',
+        region: 'Sudamérica',
+        lat: -50.500, lon: -73.000,
+        color: '#00e5ff',
+        freq: '432 Hz',
+        ray: 'Rayo Cristal Antártico & Viento',
+        circle: 'Tejedores del Viento Austral',
+        purpose: 'Reserva criogénica y estabilizador climático del polo sur; santuario de bosques milenarios de alerce y vientos de purificación.',
+        interconnectionsDesc: 'Punto de anclaje del inicio del Eje Kundalini Andino; fluye hacia Isidris y la Cuenca del Plata.',
+        connectedIds: ['bio_andes', 'bio_plata', 'intra_isidris']
+      },
+      {
+        id: 'bio_mesoamerica',
+        name: 'Biorregión Mesoamérica & Bosques Nubosos',
+        shortName: '🌽 Mesoamérica',
+        category: 'bioregion',
+        territory: 'Sierra Madre / Selva Maya / Cinturón Volcánico',
+        region: 'Centroamérica',
+        lat: 16.500, lon: -92.500,
+        color: '#ef4444',
+        freq: '528 Hz',
+        ray: 'Rayo Fuego Solar & Maíz Sagrado',
+        circle: 'Alianza de Semillas Mesoamericanas',
+        purpose: 'Preservación de la sabiduría botánica del maíz y el cacao; puente biocultural y biológico entre el norte y sur del continente.',
+        interconnectionsDesc: 'Enlace del Eje Kundalini entre Sudamérica (Tayos) y Norteamérica (Monte Shasta).',
+        connectedIds: ['bio_andes', 'intra_tayos', 'intra_shasta']
+      },
+      {
+        id: 'bio_himalayas',
+        name: 'Biorregión Himalayas & Meseta Tibetana',
+        shortName: '🏔️ Himalayas',
+        category: 'bioregion',
+        territory: 'Nacientes del Ganges, Indo y Brahmaputra / Techo del Mundo',
+        region: 'Asia',
+        lat: 28.598, lon: 83.931,
+        color: '#b366ff',
+        freq: '432 Hz',
+        ray: 'Rayo Índigo de Sabiduría & Aire',
+        circle: 'Círculo de la Cumbre Sagrada',
+        purpose: 'Torre de aguas que sostiene a más del 20% de la población humana; antena de meditación planetaria y conexión estelar.',
+        interconnectionsDesc: 'Arteria directa de irradiación desde Shamballa / Agartha hacia los valles de Asia.',
+        connectedIds: ['intra_shamballa', 'bio_taiga', 'bio_rift']
+      },
+      {
+        id: 'bio_rift',
+        name: 'Biorregión Valle del Rift & Sabana',
+        shortName: '🦁 Valle del Rift',
+        category: 'bioregion',
+        territory: 'Grandes Lagos Africanos / Cuna Ancestral',
+        region: 'África',
+        lat: -1.292, lon: 36.821,
+        color: '#f59e0b',
+        freq: '7.83 Hz',
+        ray: 'Rayo Rojo de la Vida Originaria',
+        circle: 'Raíces de la Humanidad',
+        purpose: 'Custodia de la memoria genética y biocultural de la humanidad; regeneración de ecosistemas de pastoreo.',
+        interconnectionsDesc: 'Línea de interconexión con el Mediterráneo y el Océano Índico.',
+        connectedIds: ['bio_mediterraneo', 'bio_himalayas']
+      },
+      {
+        id: 'bio_mediterraneo',
+        name: 'Biorregión Cuenca del Mediterráneo & Atlas',
+        shortName: '🫒 Mediterráneo & Atlas',
+        category: 'bioregion',
+        territory: 'Cuencas del Mar Interior / Dehesas y Olivos',
+        region: 'Europa / África',
+        lat: 36.500, lon: 5.000,
+        color: '#3b82f6',
+        freq: '432 Hz',
+        ray: 'Rayo Dorado-Verde Solar',
+        circle: 'Círculo del Olivo de Paz',
+        purpose: 'Agroforestería regenerativa milenaria, encuentro de culturas y resiliencia bioclimática templada.',
+        interconnectionsDesc: 'Eje de la Línea Ley de San Miguel / Apolo.',
+        connectedIds: ['bio_rift', 'bio_himalayas']
+      },
+      {
+        id: 'bio_pacifico',
+        name: 'Biorregión Pacífico & Red Polinesia',
+        shortName: '🐋 Pacífico & Polinesia',
+        category: 'bioregion',
+        territory: 'Triángulo Polinesio / Mar de Coral',
+        region: 'Oceanía',
+        lat: -17.713, lon: -149.406,
+        color: '#00e5ff',
+        freq: '528 Hz',
+        ray: 'Rayo Turquesa de las Aguas Madres',
+        circle: 'Navegantes del Gran Océano',
+        purpose: 'Guardián del mayor espejo de agua del planeta, navegación ancestral astronómica y regeneración coralina.',
+        interconnectionsDesc: 'Anillo oceánico conectado con la Patagonia y Monte Shasta.',
+        connectedIds: ['bio_patagonia', 'intra_shasta']
+      },
+      {
+        id: 'bio_taiga',
+        name: 'Biorregión Taiga Boreal & Bosques',
+        shortName: '🌲 Taiga Boreal',
+        category: 'bioregion',
+        territory: 'Cinturón Boreal Euroasiático y Canadiense',
+        region: 'Hemisferio Norte',
+        lat: 60.000, lon: 30.000,
+        color: '#10b981',
+        freq: '7.83 Hz',
+        ray: 'Rayo Platino de Estabilidad Térmica',
+        circle: 'Guardianes de la Taiga',
+        purpose: 'Gran filtro y sumidero global de carbono; preservación de turberas y estabilidad climática del hemisferio norte.',
+        interconnectionsDesc: 'Canal telúrico con Shamballa y los Himalayas.',
+        connectedIds: ['intra_shamballa', 'bio_himalayas']
+      }
+    ];
+
+    // 2. Ciudades Intraterrenas (Vórtices Subterráneos de Luz)
+    const INTRATERRENAS = [
+      {
+        id: 'intra_erks',
+        name: 'ERKS (Encuentro de Remanentes Kósmicos Siderales)',
+        shortName: '🏛️ ERKS (Capilla del Monte)',
+        category: 'intraterrena',
+        territory: 'Cerro Uritorco / Los Terrones / Sierras de Córdoba, Argentina',
+        region: 'Sudamérica',
+        lat: -30.854, lon: -64.526,
+        color: '#00bfff',
+        freq: '777 Hz',
+        ray: 'Rayo Azul Cósmico & Espejos de Luz',
+        circle: 'Hermandad Blanca de los Espejos de ERKS',
+        purpose: 'Vórtice primordial de despertar de la conciencia cósmica, activación de memorias estelares y portal de contacto interdimensional. Sostiene la llama azul de la transmutación en el centro de Argentina.',
+        interconnectionsDesc: 'Vértice axial de convergencia: emite flujos telúricos hacia la Biorregión de la Plata, hacia los Andes (Isidris), hacia el Acuífero Guaraní (Aurora) y hacia el Lago Titicaca.',
+        connectedIds: ['bio_plata', 'bio_andes', 'intra_aurora', 'intra_isidris', 'intra_titicaca']
+      },
+      {
+        id: 'intra_aurora',
+        name: 'Centro de Luz Aurora',
+        shortName: '🏛️ Aurora (Salto, Uruguay)',
+        category: 'intraterrena',
+        territory: 'Zona de Salto / Sobre el Acuífero Guaraní, Uruguay',
+        region: 'Sudamérica',
+        lat: -31.389, lon: -57.960,
+        color: '#10b981',
+        freq: '528 Hz',
+        ray: 'Rayo Verde & Dorado de Sanación Planetaria',
+        circle: 'Sanadores del Acuífero Sagrado',
+        purpose: 'Centro de sanación celular y espiritual de la Tierra; custodia energética de las inmensas reservas de agua dulce profunda del Acuífero Guaraní.',
+        interconnectionsDesc: 'Articulado directamente con ERKS en Córdoba y con la Cuenca Amazónica; vierte armonía vibracional en la Cuenca del Plata.',
+        connectedIds: ['bio_plata', 'intra_erks', 'bio_amazonas']
+      },
+      {
+        id: 'intra_isidris',
+        name: 'Ciudad de Isidris',
+        shortName: '🏛️ Isidris (Mendoza)',
+        category: 'intraterrena',
+        territory: 'Quebrada de San Isidro / Precordillera de Mendoza, Argentina',
+        region: 'Sudamérica',
+        lat: -32.890, lon: -68.950,
+        color: '#ffffff',
+        freq: '888 Hz',
+        ray: 'Rayo Blanco Diamantino de la Conciencia Crística',
+        circle: 'Custodios de la Infancia de la Nueva Era',
+        purpose: 'Ciudad de la luz infantil y de las nuevas generaciones; anclaje de paz y pureza en la cordillera andina para la transición dimensional.',
+        interconnectionsDesc: 'Conecta el Eje Kundalini Andino (Patagonia y Titicaca) con el nodo central de ERKS en Córdoba.',
+        connectedIds: ['bio_andes', 'intra_erks', 'bio_patagonia', 'intra_titicaca']
+      },
+      {
+        id: 'intra_titicaca',
+        name: 'Santuario Solar del Lago Titicaca',
+        shortName: '🏛️ Templo del Titicaca',
+        category: 'intraterrena',
+        territory: 'Isla del Sol / Lago Sagrado Wiñaymarka, Bolivia / Perú',
+        region: 'Sudamérica',
+        lat: -15.925, lon: -69.185,
+        color: '#f43f5e',
+        freq: '432 Hz',
+        ray: 'Rayo Dorado-Rubí de la Kundalini Planetaria',
+        circle: 'Sacerdocio Solar de los Andes',
+        purpose: 'Chakra Kundalini de la Tierra para la Nueva Era; unificación de las energías femenina y masculina y custodia del Gran Disco Solar.',
+        interconnectionsDesc: 'Epicentro del Eje Andino: transmite hacia Paititi (Amazonía), Tayos (Ecuador), Isidris y ERKS.',
+        connectedIds: ['bio_andes', 'intra_paititi', 'intra_tayos', 'intra_isidris', 'intra_erks']
+      },
+      {
+        id: 'intra_paititi',
+        name: 'Paititi (El Dorado Espiritual)',
+        shortName: '🏛️ Paititi (Madre de Dios)',
+        category: 'intraterrena',
+        territory: 'Selva del Manú / Madre de Dios, Perú',
+        region: 'Sudamérica',
+        lat: -12.250, lon: -71.500,
+        color: '#f59e0b',
+        freq: '432 Hz',
+        ray: 'Rayo Dorado Solar Ancestral',
+        circle: 'Guardianes del Archivo de los Discos Solares',
+        purpose: 'Gran biblioteca y archivo viviente de la sabiduría milenaria de los hijos del sol; puente sagrado entre la cordillera y la selva amazónica.',
+        interconnectionsDesc: 'Enlace telúrico directo entre el Templo del Titicaca y la Cuenca Amazónica.',
+        connectedIds: ['bio_amazonas', 'intra_titicaca', 'bio_andes']
+      },
+      {
+        id: 'intra_tayos',
+        name: 'Cueva de los Tayos',
+        shortName: '🏛️ Cueva de los Tayos (Ecuador)',
+        category: 'intraterrena',
+        territory: 'Cordillera del Cóndor, Morona Santiago, Ecuador',
+        region: 'Sudamérica',
+        lat: -3.060, lon: -78.220,
+        color: '#e2e8f0',
+        freq: '963 Hz',
+        ray: 'Rayo Platino de la Historia Estelar',
+        circle: 'Custodios de las Planchas Metálicas',
+        purpose: 'Biblioteca subterránea que preserva los registros milenarios de la génesis y evolución de la Tierra tallados en láminas de metal noble.',
+        interconnectionsDesc: 'Canal de tránsito intercontinental hacia Titicaca al sur y Mesoamérica al norte.',
+        connectedIds: ['bio_amazonas', 'intra_titicaca', 'bio_mesoamerica']
+      },
+      {
+        id: 'intra_shasta',
+        name: 'Telos (Monte Shasta)',
+        shortName: '🏛️ Monte Shasta (California)',
+        category: 'intraterrena',
+        territory: 'Cordillera de las Cascadas, California, EE.UU.',
+        region: 'Norteamérica',
+        lat: 41.409, lon: -122.195,
+        color: '#a855f7',
+        freq: '528 Hz',
+        ray: 'Rayo Violeta de la Transmutación',
+        circle: 'Hermandad de Telos',
+        purpose: 'Faro de transmutación y ascensión lemuriana del hemisferio norte; armonización telúrica del Anillo de Fuego del Pacífico.',
+        interconnectionsDesc: 'Vinculado al Eje Kundalini desde Mesoamérica y hacia la cuenca del Pacífico.',
+        connectedIds: ['bio_mesoamerica', 'bio_pacifico']
+      },
+      {
+        id: 'intra_shamballa',
+        name: 'Shamballa / Agartha Central',
+        shortName: '🏛️ Shamballa (Asia Central)',
+        category: 'intraterrena',
+        territory: 'Desierto de Gobi / Valle de los Himalayas, Asia Central',
+        region: 'Asia',
+        lat: 42.000, lon: 104.000,
+        color: '#ffd700',
+        freq: '999 Hz',
+        ray: 'Rayo Síntesis de la Voluntad Divina',
+        circle: 'Gran Fraternidad Blanca de Shamballa',
+        purpose: 'Corazón directriz de la Red de Agartha y emisión del Plan Evolutivo para la Tierra; irradiación de luz de síntesis universal.',
+        interconnectionsDesc: 'Nutre la espina de los Himalayas y las estepas boreales.',
+        connectedIds: ['bio_himalayas', 'bio_taiga']
+      }
+    ];
+
+    // 3. Vórtices Sagrados del Agua y Memoria Telúrica
+    const SACRED_SITES = [
+      {
+        id: 'site_san_agustin',
+        name: 'San Agustín & Macizo Colombiano (Laguna Kusiyaku)',
+        shortName: '💧 San Agustín (Kusiyaku)',
+        category: 'sacred_site',
+        territory: 'Macizo Colombiano / Páramo de las Papas, Huila y Cauca, Colombia',
+        region: 'Sudamérica (Andes del Norte)',
+        lat: 1.884, lon: -76.297,
+        color: '#06d6a0',
+        freq: '528 Hz',
+        ray: 'Rayo Esmeralda-Cristal / Fábrica del Agua Continental',
+        circle: 'Guardianes de los Páramos & Tejedores de la Niebla',
+        ecosystem: 'Páramo de Frailejones (Espeletia) y Lagunas Glaciares de Altura',
+        riversBorn: 'Río Putumayo, Río Caquetá, Río Magdalena, Río Cauca',
+        purpose: 'Estrella Fluvial de Colombia y matriz primigenia de agua dulce. Los frailejones atrapan la niebla andina alimentando la Laguna Kusiyaku y la Laguna de la Magdalena, dando nacimiento al Río Putumayo y Caquetá que nutren el Río Amazonas, y a través de los Ríos Voladores conectan con el Acuífero Guaraní y la Cuenca del Plata. Complejo megalítico ceremonial de guardianes de piedra y fuentes talladas en roca viva (Lavapatas).',
+        interconnectionsDesc: 'Ruta directa del agua viva: Kusiyaku → Río Putumayo → Río Amazonas → Acuífero Guaraní / ERKS → Cuenca del Plata. Conectado también con la Sierra Nevada de Santa Marta y Caño Cristales.',
+        connectedIds: ['bio_amazonas', 'intra_tayos', 'bio_plata', 'site_sierra_nevada', 'site_iguazu', 'site_cano_cristales']
+      },
+      {
+        id: 'site_sierra_nevada',
+        name: 'Sierra Nevada de Santa Marta (El Corazón del Mundo)',
+        shortName: '🏔️ Sierra Nevada (Gonawindua)',
+        category: 'sacred_site',
+        territory: 'Caribe Colombiano / Picos Colón y Bolívar, Colombia',
+        region: 'Sudamérica (Caribe)',
+        lat: 10.867, lon: -73.689,
+        color: '#ffffff',
+        freq: '888 Hz',
+        ray: 'Rayo Blanco de la Ley de Origen (Sé Nenlang)',
+        circle: 'Mamos y Sagas (Kogui, Arhuaco, Wiwa, Kankuamo)',
+        ecosystem: 'Glaciares tropicales, páramo y selva húmeda costera',
+        riversBorn: 'Ríos Guatapurí, Cesar, Badillo, Ranchería, Don Diego',
+        purpose: 'Pirámide costera más alta del planeta Tierra. Territorio sagrado de los 4 pueblos originarios encargados de regular el equilibrio bioclimático y espiritual del planeta mediante la delimitación de la Línea Negra ancestral.',
+        interconnectionsDesc: 'Ancla superior de la columna andina; conectado telúricamente con San Agustín, Mesoamérica y Monte Roraima.',
+        connectedIds: ['site_san_agustin', 'bio_mesoamerica', 'site_roraima']
+      },
+      {
+        id: 'site_roraima',
+        name: 'Monte Roraima (Tepuy Sagrado / Escudo Guayanés)',
+        shortName: '⛰️ Monte Roraima',
+        category: 'sacred_site',
+        territory: 'Gran Sabana / Frontera Venezuela, Brasil y Guyana',
+        region: 'Sudamérica (Escudo Guayanés)',
+        lat: 5.143, lon: -60.762,
+        color: '#ec4899',
+        freq: '963 Hz',
+        ray: 'Rayo Primordial de la Creación (2.000 Millones de Años)',
+        circle: 'Guardianes Pemones del Tepuy',
+        ecosystem: 'Meseta tabular de cuarzo y turberas endémicas',
+        riversBorn: 'Nacientes de afluentes del Orinoco y del Río Amazonas',
+        purpose: 'Una de las formaciones geológicas más arcaicas de la Tierra. Meseta de cuarzo y roca primigenia donde nacen aguas ultra puras que descienden en cascadas sagradas alimentando los sistemas fluviales del norte sudamericano.',
+        interconnectionsDesc: 'Puente mineral entre el Escudo Guayanés, San Agustín, la Amazonía y las Cataratas del Iguazú.',
+        connectedIds: ['site_san_agustin', 'bio_amazonas', 'site_iguazu']
+      },
+      {
+        id: 'site_iguazu',
+        name: 'Cataratas del Iguazú / Garganta del Diablo',
+        shortName: '🌊 Cataratas del Iguazú',
+        category: 'sacred_site',
+        territory: 'Misiones, Argentina / Paraná, Brasil',
+        region: 'Sudamérica (Cuenca del Plata)',
+        lat: -25.695, lon: -54.436,
+        color: '#8b5cf6',
+        freq: '741 Hz',
+        ray: 'Rayo Violeta-Platino / Ionización & Purificación Telúrica',
+        circle: 'Custodios Guaraníes de la Selva Paranaense',
+        ecosystem: 'Selva Paranaense / Basaltos del Acuífero Guaraní',
+        riversBorn: 'Río Iguazú y confluencia Paraná',
+        purpose: 'Falla geológica volcánica donde 275 saltos de agua vierten su energía directamente sobre el lecho basáltico del Acuífero Guaraní. Vórtice de máxima ionización negativa, transmutación y resonancia sónica telúrica.',
+        interconnectionsDesc: 'Conexión axial con el Centro de Luz Aurora (Salto), el vórtice de ERKS (Córdoba) y la Ruta del Agua Viva desde San Agustín.',
+        connectedIds: ['intra_aurora', 'intra_erks', 'bio_plata', 'site_san_agustin']
+      },
+      {
+        id: 'site_uyuni',
+        name: 'Salar de Uyuni & Volcán Tunupa',
+        shortName: '🧂 Salar de Uyuni',
+        category: 'sacred_site',
+        territory: 'Potosí / Oruro, Altiplano de Bolivia',
+        region: 'Sudamérica (Altiplano)',
+        lat: -20.133, lon: -67.489,
+        color: '#e0e7ff',
+        freq: '528 Hz',
+        ray: 'Rayo Cristalino / Memoria Mineral & Reflejo Cósmico',
+        circle: 'Guardianes Aymaras del Volcán Tunupa',
+        ecosystem: 'Lago salino fósil y reservas de litio más grandes del mundo',
+        riversBorn: 'Cuenca endorreica del Altiplano',
+        purpose: 'El mayor espejo de sal y litio del planeta. Antena reflectora del firmamento estelar que calibra el campo electromagnético andino y custodia memorias oceánicas arcaicas en estado cristalizado.',
+        interconnectionsDesc: 'Corredor altiplánico que dialoga con el Templo del Titicaca, Isidris y ERKS.',
+        connectedIds: ['intra_titicaca', 'intra_isidris', 'intra_erks']
+      },
+      {
+        id: 'site_cano_cristales',
+        name: 'Caño Cristales / Serranía de La Macarena',
+        shortName: '🌈 Caño Cristales',
+        category: 'sacred_site',
+        territory: 'La Macarena, Meta, Colombia',
+        region: 'Sudamérica (Transición Andes-Amazonas)',
+        lat: 2.215, lon: -73.791,
+        color: '#f59e0b',
+        freq: '639 Hz',
+        ray: 'Rayo Arcoíris de la Biodiversidad',
+        circle: 'Protectores de la Macarenia Clavigera',
+        ecosystem: 'Lecho rocoso precámbrico y plantas acuáticas cromáticas',
+        riversBorn: 'Río Guayabero / Cuenca del Orinoco y Amazonas',
+        purpose: 'El "Río de los Siete Colores", punto de encrucijada biocósmica entre el Escudo Guayanés, la Cordillera Oriental y la Hilea Amazónica. Pulsación de vida vegetal cromática que vibra al unísono con el sol.',
+        interconnectionsDesc: 'Canal de conexión entre San Agustín (Kusiyaku) y la planicie amazónica hacia Paititi.',
+        connectedIds: ['site_san_agustin', 'bio_amazonas']
+      }
+    ];
+
+    // 4. Grandes Líneas Ley y Flujos Telúricos
+    const LEY_LINES = [
+      {
+        id: 'ley_ruta_agua_viva',
+        name: 'Ruta Sagrada del Agua Viva (Kusiyaku → Putumayo → Amazonas → Cuenca del Plata)',
+        shortName: '💧 Ruta del Agua Viva (Kusiyaku → Plata)',
+        category: 'leyline',
+        color: '#00e5ff',
+        nodes: ['site_san_agustin', 'site_cano_cristales', 'intra_paititi', 'bio_amazonas', 'site_iguazu', 'intra_aurora', 'intra_erks', 'bio_plata'],
+        purpose: 'El gran viaje sagrado del agua continental: nace de la niebla atrapada por los frailejones en el Macizo Colombiano (Laguna Kusiyaku, San Agustín), alimenta el Río Putumayo y Caquetá, confluye en el Río Amazonas, asciende como Ríos Voladores sobre la selva, recarga las aguas subterráneas del Acuífero Guaraní (Aurora e Iguazú), cruza el vórtice de ERKS en Córdoba y se vierte en la fertilidad de la Cuenca del Plata.',
+        interconnectionsDesc: 'Kusiyaku/San Agustín → Caño Cristales → Paititi → Amazonas → Cataratas del Iguazú → Aurora → ERKS → Cuenca del Plata.'
+      },
+      {
+        id: 'ley_kundalini',
+        name: 'Eje Kundalini Andino (Columna de América)',
+        shortName: '⚡ Eje Kundalini Andino',
+        category: 'leyline',
+        color: '#00e5ff',
+        nodes: ['bio_patagonia', 'intra_isidris', 'intra_erks', 'intra_titicaca', 'intra_paititi', 'intra_tayos', 'bio_mesoamerica', 'intra_shasta'],
+        purpose: 'Conduce el flujo de energía vital y espiritual de la Nueva Era a lo largo de toda la cordillera americana.',
+        interconnectionsDesc: 'Alinea los centros sagrados de Patagonia, Isidris, ERKS, Titicaca, Paititi, Tayos y Shasta.'
+      },
+      {
+        id: 'ley_rios_acuifero',
+        name: 'Flujo Telúrico: Ríos Voladores & Acuífero Guaraní',
+        shortName: '🌊 Flujo Amazónico-Platense',
+        category: 'leyline',
+        color: '#10b981',
+        nodes: ['bio_andes', 'bio_amazonas', 'intra_aurora', 'intra_erks', 'bio_plata'],
+        purpose: 'Circuito de circulación vital del agua: siembra en los Andes, evaporación selvática y almacenamiento en el Acuífero Guaraní.',
+        interconnectionsDesc: 'Articula la Amazonía con las ciudades intraterrenas de Aurora y ERKS y la Cuenca del Plata.'
+      },
+      {
+        id: 'ley_apolo',
+        name: 'Línea Solar de San Miguel / Apolo',
+        shortName: '☀️ Línea de San Miguel',
+        category: 'leyline',
+        color: '#f59e0b',
+        nodes: ['bio_mediterraneo', 'bio_rift', 'bio_himalayas'],
+        purpose: 'Alineación de santuarios solares desde Europa hasta los Himalayas.',
+        interconnectionsDesc: 'Conecta el Mediterráneo con África y Asia central.'
+      }
+    ];
+
+    // 4. Puntos de Convergencia (Vórtices de Máxima Concentración)
+    const CONVERGENCES = [
+      {
+        id: 'conv_erks',
+        name: 'Vórtice Uritorco / ERKS',
+        shortName: '🎯 Convergencia ERKS (Córdoba)',
+        lat: -30.854, lon: -64.526,
+        color: '#00bfff',
+        linesCount: 5,
+        description: 'Encrucijada energética que articula la llanura pampeana, las sierras centrales y los Andes. Punto de anclaje de la ciudad de ERKS.'
+      },
+      {
+        id: 'conv_titicaca',
+        name: 'Vórtice Sagrado Titicaca',
+        shortName: '🎯 Convergencia Lago Titicaca',
+        lat: -15.925, lon: -69.185,
+        color: '#f43f5e',
+        linesCount: 6,
+        description: 'Punto de convergencia donde el Eje Kundalini Andino se unifica con los flujos de la Amazonía y el Pacífico.'
+      },
+      {
+        id: 'conv_aurora',
+        name: 'Vórtice Acuífero Guaraní (Aurora)',
+        shortName: '🎯 Convergencia Aurora (Salto)',
+        lat: -31.389, lon: -57.960,
+        color: '#10b981',
+        linesCount: 4,
+        description: 'Confluencia hídrica subterránea de máxima irradiación sanadora.'
+      },
+      {
+        id: 'conv_shasta',
+        name: 'Vórtice Monte Shasta (Telos)',
+        shortName: '🎯 Convergencia Monte Shasta',
+        lat: 41.409, lon: -122.195,
+        color: '#a855f7',
+        linesCount: 5,
+        description: 'Faro electromagnético que equilibra la falla tectónica del Pacífico Norte.'
+      }
+    ];
+
+    // =========================================================================
+    // MAPA DETALLADO DEL PLANETA TIERRA
+    // =========================================================================
+    const WORLD_CONTINENTS = {
+      southAmerica: [
+        {lat: 12.5, lon: -71.5}, {lat: 10.5, lon: -61.5}, {lat: 5.0, lon: -51.0},
+        {lat: -2.0, lon: -44.0}, {lat: -7.0, lon: -34.8}, {lat: -18.0, lon: -39.5},
+        {lat: -23.0, lon: -43.0}, {lat: -34.0, lon: -53.5}, {lat: -38.0, lon: -57.5},
+        {lat: -46.0, lon: -66.0}, {lat: -54.0, lon: -67.0}, {lat: -55.5, lon: -68.5},
+        {lat: -50.0, lon: -75.0}, {lat: -40.0, lon: -74.0}, {lat: -30.0, lon: -71.5},
+        {lat: -18.0, lon: -70.5}, {lat: -12.0, lon: -77.0}, {lat: -5.0, lon: -81.0},
+        {lat: 1.0, lon: -79.0}, {lat: 8.0, lon: -77.5}, {lat: 12.5, lon: -71.5}
+      ],
+      northAmerica: [
+        {lat: 70, lon: -160}, {lat: 65, lon: -140}, {lat: 55, lon: -130},
+        {lat: 48, lon: -124}, {lat: 34, lon: -120}, {lat: 23, lon: -110},
+        {lat: 15, lon: -92},  {lat: 18, lon: -88},  {lat: 25, lon: -80},
+        {lat: 30, lon: -81},  {lat: 40, lon: -74},  {lat: 45, lon: -65},
+        {lat: 52, lon: -56},  {lat: 60, lon: -65},  {lat: 70, lon: -85},
+        {lat: 72, lon: -125}, {lat: 70, lon: -160}
+      ],
+      africa: [
+        {lat: 36, lon: -5},  {lat: 37, lon: 10},  {lat: 31, lon: 32},
+        {lat: 22, lon: 37},  {lat: 12, lon: 51},  {lat: -2, lon: 41},
+        {lat: -16, lon: 40}, {lat: -28, lon: 32}, {lat: -34, lon: 20},
+        {lat: -34, lon: 18}, {lat: -18, lon: 12}, {lat: -5, lon: 12},
+        {lat: 4, lon: 9},    {lat: 5, lon: 2},    {lat: 5, lon: -7},
+        {lat: 15, lon: -17}, {lat: 28, lon: -13}, {lat: 36, lon: -5}
+      ],
+      europeAsia: [
+        {lat: 36, lon: -9},  {lat: 43, lon: -9},  {lat: 47, lon: -2},
+        {lat: 54, lon: 8},   {lat: 58, lon: 5},   {lat: 71, lon: 28},
+        {lat: 76, lon: 100}, {lat: 73, lon: 140}, {lat: 65, lon: 170},
+        {lat: 55, lon: 160}, {lat: 45, lon: 142}, {lat: 35, lon: 130},
+        {lat: 22, lon: 114}, {lat: 10, lon: 105}, {lat: 1, lon: 104},
+        {lat: 12, lon: 92},  {lat: 8, lon: 77},   {lat: 22, lon: 69},
+        {lat: 25, lon: 56},  {lat: 12, lon: 44},  {lat: 30, lon: 34},
+        {lat: 36, lon: 28},  {lat: 40, lon: 23},  {lat: 38, lon: 15},
+        {lat: 44, lon: 8},   {lat: 36, lon: -9}
+      ],
+      australia: [
+        {lat: -11, lon: 142}, {lat: -16, lon: 146}, {lat: -28, lon: 153},
+        {lat: -38, lon: 145}, {lat: -35, lon: 136}, {lat: -32, lon: 115},
+        {lat: -22, lon: 114}, {lat: -15, lon: 124}, {lat: -12, lon: 132},
+        {lat: -11, lon: 142}
+      ],
+      antarctica: [
+        {lat: -65, lon: -60}, {lat: -68, lon: 0},   {lat: -66, lon: 90},
+        {lat: -68, lon: 140}, {lat: -75, lon: 170}, {lat: -70, lon: -120},
+        {lat: -65, lon: -60}
+      ]
+    };
+
+    // =========================================================================
+    // MOTOR 3D Y 2D (CANVAS PROJECTION)
+    // =========================================================================
+    const canvas = document.getElementById('canvas-globe');
+    const ctx = canvas.getContext('2d');
+
+    let viewMode = '3D';
+    let showIntra = true;
+    let showSacred = true;
+    let showLey = true;
+    let showConv = true;
+    let showEarth = true;
+    let showLabels = true;
+    let autoRotate = true;
+    let currentTab = 'bioregions'; // 'bioregions', 'intraterrenas', 'sacred', 'leylines'
+    let searchQuery = '';
+
+    let selectedEntity = INTRATERRENAS[0]; // ERKS seleccionado por defecto
+    let hoveredEntity = null;
+    let selectedEntities = []; // Territorios seleccionados para análisis de vínculos telúricos
+    let multiSelectMode = false; // Estado del modo de multiselección
+
+    // Parámetros Dinámicos del Motor de Auto-Mejora y Evolución
+    let rotationSpeed = 0.0015;
+    let particleSpeedFactor = 1.0;
+    let soundEnabled = true;
+    let baseA4Frequency = 432;
+    let systemTheme = {
+      bgColor: '#040711',
+      atmoColor: 'rgba(0, 229, 255, 0.22)',
+      leyLineGlow: '#00e5ff',
+      name: 'Cósmico Clásico'
+    };
+    let isMeditationMode = false;
+    let appliedImprovements = []; // Registro de mejoras aplicadas en sí mismo
+
+    // Cámara (Enfocada inicialmente hacia Sudamérica / ERKS)
+    let rotX = 0.45, rotY = -1.0;
+    let velX = 0, velY = 0;
+    let panX = 140, panY = 0;
+    let baseGlobeRadius = 240;
+    let globeRadius = 240;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      baseGlobeRadius = Math.min(canvas.width, canvas.height) * 0.28;
+      if (!globeRadius || Math.abs(globeRadius - 240) < 5) {
+        globeRadius = baseGlobeRadius;
+      }
+      updateZoomUI();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function setZoom(newRadius) {
+      globeRadius = Math.max(100, Math.min(700, newRadius));
+      updateZoomUI();
+    }
+
+    function updateZoomUI() {
+      const percentage = Math.round((globeRadius / (baseGlobeRadius || 240)) * 100);
+      const slider = document.getElementById('zoom-slider');
+      const topSlider = document.getElementById('top-zoom-slider');
+      const text = document.getElementById('zoom-level-text');
+      const topText = document.getElementById('top-zoom-level');
+
+      if (slider) slider.value = globeRadius;
+      if (topSlider) topSlider.value = globeRadius;
+      if (text) text.textContent = `${percentage}%`;
+      if (topText) topText.textContent = `${percentage}%`;
+    }
+
+    function getMapDimensions() {
+      const margin = 40;
+      const baseMapW = canvas.width - 340 - margin * 2;
+      const zoomFactor = globeRadius / (baseGlobeRadius || 240);
+      const mapW = baseMapW * zoomFactor;
+      const mapH = mapW * 0.52;
+      const startX = 330 + margin + panX * 0.5 + (baseMapW - mapW) / 2;
+      const startY = (canvas.height - mapH) / 2 + panY * 0.5;
+      return { mapW, mapH, startX, startY };
+    }
+
+    function geoToCartesian(lat, lon, r = 1) {
+      const phi = (90 - lat) * (Math.PI / 180);
+      const theta = (lon + 180) * (Math.PI / 180);
+      const x = -(r * Math.sin(phi) * Math.cos(theta));
+      const z = r * Math.sin(phi) * Math.sin(theta);
+      const y = r * Math.cos(phi);
+      return [x, y, z];
+    }
+
+    function project3D(lat, lon, r = globeRadius) {
+      const p3 = geoToCartesian(lat, lon, r);
+      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+      const x1 = p3[0] * cosY + p3[2] * sinY;
+      const z1 = -p3[0] * sinY + p3[2] * cosY;
+
+      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+      const y2 = p3[1] * cosX - z1 * sinX;
+      const z2 = p3[1] * sinX + z1 * cosX;
+
+      const cx = canvas.width / 2 + panX;
+      const cy = canvas.height / 2 + panY;
+
+      return { x: cx + x1, y: cy - y2, z: z2, isFront: z2 > -15 };
+    }
+
+    function project2D(lat, lon) {
+      const { mapW, mapH, startX, startY } = getMapDimensions();
+      const x = startX + ((lon + 180) / 360) * mapW;
+      const y = startY + ((90 - lat) / 180) * mapH;
+      return { x, y, z: 1, isFront: true };
+    }
+
+    function project(lat, lon, r = globeRadius) {
+      return viewMode === '3D' ? project3D(lat, lon, r) : project2D(lat, lon);
+    }
+
+    // Partículas viajando en las Líneas Ley
+    const leyParticles = [];
+    for (let i = 0; i < 40; i++) {
+      leyParticles.push({
+        lineIdx: i % LEY_LINES.length,
+        progress: Math.random(),
+        speed: 0.004 + Math.random() * 0.006
+      });
+    }
+
+    // =========================================================================
+    // BUCLE DE RENDERIZADO PRINCIPAL
+    // =========================================================================
+    function render(timestamp) {
+      const time = timestamp * 0.001;
+      ctx.fillStyle = systemTheme.bgColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const cx = canvas.width / 2 + panX;
+      const cy = canvas.height / 2 + panY;
+
+      if (viewMode === '3D' && autoRotate) {
+        rotY += rotationSpeed;
+      }
+      rotX += velX; rotY += velY;
+      velX *= 0.9; velY *= 0.9;
+
+      if (viewMode === '3D') {
+        // Atmósfera cósmica
+        const atmGrad = ctx.createRadialGradient(cx, cy, globeRadius * 0.88, cx, cy, globeRadius * 1.18);
+        atmGrad.addColorStop(0, 'rgba(0, 229, 255, 0.05)');
+        atmGrad.addColorStop(0.7, systemTheme.atmoColor);
+        atmGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = atmGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, globeRadius * 1.18, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Esfera base
+        const globeGrad = ctx.createRadialGradient(cx - globeRadius*0.35, cy - globeRadius*0.35, 0, cx, cy, globeRadius);
+        globeGrad.addColorStop(0, '#102544');
+        globeGrad.addColorStop(0.7, '#0a1628');
+        globeGrad.addColorStop(1, '#050b14');
+        ctx.fillStyle = globeGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, globeRadius, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // Marco de Mapa 2D con Zoom Dinámico
+        const { mapW, mapH, startX, startY } = getMapDimensions();
+
+        ctx.fillStyle = '#0a1628';
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(startX, startY, mapW, mapH, 12);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // 1. Continentes Terrestres
+      if (showEarth) {
+        ctx.save();
+        if (viewMode === '3D') {
+          ctx.beginPath();
+          ctx.arc(cx, cy, globeRadius, 0, Math.PI * 2);
+          ctx.clip();
+        }
+
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.18)';
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.85)';
+        ctx.lineWidth = 1.4;
+
+        for (const [key, poly] of Object.entries(WORLD_CONTINENTS)) {
+          ctx.beginPath();
+          let started = false;
+          for (const pt of poly) {
+            const pr = project(pt.lat, pt.lon, globeRadius);
+            if (viewMode === '3D' && !pr.isFront) continue;
+            if (!started) { ctx.moveTo(pr.x, pr.y); started = true; }
+            else ctx.lineTo(pr.x, pr.y);
+          }
+          if (started) { ctx.stroke(); ctx.fill(); }
+        }
+
+        // Paralelos y Ecuador
+        for (const lat of [-60, -30, 0, 30, 60]) {
+          ctx.beginPath();
+          let started = false;
+          for (let lon = -180; lon <= 180; lon += 8) {
+            const pr = project(lat, lon, globeRadius);
+            if (viewMode === '3D' && !pr.isFront) { started = false; continue; }
+            if (!started) { ctx.moveTo(pr.x, pr.y); started = true; }
+            else ctx.lineTo(pr.x, pr.y);
+          }
+          ctx.strokeStyle = (lat === 0) ? 'rgba(245, 158, 11, 0.35)' : 'rgba(255, 255, 255, 0.08)';
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      // 2. Grandes Líneas Ley y Flujos Telúricos
+      if (showLey) {
+        for (const line of LEY_LINES) {
+          ctx.strokeStyle = line.color;
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          let started = false;
+
+          for (const nodeId of line.nodes) {
+            const entity = findEntity(nodeId);
+            if (!entity) continue;
+            const pr = project(entity.lat, entity.lon, globeRadius * 1.015);
+            if (viewMode === '3D' && !pr.isFront) continue;
+            if (!started) { ctx.moveTo(pr.x, pr.y); started = true; }
+            else ctx.lineTo(pr.x, pr.y);
+          }
+          ctx.stroke();
+        }
+
+        // Partículas en Líneas Ley
+        for (const p of leyParticles) {
+          p.progress = (p.progress + p.speed * particleSpeedFactor) % 1;
+
+          const line = LEY_LINES[p.lineIdx];
+          if (!line || line.nodes.length < 2) continue;
+
+          const segCount = line.nodes.length - 1;
+          const currentSeg = Math.floor(p.progress * segCount);
+          const segProgress = (p.progress * segCount) - currentSeg;
+
+          const entA = findEntity(line.nodes[currentSeg]);
+          const entB = findEntity(line.nodes[currentSeg + 1]);
+          if (!entA || !entB) continue;
+
+          const prA = project(entA.lat, entA.lon, globeRadius * 1.02);
+          const prB = project(entB.lat, entB.lon, globeRadius * 1.02);
+          if (viewMode === '3D' && (!prA.isFront || !prB.isFront)) continue;
+
+          const px = prA.x + (prB.x - prA.x) * segProgress;
+          const py = prA.y + (prB.y - prA.y) * segProgress;
+
+          ctx.fillStyle = line.color;
+          ctx.beginPath();
+          ctx.arc(px, py, 3.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // 3. Puntos de Convergencia (Vortex Rings)
+      if (showConv) {
+        for (const conv of CONVERGENCES) {
+          const pr = project(conv.lat, conv.lon, globeRadius * 1.02);
+          if (viewMode === '3D' && !pr.isFront) continue;
+
+          const wave = (time * 2) % 1;
+          for (let r = 1; r <= 3; r++) {
+            const rad = 8 + r * 7 + wave * 5;
+            ctx.strokeStyle = conv.color;
+            ctx.globalAlpha = Math.max(0, 1 - (rad / 30));
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(pr.x, pr.y, rad, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      // 4. Interconexiones del Elemento Seleccionado
+      if (selectedEntity && selectedEntity.connectedIds) {
+        const pSel = project(selectedEntity.lat, selectedEntity.lon, globeRadius * 1.02);
+        if (viewMode !== '3D' || pSel.isFront) {
+          for (const connId of selectedEntity.connectedIds) {
+            const connEnt = findEntity(connId);
+            if (!connEnt) continue;
+            const pConn = project(connEnt.lat, connEnt.lon, globeRadius * 1.02);
+            if (viewMode === '3D' && !pConn.isFront) continue;
+
+            // Haz de conexión activo
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(pSel.x, pSel.y);
+            ctx.lineTo(pConn.x, pConn.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+        }
+      }
+
+      // 4b. Dibujar Trazado de Circuito Poligonal de Multiselección
+      if (selectedEntities.length >= 2) {
+        const msPoints = selectedEntities.map((ent, idx) => ({
+          ent,
+          idx: idx + 1,
+          proj: project(ent.lat, ent.lon, globeRadius * 1.03)
+        }));
+
+        ctx.save();
+        ctx.lineWidth = 2.8;
+        ctx.setLineDash([7, 5]);
+        ctx.lineDashOffset = -time * 26;
+
+        for (let i = 0; i < msPoints.length; i++) {
+          const p1 = msPoints[i];
+          const p2 = msPoints[(i + 1) % msPoints.length];
+
+          if (viewMode === '2D' || (p1.proj.isFront && p2.proj.isFront)) {
+            const grad = ctx.createLinearGradient(p1.proj.x, p1.proj.y, p2.proj.x, p2.proj.y);
+            grad.addColorStop(0, p1.ent.color || '#00e5ff');
+            grad.addColorStop(0.5, '#ffffff');
+            grad.addColorStop(1, p2.ent.color || '#b366ff');
+
+            ctx.strokeStyle = grad;
+            ctx.beginPath();
+            ctx.moveTo(p1.proj.x, p1.proj.y);
+            ctx.lineTo(p2.proj.x, p2.proj.y);
+            ctx.stroke();
+
+            // Partícula de energía viva viajando por el rayo telúrico
+            const progress = (time * 0.8 + i / msPoints.length) % 1;
+            const partX = p1.proj.x + (p2.proj.x - p1.proj.x) * progress;
+            const partY = p1.proj.y + (p2.proj.y - p1.proj.y) * progress;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = '#00e5ff';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(partX, partY, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+        }
+        ctx.restore();
+      }
+
+      // 5. Dibujar Nodos: Biorregiones, Intraterrenas y Sitios Sagrados
+      const allEntities = [...BIOREGIONS];
+      if (showIntra) allEntities.push(...INTRATERRENAS);
+      if (showSacred) allEntities.push(...SACRED_SITES);
+
+      const visibleItems = allEntities.map(e => ({
+        ent: e,
+        proj: project(e.lat, e.lon, globeRadius * 1.03)
+      })).filter(item => item.proj.isFront);
+
+      if (viewMode === '3D') {
+        visibleItems.sort((a, b) => a.proj.z - b.proj.z);
+      }
+
+      for (const { ent, proj } of visibleItems) {
+        const isSelected = selectedEntity && selectedEntity.id === ent.id;
+        const isHovered = hoveredEntity && hoveredEntity.id === ent.id;
+        const isMultiSelected = selectedEntities.some(s => s.id === ent.id);
+        const multiIndex = selectedEntities.findIndex(s => s.id === ent.id);
+        const isIntra = ent.category === 'intraterrena';
+        const isSacred = ent.category === 'sacred_site';
+
+        const phase = (ent.lon / 180) * Math.PI;
+        const wave = 0.5 + 0.5 * Math.sin(time * 3.5 + phase);
+        const radius = isSelected || isMultiSelected ? 8 + wave * 3 : 5 + wave * 2;
+
+        // Selección individual
+        if (isSelected) {
+          ctx.strokeStyle = '#00e5ff';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(proj.x, proj.y, radius + 9 + Math.sin(time * 6) * 3, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Resplandor y Medalla de Multiselección
+        if (isMultiSelected) {
+          ctx.strokeStyle = '#b366ff';
+          ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          ctx.arc(proj.x, proj.y, radius + 11 + Math.sin(time * 5 + multiIndex) * 3, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Medalla numérica de orden (1, 2, 3...)
+          ctx.fillStyle = '#b366ff';
+          ctx.beginPath();
+          ctx.arc(proj.x + radius + 7, proj.y - radius - 5, 8.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9.5px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(multiIndex + 1, proj.x + radius + 7, proj.y - radius - 5);
+        }
+
+        // Halo de resplandor
+        const auraGrad = ctx.createRadialGradient(proj.x, proj.y, 0, proj.x, proj.y, radius * 3.2);
+        auraGrad.addColorStop(0, ent.color);
+        auraGrad.addColorStop(0.5, ent.color);
+        auraGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = auraGrad;
+        ctx.globalAlpha = 0.6 * (0.5 + 0.5 * wave);
+        ctx.beginPath();
+        ctx.arc(proj.x, proj.y, radius * 3.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Formas según la categoría
+        if (isIntra) {
+          // Haz vertical emergente del interior
+          ctx.strokeStyle = ent.color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(proj.x, proj.y + 12);
+          ctx.lineTo(proj.x, proj.y - 12);
+          ctx.stroke();
+
+          // Diamante central
+          ctx.fillStyle = ent.color;
+          ctx.beginPath();
+          ctx.moveTo(proj.x, proj.y - radius - 2);
+          ctx.lineTo(proj.x + radius + 2, proj.y);
+          ctx.lineTo(proj.x, proj.y + radius + 2);
+          ctx.lineTo(proj.x - radius - 2, proj.y);
+          ctx.closePath();
+          ctx.fill();
+        } else if (isSacred) {
+          // Vórtice de Agua Sagrada: gota/cristal estelar con cruz de luz
+          ctx.fillStyle = ent.color;
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.arc(proj.x, proj.y, radius * 0.9, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Cruz diamantina de irradiación hídrica
+          ctx.strokeStyle = ent.color;
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(proj.x, proj.y - radius - 4);
+          ctx.lineTo(proj.x, proj.y + radius + 4);
+          ctx.moveTo(proj.x - radius - 4, proj.y);
+          ctx.lineTo(proj.x + radius + 4, proj.y);
+          ctx.stroke();
+        } else {
+          // Esfera normal de Biorregión
+          ctx.fillStyle = ent.color;
+          ctx.beginPath();
+          ctx.arc(proj.x, proj.y, radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Etiquetas
+        if (showLabels || isSelected || isHovered) {
+          ctx.font = isSelected ? 'bold 11px -apple-system, sans-serif' : '9.5px -apple-system, sans-serif';
+          const text = ent.shortName || ent.name;
+          const textW = ctx.measureText(text).width;
+
+          ctx.fillStyle = 'rgba(7, 13, 28, 0.88)';
+          ctx.strokeStyle = isSelected ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.18)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(proj.x - textW/2 - 6, proj.y - radius - 20, textW + 12, 16, 4);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = isSelected ? '#00e5ff' : '#ffffff';
+          ctx.textAlign = 'center';
+          ctx.fillText(text, proj.x, proj.y - radius - 8);
+        }
+      }
+
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+
+    // =========================================================================
+    // UTILIDADES Y BÚSQUEDA DE ENTIDADES
+    // =========================================================================
+    function findEntity(id) {
+      return BIOREGIONS.find(b => b.id === id) || 
+             INTRATERRENAS.find(i => i.id === id) || 
+             SACRED_SITES.find(s => s.id === id) ||
+             LEY_LINES.find(l => l.id === id) ||
+             CONVERGENCES.find(c => c.id === id);
+    }
+
+    // =========================================================================
+    // GESTIÓN DEL DIRECTORIO LATERAL MULTICAPA
+    // =========================================================================
+    const dirList = document.getElementById('dir-items-list');
+    const tabBio = document.getElementById('tab-bioregions');
+    const tabIntra = document.getElementById('tab-intraterrenas');
+    const tabSacred = document.getElementById('tab-sacred');
+    const tabLey = document.getElementById('tab-leylines');
+
+    tabBio.addEventListener('click', () => switchTab('bioregions'));
+    tabIntra.addEventListener('click', () => switchTab('intraterrenas'));
+    tabSacred.addEventListener('click', () => switchTab('sacred'));
+    tabLey.addEventListener('click', () => switchTab('leylines'));
+
+    function switchTab(tab) {
+      currentTab = tab;
+      tabBio.classList.toggle('active', tab === 'bioregions');
+      tabIntra.classList.toggle('active', tab === 'intraterrenas');
+      tabSacred.classList.toggle('active', tab === 'sacred');
+      tabLey.classList.toggle('active', tab === 'leylines');
+      populateDirectory();
+    }
+
+    function populateDirectory() {
+      dirList.innerHTML = '';
+      let dataset = [];
+      if (currentTab === 'bioregions') dataset = BIOREGIONS;
+      else if (currentTab === 'intraterrenas') dataset = INTRATERRENAS;
+      else if (currentTab === 'sacred') dataset = SACRED_SITES;
+      else dataset = LEY_LINES;
+
+      const filtered = dataset.filter(item => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return item.name.toLowerCase().includes(q) || 
+               (item.territory && item.territory.toLowerCase().includes(q)) ||
+               (item.purpose && item.purpose.toLowerCase().includes(q));
+      });
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        const isActive = selectedEntity && selectedEntity.id === item.id;
+        const multiIndex = selectedEntities.findIndex(e => e.id === item.id);
+        const isMulti = multiIndex !== -1;
+        card.className = `item-card ${isActive ? 'active' : ''} ${isMulti ? 'multiselected' : ''}`;
+        
+        const badgeText = item.region || item.type || 'Línea Ley';
+        const subText = item.territory || item.purpose;
+
+        let orderBadgeHtml = '';
+        if (isMulti) {
+          orderBadgeHtml = `<span class="item-card-order-badge" title="Orden de selección #${multiIndex + 1}">${multiIndex + 1}</span>`;
+        }
+
+        card.innerHTML = `
+          <div class="item-card-top">
+            <span class="item-card-name" style="display:flex; align-items:center;">
+              ${orderBadgeHtml}${item.shortName || item.name}
+            </span>
+            <span class="item-card-badge" style="color:${item.color};">${badgeText}</span>
+          </div>
+          <div class="item-card-sub">${subText}</div>
+        `;
+
+        card.addEventListener('click', (e) => {
+          if (multiSelectMode || e.shiftKey) {
+            toggleEntityMultiSelect(item);
+          } else {
+            selectEntity(item);
+            flyTo(item);
+          }
+        });
+
+        dirList.appendChild(card);
+      });
+    }
+
+    // Centrar la cámara en una entidad
+    function flyTo(item) {
+      if (viewMode === '3D') {
+        let targetLat = item.lat;
+        let targetLon = item.lon;
+
+        if (item.category === 'leyline' && item.nodes && item.nodes.length > 0) {
+          const firstNode = findEntity(item.nodes[0]);
+          if (firstNode) { targetLat = firstNode.lat; targetLon = firstNode.lon; }
+        }
+
+        if (targetLat !== undefined && targetLon !== undefined) {
+          rotY = -(targetLon * Math.PI / 180) - Math.PI / 2;
+          rotX = (targetLat * Math.PI / 180);
+          velX = 0; velY = 0;
+        }
+      }
+    }
+
+    // Buscador
+    document.getElementById('search-box').addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      populateDirectory();
+    });
+
+    // =========================================================================
+    // INSPECTOR Y DETALLES DEL NODO
+    // =========================================================================
+    const inspector = document.getElementById('inspector-panel');
+
+    function selectEntity(item) {
+      selectedEntity = item;
+
+      if (item.category === 'intraterrena') {
+        document.getElementById('insp-node-title').textContent = 'Ciudad Intraterrena';
+      } else if (item.category === 'sacred_site') {
+        document.getElementById('insp-node-title').textContent = '💧 Sitio Sagrado / Vórtice de Agua';
+      } else if (item.category === 'leyline') {
+        document.getElementById('insp-node-title').textContent = 'Línea Ley / Flujo Telúrico';
+      } else {
+        document.getElementById('insp-node-title').textContent = 'Biorregión';
+      }
+
+      document.getElementById('insp-dot').style.background = item.color;
+      document.getElementById('txt-entity-name').textContent = item.name;
+      document.getElementById('txt-entity-location').textContent = item.territory || item.location || 'Red Planetaria';
+
+      if (item.lat !== undefined) {
+        document.getElementById('coord-lat').textContent = `Lat: ${item.lat.toFixed(2)}°`;
+        document.getElementById('coord-lon').textContent = `Lon: ${item.lon.toFixed(2)}°`;
+        document.getElementById('txt-entity-freq').textContent = item.freq || item.vibrationalFreq ? `${item.freq || item.vibrationalFreq} Hz` : 'Armónico';
+      } else {
+        document.getElementById('coord-lat').textContent = 'Global';
+        document.getElementById('coord-lon').textContent = 'Continental';
+        document.getElementById('txt-entity-freq').textContent = 'Resonante';
+      }
+
+      document.getElementById('txt-entity-purpose').textContent = item.purpose;
+      document.getElementById('txt-interconn-desc').textContent = item.interconnectionsDesc || 'Interconectado por canales telúricos.';
+
+      // Detalles de Fábrica del Agua y Ecosistema
+      const secWater = document.getElementById('sec-water-details');
+      if (item.ecosystem || item.riversBorn) {
+        secWater.style.display = 'flex';
+        document.getElementById('txt-entity-ecosystem').innerHTML = item.ecosystem ? `🌱 <strong>Ecosistema:</strong> ${item.ecosystem}` : '';
+        document.getElementById('txt-entity-rivers').innerHTML = item.riversBorn ? `🌊 <strong>Ríos Nacientes:</strong> ${item.riversBorn}` : '';
+      } else {
+        secWater.style.display = 'none';
+      }
+
+      document.getElementById('txt-ray-element').textContent = item.ray || item.type || 'Eje Telúrico';
+      document.getElementById('txt-custodians').textContent = item.circle || 'Custodios Planetarios';
+
+      // Conexiones / Nodos Hermanos
+      const boxConns = document.getElementById('box-conns');
+      boxConns.innerHTML = '';
+      const connIds = item.connectedIds || item.nodes || [];
+      document.getElementById('txt-conn-count').textContent = connIds.length;
+
+      connIds.forEach(cId => {
+        const cEnt = findEntity(cId);
+        if (!cEnt) return;
+        const tag = document.createElement('div');
+        tag.className = 'conn-tag';
+        tag.textContent = cEnt.shortName || cEnt.name;
+        tag.addEventListener('click', () => {
+          selectEntity(cEnt);
+          flyTo(cEnt);
+        });
+        boxConns.appendChild(tag);
+      });
+
+      inspector.classList.add('open');
+      populateDirectory();
+    }
+
+    document.getElementById('btn-close-insp').addEventListener('click', () => {
+      inspector.classList.remove('open');
+    });
+
+    // =========================================================================
+    // INTERACCIÓN CON EL RATÓN
+    // =========================================================================
+    let isDragging = false, isPanning = false;
+    let startX = 0, startY = 0;
+    const tooltip = document.getElementById('tooltip');
+
+    canvas.addEventListener('mousedown', (e) => {
+      startX = e.clientX; startY = e.clientY;
+      if (e.button === 2 || e.shiftKey) isPanning = true;
+      else isDragging = true;
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; isPanning = false; });
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+    canvas.addEventListener('mousemove', (e) => {
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      if (isDragging) {
+        velY = dx * 0.005;
+        velX = dy * 0.005;
+        rotY += velY;
+        rotX += velX;
+        startX = e.clientX; startY = e.clientY;
+      } else if (isPanning) {
+        panX += dx; panY += dy;
+        startX = e.clientX; startY = e.clientY;
+      } else {
+        // Detección de Hover
+        hoveredEntity = null;
+        const all = [...BIOREGIONS, ...(showIntra ? INTRATERRENAS : []), ...(showSacred ? SACRED_SITES : [])];
+        for (const ent of all) {
+          const pr = project(ent.lat, ent.lon, globeRadius * 1.03);
+          if (pr.isFront && Math.hypot(e.clientX - pr.x, e.clientY - pr.y) < 18) {
+            hoveredEntity = ent;
+            tooltip.style.left = `${e.clientX}px`;
+            tooltip.style.top = `${e.clientY - 12}px`;
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = `<strong>${ent.shortName || ent.name}</strong><br><span style="color:${ent.color}">●</span> ${ent.territory || ent.location}<br><span style="color:var(--text-muted)">${ent.ray || ent.type}</span>`;
+            break;
+          }
+        }
+        if (!hoveredEntity) tooltip.style.display = 'none';
+      }
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      setZoom(globeRadius - e.deltaY * 0.35);
+    }, { passive: false });
+
+    // =========================================================================
+    // CONTROLADORES DE LA BARRA DE ZOOM
+    // =========================================================================
+    const zoomSlider = document.getElementById('zoom-slider');
+    const topZoomSlider = document.getElementById('top-zoom-slider');
+
+    if (zoomSlider) {
+      zoomSlider.addEventListener('input', (e) => setZoom(parseFloat(e.target.value)));
+    }
+    if (topZoomSlider) {
+      topZoomSlider.addEventListener('input', (e) => setZoom(parseFloat(e.target.value)));
+    }
+
+    document.getElementById('btn-zoom-in')?.addEventListener('click', () => setZoom(globeRadius + 35));
+    document.getElementById('btn-zoom-out')?.addEventListener('click', () => setZoom(globeRadius - 35));
+    document.getElementById('btn-top-zoom-in')?.addEventListener('click', () => setZoom(globeRadius + 35));
+    document.getElementById('btn-top-zoom-out')?.addEventListener('click', () => setZoom(globeRadius - 35));
+    document.getElementById('btn-zoom-reset')?.addEventListener('click', () => setZoom(baseGlobeRadius || 240));
+
+    // Conmutador del modo Multiselección en barra superior
+    const btnToggleMultisel = document.getElementById('btn-toggle-multisel');
+    const txtMultisel = document.getElementById('txt-multisel');
+    if (btnToggleMultisel) {
+      btnToggleMultisel.addEventListener('click', () => {
+        multiSelectMode = !multiSelectMode;
+        txtMultisel.textContent = multiSelectMode ? 'ON' : 'OFF';
+        btnToggleMultisel.classList.toggle('btn-active', multiSelectMode);
+        updateMultiSelectUI();
+      });
+    }
+
+    canvas.addEventListener('click', (e) => {
+      const all = [...BIOREGIONS, ...(showIntra ? INTRATERRENAS : []), ...(showSacred ? SACRED_SITES : [])];
+      for (const ent of all) {
+        const pr = project(ent.lat, ent.lon, globeRadius * 1.03);
+        if (pr.isFront && Math.hypot(e.clientX - pr.x, e.clientY - pr.y) < 20) {
+          if (multiSelectMode || e.shiftKey) {
+            toggleEntityMultiSelect(ent);
+          } else {
+            selectEntity(ent);
+            flyTo(ent);
+          }
+          return;
+        }
+      }
+    });
+
+    // =========================================================================
+    // BOTONES Y CONMUTADORES SUPERIORES
+    // =========================================================================
+    // Modo 3D vs 2D
+    const btnViewMode = document.getElementById('btn-view-mode');
+    const txtViewMode = document.getElementById('txt-view-mode');
+    btnViewMode.addEventListener('click', () => {
+      viewMode = viewMode === '3D' ? '2D' : '3D';
+      txtViewMode.textContent = viewMode === '3D' ? 'Globo 3D' : 'Mapa 2D';
+    });
+
+    // Conmutador Ciudades Intraterrenas
+    const btnIntra = document.getElementById('btn-toggle-intra');
+    const txtIntra = document.getElementById('txt-intra');
+    btnIntra.addEventListener('click', () => {
+      showIntra = !showIntra;
+      txtIntra.textContent = showIntra ? 'ON' : 'OFF';
+      btnIntra.classList.toggle('btn-active', showIntra);
+    });
+
+    // Conmutador Sitios Sagrados del Agua
+    const btnSacred = document.getElementById('btn-toggle-sacred');
+    const txtSacred = document.getElementById('txt-sacred');
+    btnSacred.addEventListener('click', () => {
+      showSacred = !showSacred;
+      txtSacred.textContent = showSacred ? 'ON' : 'OFF';
+      btnSacred.classList.toggle('btn-active', showSacred);
+    });
+
+    // Conmutador Líneas Ley
+    const btnLey = document.getElementById('btn-toggle-ley');
+    const txtLey = document.getElementById('txt-ley');
+    btnLey.addEventListener('click', () => {
+      showLey = !showLey;
+      txtLey.textContent = showLey ? 'ON' : 'OFF';
+      btnLey.classList.toggle('btn-active', showLey);
+    });
+
+    // Conmutador Convergencias
+    const btnConv = document.getElementById('btn-toggle-conv');
+    const txtConv = document.getElementById('txt-conv');
+    btnConv.addEventListener('click', () => {
+      showConv = !showConv;
+      txtConv.textContent = showConv ? 'ON' : 'OFF';
+      btnConv.classList.toggle('btn-active', showConv);
+    });
+
+    // Conmutador Tierra
+    const btnEarth = document.getElementById('btn-toggle-earth');
+    const txtEarth = document.getElementById('txt-earth');
+    btnEarth.addEventListener('click', () => {
+      showEarth = !showEarth;
+      txtEarth.textContent = showEarth ? 'ON' : 'OFF';
+      btnEarth.classList.toggle('btn-active', showEarth);
+    });
+
+    // Conmutador Etiquetas
+    const btnLabels = document.getElementById('btn-toggle-labels');
+    const txtLabels = document.getElementById('txt-labels');
+    btnLabels.addEventListener('click', () => {
+      showLabels = !showLabels;
+      txtLabels.textContent = showLabels ? 'ON' : 'OFF';
+      btnLabels.classList.toggle('btn-active', showLabels);
+    });
+
+    // Conmutador Rotación
+    const btnRot = document.getElementById('btn-toggle-rot');
+    const txtRot = document.getElementById('txt-rot');
+    btnRot.addEventListener('click', () => {
+      autoRotate = !autoRotate;
+      txtRot.textContent = autoRotate ? 'ON' : 'OFF';
+    });
+
+    // Exportar JSON a la notebook
+    document.getElementById('btn-export').addEventListener('click', () => {
+      const payload = {
+        schema: 'MatrizCristalSincronica-AguaSagrada-v3.2',
+        exportedAt: new Date().toISOString(),
+        bioregions: BIOREGIONS,
+        intraterrenas: INTRATERRENAS,
+        sacredSites: SACRED_SITES,
+        leyLines: LEY_LINES,
+        convergences: CONVERGENCES
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `matriz_cristal_erks_biorregiones_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    // Captura PNG
+    document.getElementById('btn-snap').addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `planeta_tierra_erks_lineas_ley_${Date.now()}.png`;
+      a.click();
+    });
+
+    // Captura PNG
+    document.getElementById('btn-snap').addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `planeta_tierra_erks_lineas_ley_${Date.now()}.png`;
+      a.click();
+    });
+
+    // =========================================================================
+    // BASE DE CONOCIMIENTO DE VÓRTICES Y SITIOS SAGRADOS PARA EL ASISTENTE
+    // =========================================================================
+    const SACRED_KNOWLEDGE_BASE = [
+      {
+        keys: ['kailash', 'gang rinpoche', 'tibet'],
+        name: 'Monte Kailash (Gang Rinpoche)',
+        shortName: '🏔️ Monte Kailash',
+        category: 'sacred_site',
+        territory: 'Meseta del Tíbet, Cordillera Gangdise, China',
+        region: 'Asia (Himalayas)',
+        lat: 31.067, lon: 81.312,
+        color: '#00e5ff',
+        freq: '999 Hz',
+        ray: 'Rayo Índigo-Diamantino / Séptimo Chakra Planetario',
+        circle: 'Guardianes del Techo del Mundo',
+        ecosystem: 'Pirámide de hielo sagrada y lagunas Manasarovar & Rakshastal',
+        riversBorn: 'Río Indo, Río Sutlej, Río Brahmaputra, Río Karnali (Ganges)',
+        purpose: 'El eje cósmico (Axis Mundi) más sagrado de Asia, venerado por 4 tradiciones milenarias. Vientre hídrico de 4 ríos vitales que nutren a miles de millones de seres.',
+        interconnectionsDesc: 'Conecta con Shamballa / Agartha y la Biorregión de los Himalayas.',
+        connectedIds: ['bio_himalayas', 'intra_shamballa']
+      },
+      {
+        keys: ['stonehenge', 'avebury', 'salisbury', 'inglaterra', 'reino unido'],
+        name: 'Stonehenge & Complejo Megalítico de Avebury',
+        shortName: '🌀 Stonehenge & Avebury',
+        category: 'sacred_site',
+        territory: 'Planicie de Salisbury, Wiltshire, Reino Unido',
+        region: 'Europa',
+        lat: 51.178, lon: -1.826,
+        color: '#38bdf8',
+        freq: '432 Hz',
+        ray: 'Rayo Azul-Plata Megalítico / Geometría Solar',
+        circle: 'Círculo de la Piedra Azul',
+        ecosystem: 'Praderas calcáreas y templos de piedra sarsen',
+        riversBorn: 'Cuenca del Río Avon',
+        purpose: 'Templo astronómico megalítico alineado con los solsticios y los ciclos lunares. Antena resonadora de ondas telúricas sobre fallas de tiza blanca.',
+        interconnectionsDesc: 'Epicentro del cruce de las Líneas de San Miguel y Santa María; puente con Glastonbury.',
+        connectedIds: ['bio_mediterraneo']
+      },
+      {
+        keys: ['glastonbury', 'avalon', 'chalice well', 'manantial del caliz'],
+        name: 'Glastonbury Tor & Manantial del Cáliz (Chalice Well)',
+        shortName: '🌿 Glastonbury (Avalon)',
+        category: 'sacred_site',
+        territory: 'Somerset, Reino Unido',
+        region: 'Europa',
+        lat: 51.146, lon: -2.714,
+        color: '#10b981',
+        freq: '528 Hz',
+        ray: 'Rayo Verde Esmeralda del Santo Grial & Agua Roja de Hierro',
+        circle: 'Custodios de Avalon',
+        ecosystem: 'Colina espiralada de piedra y manantial ferroso de agua viva',
+        riversBorn: 'Ríos de los Humedales de Somerset',
+        purpose: 'El mítico Avalon, chakra del corazón espiritual de Europa. El manantial sagrado emite agua viva rica en hierro con memorias arcaicas de sanación.',
+        interconnectionsDesc: 'Nodo neurálgico de la Línea Ley de San Miguel; enlace directo con Stonehenge.',
+        connectedIds: ['bio_mediterraneo']
+      },
+      {
+        keys: ['giza', 'guiza', 'piramides de egipto', 'esfinge', 'keops', 'egipto'],
+        name: 'Gran Pirámide de Giza & La Esfinge',
+        shortName: '☀️ Pirámides de Giza',
+        category: 'sacred_site',
+        territory: 'Meseta de Giza / Río Nilo, El Cairo, Egipto',
+        region: 'África / Oriente Próximo',
+        lat: 29.979, lon: 31.134,
+        color: '#f59e0b',
+        freq: '432 Hz',
+        ray: 'Rayo Dorado Solar de Orión / Geodésica Planetaria',
+        circle: 'Iniciados de la Escuela de Horus',
+        ecosystem: 'Meseta desértica sobre la ribera del Río Nilo',
+        riversBorn: 'Ribera del Río Nilo',
+        purpose: 'Centro geodésico de la masa continental emergida de la Tierra. Armonizador armónico del meridiano 31° este y receptor de frecuencias estelares alineadas al cinturón de Orión.',
+        interconnectionsDesc: 'Enlace central de la Línea Solar de San Miguel con el Valle del Rift y los Himalayas.',
+        connectedIds: ['bio_rift', 'bio_mediterraneo', 'bio_himalayas']
+      },
+      {
+        keys: ['palenque', 'lakamha', 'pakal', 'chiapas', 'selva lacandona'],
+        name: 'Pirámides de Palenque (Lakamha) & Selva Lacandona',
+        shortName: '🏛️ Palenque (Lakamha)',
+        category: 'sacred_site',
+        territory: 'Chiapas, México / Selva Lacandona',
+        region: 'Centroamérica (Mesoamérica)',
+        lat: 17.484, lon: -92.046,
+        color: '#06d6a0',
+        freq: '528 Hz',
+        ray: 'Rayo Jade Solar Maya / Calendario Cósmico Tzolkin',
+        circle: 'Guardianes Mayas de las Estrellas',
+        ecosystem: 'Selva húmeda tropical con cascadas kársticas de agua turquesa (Misol-Ha, Agua Azul)',
+        riversBorn: 'Río Usumacinta y Río Tulijá',
+        purpose: 'Santuario ceremonial de astronomía y sabiduría estelar maya. Custodia el Templo de las Inscripciones y el conocimiento del tiempo sincrónico.',
+        interconnectionsDesc: 'Puente mesoamericano que une Teotihuacán con la Cueva de los Tayos y San Agustín.',
+        connectedIds: ['bio_mesoamerica', 'intra_tayos', 'site_san_agustin']
+      },
+      {
+        keys: ['champaqui', 'cerro champaqui', 'traslasierra', 'calamuchita', 'cordoba'],
+        name: 'Cerro Champaquí (Corona de las Sierras)',
+        shortName: '⛰️ Cerro Champaquí',
+        category: 'sacred_site',
+        territory: 'Sierras Grandes de Córdoba / Valle de Traslasierra, Argentina',
+        region: 'Sudamérica (Centro)',
+        lat: -31.986, lon: -64.935,
+        color: '#a855f7',
+        freq: '777 Hz',
+        ray: 'Rayo Violeta de la Transmutación Serrana',
+        circle: 'Círculo de la Cumbre Comechingona',
+        ecosystem: 'Pastizales de altura, bosques de tabaquillo y lagunas de roca granítica',
+        riversBorn: 'Ríos de los valles de Calamuchita y Traslasierra',
+        purpose: 'El pico más alto de las Sierras de Córdoba (2.884 m). Antena telúrica hermana del Cerro Uritorco que custodia el corredor electromagnético de ERKS.',
+        interconnectionsDesc: 'Resonancia armónica directa con ERKS, el Acuífero Guaraní y los Andes.',
+        connectedIds: ['intra_erks', 'bio_plata', 'intra_isidris']
+      },
+      {
+        keys: ['licancabur', 'laguna verde', 'atacama', 'san pedro de atacama'],
+        name: 'Volcán Licancabur & Laguna Verde',
+        shortName: '🌋 Volcán Licancabur',
+        category: 'sacred_site',
+        territory: 'Desierto de Atacama / Frontera Chile - Bolivia',
+        region: 'Sudamérica (Altiplano)',
+        lat: -22.833, lon: -67.883,
+        color: '#06d6a0',
+        freq: '528 Hz',
+        ray: 'Rayo Turquesa-Fuego de Altura',
+        circle: 'Sacerdotes del Fuego Atacameño',
+        ecosystem: 'Cráter con laguna a 5.916 msnm y salares de altura',
+        riversBorn: 'Cuenca endorreica del Salar de Atacama',
+        purpose: 'Santuario incaico de alta montaña donde el fuego volcánico se encuentra con aguas termales y lagunas de altura, sirviendo de laboratorio cósmico y anclaje solar.',
+        interconnectionsDesc: 'Conectado con el Salar de Uyuni, el Templo del Titicaca y la ciudad de Isidris.',
+        connectedIds: ['site_uyuni', 'intra_titicaca', 'bio_andes']
+      },
+      {
+        keys: ['baikal', 'lago baikal', 'oljon', 'olkhon', 'siberia'],
+        name: 'Lago Baikal (El Ojo Sagrado de Siberia)',
+        shortName: '🌊 Lago Baikal',
+        category: 'sacred_site',
+        territory: 'Irkutsk y Buriatia, Siberia, Rusia',
+        region: 'Asia Boreal',
+        lat: 53.500, lon: 108.000,
+        color: '#38bdf8',
+        freq: '432 Hz',
+        ray: 'Rayo Cristalino Azul Ártico / Reserva de Pureza Primitiva',
+        circle: 'Chamanes Buriatos de la Isla Oljón',
+        ecosystem: 'El lago de agua dulce más antiguo (25 millones de años) y profundo (1.642 m), conteniendo el 20% del agua dulce de la Tierra',
+        riversBorn: 'Río Angara (hacia el Yeniséi y el Océano Ártico)',
+        purpose: 'El "Mar Sagrado" de Siberia y antena geomagnética boreal. Vórtice chamánico primordial y reservorio de la memoria líquida prístina del planeta.',
+        interconnectionsDesc: 'Arteria de enlace entre la Taiga Boreal y Shamballa.',
+        connectedIds: ['bio_taiga', 'intra_shamballa']
+      },
+      {
+        keys: ['uluru', 'ayers rock', 'kata tjuta', 'australia'],
+        name: 'Uluru / Kata Tjuta (El Corazón Rojo)',
+        shortName: '🪨 Uluru (Ayers Rock)',
+        category: 'sacred_site',
+        territory: 'Territorio del Norte, Desierto Central de Australia',
+        region: 'Oceanía',
+        lat: -25.344, lon: 131.036,
+        color: '#ef4444',
+        freq: '7.83 Hz',
+        ray: 'Rayo Rojo Tierra / Plexo Solar Planetario / Tiempo del Ensueño',
+        circle: 'Guardianes Anangu del Tjukurpa',
+        ecosystem: 'Monolito de arenisca arcosa roja con charcas de agua perenne',
+        riversBorn: 'Oasis efímeros del desierto central',
+        purpose: 'Considerado el chakra del plexo solar de la Tierra. Ancla viva del "Tiempo del Ensueño" (Tjukurpa), donde las Songlines tejen la memoria de los antepasados creadores.',
+        interconnectionsDesc: 'Conecta con la Biorregión del Pacífico y la Antártida.',
+        connectedIds: ['bio_pacifico']
+      },
+      {
+        keys: ['machu picchu', 'urubamba', 'cusco', 'intihuatana', 'valle sagrado'],
+        name: 'Machu Picchu & Valle Sagrado del Urubamba',
+        shortName: '🏛️ Machu Picchu',
+        category: 'sacred_site',
+        territory: 'Cusco / Urubamba, Perú',
+        region: 'Sudamérica (Andes Centrales)',
+        lat: -13.163, lon: -72.545,
+        color: '#eab308',
+        freq: '432 Hz',
+        ray: 'Rayo Oro Cristal Andino / Intihuatana',
+        circle: 'Sacerdocio Solar Quechua',
+        ecosystem: 'Ceja de selva y bosque de niebla andino',
+        riversBorn: 'Cañón del Río Urubamba (Vilcanota)',
+        purpose: 'Cristal megalítico de integración astronómica. El Intihuatana sella la energía solar en la roca viva, funcionando como puente entre los Andes y la Amazonía.',
+        interconnectionsDesc: 'Eje directo con el Lago Titicaca, Paititi y San Agustín.',
+        connectedIds: ['bio_andes', 'intra_titicaca', 'intra_paititi', 'site_san_agustin']
+      },
+      {
+        keys: ['guatape', 'piedra del peñol', 'el peñol', 'antioquia'],
+        name: 'Piedra del Peñol & Complejo Lacustre de Guatapé',
+        shortName: '🪨 Piedra del Peñol',
+        category: 'sacred_site',
+        territory: 'Antioquia, Colombia',
+        region: 'Sudamérica (Andes del Norte)',
+        lat: 6.221, lon: -75.179,
+        color: '#06d6a0',
+        freq: '528 Hz',
+        ray: 'Rayo Esmeralda-Granítico de Abundancia',
+        circle: 'Guardianes del Embalse Sagrado',
+        ecosystem: 'Monolito inselberg granítico de cuarzo y feldespato rodeado por un laberinto de aguas cristalinas',
+        riversBorn: 'Afluentes del Río Nare y Río Magdalena',
+        purpose: 'Monolito de 220 metros emergiendo de un entramado de aguas serpenteantes. Antena mineral de cuarzo que calibra la energía hídrica del noroccidente andino.',
+        interconnectionsDesc: 'Vinculado a San Agustín (Kusiyaku) y la Sierra Nevada de Santa Marta.',
+        connectedIds: ['site_san_agustin', 'site_sierra_nevada']
+      },
+      {
+        keys: ['nahuel huapi', 'tronador', 'bariloche', 'cerro tronador'],
+        name: 'Lago Nahuel Huapi & Cerro Tronador',
+        shortName: '🏔️ Nahuel Huapi (Tronador)',
+        category: 'sacred_site',
+        territory: 'Río Negro y Neuquén, Patagonia, Argentina',
+        region: 'Sudamérica (Patagonia)',
+        lat: -41.050, lon: -71.300,
+        color: '#00e5ff',
+        freq: '432 Hz',
+        ray: 'Rayo Cristal Glaciar & Selva Valdiviana',
+        circle: 'Custodios del Agua Glaciar Mapuche',
+        ecosystem: 'Glaciares fósiles negros, lagos glaciares ultra profundos y bosques milenarios',
+        riversBorn: 'Río Limay (hacia el Río Negro y el Atlántico)',
+        purpose: 'El "Rugido de los Glaciares" alimenta lagos de extrema pureza y memoria criogénica ancestral. Portal de purificación telúrica del norte patagónico.',
+        interconnectionsDesc: 'Conecta con la Patagonia Austral, Isidris y ERKS.',
+        connectedIds: ['bio_patagonia', 'intra_isidris', 'intra_erks']
+      },
+      {
+        keys: ['teotihuacan', 'piramide del sol', 'piramide de la luna', 'quetzalcoatl'],
+        name: 'Teotihuacán (La Ciudad de los Dioses)',
+        shortName: '🏛️ Teotihuacán',
+        category: 'sacred_site',
+        territory: 'Valle de México, México',
+        region: 'Centroamérica (Mesoamérica)',
+        lat: 19.692, lon: -98.843,
+        color: '#f59e0b',
+        freq: '528 Hz',
+        ray: 'Rayo Solar & Pirámide de la Serpiente Emplumada',
+        circle: 'Iniciados de Quetzalcóatl',
+        ecosystem: 'Altiplano central mexicano',
+        riversBorn: 'Cuenca del Valle de México',
+        purpose: 'Ciudad sagrada diseñada a escala cósmica. La Calzada de los Muertos y sus pirámides anclan frecuencias solares de ascensión para el norte continental.',
+        interconnectionsDesc: 'Nodo del Eje Kundalini hacia Monte Shasta al norte y Palenque/Tayos al sur.',
+        connectedIds: ['bio_mesoamerica', 'intra_shasta', 'intra_tayos']
+      },
+      {
+        keys: ['sedona', 'bell rock', 'cathedral rock', 'arizona'],
+        name: 'Sedona (Vórtices de Arenisca Roja)',
+        shortName: '🏜️ Sedona',
+        category: 'sacred_site',
+        territory: 'Valle de Oak Creek, Arizona, EE.UU.',
+        region: 'Norteamérica',
+        lat: 34.869, lon: -111.760,
+        color: '#f97316',
+        freq: '528 Hz',
+        ray: 'Rayo Fuego-Tierra / Vórtices Electromagnéticos',
+        circle: 'Guardianes de la Roca Roja',
+        ecosystem: 'Mesetas de arenisca ferruginosa y cañones desérticos',
+        riversBorn: 'Oak Creek',
+        purpose: 'Campo de vórtices electromagnéticos de arenisca roja de máxima aceleración energética y transmutación.',
+        interconnectionsDesc: 'Puente telúrico entre Monte Shasta y Mesoamérica.',
+        connectedIds: ['intra_shasta', 'bio_mesoamerica']
+      },
+      {
+        keys: ['fuji', 'monte fuji', 'fujisan', 'japon'],
+        name: 'Monte Fuji (Fujisan)',
+        shortName: '🗻 Monte Fuji',
+        category: 'sacred_site',
+        territory: 'Isla de Honshu, Japón',
+        region: 'Asia Oriental',
+        lat: 35.360, lon: 138.727,
+        color: '#ffffff',
+        freq: '888 Hz',
+        ray: 'Rayo Blanco del Sol Naciente / Equilibrio Volcánico',
+        circle: 'Guardianes Sintoístas del Fuji',
+        ecosystem: 'Estratovolcán cónico coronado de nieve y los 5 Lagos del Fuji',
+        riversBorn: 'Manantiales sagrados de deshielo volcánico',
+        purpose: 'El vórtice espiritual supremo de Japón. Montaña sagrada del sintoísmo que ancla la pureza y estabiliza el Anillo de Fuego del Pacífico.',
+        interconnectionsDesc: 'Conecta con la Biorregión del Pacífico y los Himalayas.',
+        connectedIds: ['bio_pacifico', 'bio_himalayas']
+      }
+    ];
+
+    // =========================================================================
+    // PERSISTENCIA DE PUNTOS PERSONALIZADOS (LOCALSTORAGE)
+    // =========================================================================
+    function loadCustomSites() {
+      try {
+        const saved = localStorage.getItem('MATRIZ_CUSTOM_SITES');
+        if (saved) {
+          const list = JSON.parse(saved);
+          list.forEach(site => {
+            if (!findEntity(site.id)) {
+              if (site.category === 'intraterrena') INTRATERRENAS.push(site);
+              else if (site.category === 'bioregion') BIOREGIONS.push(site);
+              else SACRED_SITES.push(site);
+            }
+          });
+        }
+      } catch(e) {
+        console.warn('Error cargando puntos personalizados:', e);
+      }
+    }
+
+    function saveCustomSite(site) {
+      try {
+        const saved = JSON.parse(localStorage.getItem('MATRIZ_CUSTOM_SITES') || '[]');
+        if (!saved.some(s => s.id === site.id)) {
+          saved.push(site);
+          localStorage.setItem('MATRIZ_CUSTOM_SITES', JSON.stringify(saved));
+        }
+      } catch(e) {}
+    }
+
+    // Sonido armónico de confirmación (Web Audio API puro)
+    function playHarmonicChime(freq = 528) {
+      if (!soundEnabled) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        const f = typeof freq === 'number' ? freq : (parseInt(freq) || 528);
+        osc.frequency.setValueAtTime(f, ctx.currentTime);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 1.2);
+      } catch (e) {}
+    }
+
+    // Distancia esférica angular
+    function getSphericalDistance(lat1, lon1, lat2, lon2) {
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      return 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    // Distancia geodésica en kilómetros
+    function calculateGeodesicDistanceKm(lat1, lon1, lat2, lon2) {
+      if (lat1 === undefined || lon1 === undefined || lat2 === undefined || lon2 === undefined) return 0;
+      const R = 6371;
+      const d = getSphericalDistance(lat1, lon1, lat2, lon2);
+      return Math.round(R * d);
+    }
+
+    // Acorde polifónico simultáneo en Web Audio API
+    function playPolyphonicChord(freqs = [432, 528]) {
+      if (!soundEnabled) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+        freqs.forEach((f, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+          const numF = typeof f === 'number' ? f : (parseFloat(f) || 432);
+          osc.frequency.setValueAtTime(numF, now);
+          gain.gain.setValueAtTime(0.09 / Math.max(1, freqs.length), now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.8);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 2.8);
+        });
+      } catch (e) {}
+    }
+
+    // Gestión de la lista de selección múltiple
+    function toggleEntityMultiSelect(item) {
+      if (!item) return;
+      const idx = selectedEntities.findIndex(e => e.id === item.id);
+      if (idx !== -1) {
+        selectedEntities.splice(idx, 1);
+      } else {
+        selectedEntities.push(item);
+        selectEntity(item);
+      }
+      updateMultiSelectUI();
+      populateDirectory();
+    }
+
+    function updateMultiSelectUI() {
+      const multiselBar = document.getElementById('multisel-action-bar');
+      const countText = document.getElementById('multisel-count-text');
+      const tagsContainer = document.getElementById('multisel-tags');
+      if (!multiselBar) return;
+
+      if (selectedEntities.length >= 1) {
+        multiselBar.style.display = 'flex';
+        countText.innerHTML = `<strong>${selectedEntities.length}</strong> ${selectedEntities.length === 1 ? 'territorio' : 'territorios'}`;
+        tagsContainer.innerHTML = '';
+        selectedEntities.forEach((ent, i) => {
+          const pill = document.createElement('div');
+          pill.className = 'multisel-pill';
+          pill.style.borderColor = ent.color || '#00e5ff';
+          pill.innerHTML = `
+            <span style="color:${ent.color || '#00e5ff'}; font-weight:700;">#${i + 1}</span>
+            <span>${ent.shortName || ent.name}</span>
+            <span class="multisel-pill-remove" title="Quitar de selección">&times;</span>
+          `;
+          pill.querySelector('.multisel-pill-remove').addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            toggleEntityMultiSelect(ent);
+          });
+          tagsContainer.appendChild(pill);
+        });
+      } else {
+        multiselBar.style.display = 'none';
+      }
+    }
+
+    document.getElementById('btn-multisel-clear')?.addEventListener('click', () => {
+      selectedEntities = [];
+      updateMultiSelectUI();
+      populateDirectory();
+    });
+
+    document.getElementById('btn-multisel-analyze')?.addEventListener('click', () => {
+      openAssistant();
+      analyzeTelluricLink(selectedEntities);
+    });
+
+    // Formateador Markdown a HTML básico
+    function formatMarkdown(text) {
+      if (!text) return '';
+      let html = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      html = html.replace(/^### (.*$)/gim, '<h4 style="color:var(--accent-cyan); margin:8px 0 4px 0; font-size:12px;">$1</h4>');
+      html = html.replace(/^## (.*$)/gim, '<h3 style="color:var(--accent-gold); margin:10px 0 6px 0; font-size:13px;">$1</h3>');
+      html = html.replace(/^# (.*$)/gim, '<h2 style="color:var(--accent-purple); margin:12px 0 8px 0; font-size:14px;">$1</h2>');
+      html = html.replace(/^\s*[-•]\s+(.*$)/gim, '<div style="margin-left:8px; margin-bottom:3px;">• $1</div>');
+      html = html.replace(/^\s*(\d+)\.\s+(.*$)/gim, '<div style="margin-left:8px; margin-bottom:3px;"><strong>$1.</strong> $2</div>');
+      html = html.replace(/\n\n/g, '<br><br>');
+      html = html.replace(/\n/g, '<br>');
+      return html;
+    }
+
+    // Llamada opcional a Gemini API (gemini-2.5-flash)
+    async function callGeminiTelluricSynthesis(entities, apiKey) {
+      const prompt = `Actúa como el Oráculo Telúrico y Geómetra Sagrado de la Matriz Cristal Sincrónica de la Tierra.
+El usuario ha seleccionado los siguientes ${entities.length} territorios/nodos sagrados en el mapa:
+${entities.map((e, i) => `${i + 1}. ${e.name} (${e.territory || e.region || 'Tierra'})
+   - Categoría: ${e.category}
+   - Coordenadas: Lat ${e.lat !== undefined ? e.lat.toFixed(3) : '0'}°, Lon ${e.lon !== undefined ? e.lon.toFixed(3) : '0'}°
+   - Frecuencia: ${e.freq || '432 Hz'}
+   - Rayo / Elemento: ${e.ray || 'Cristalino'}
+   - Propósito biocultural: ${e.purpose || ''}
+   - Interconexiones conocidas: ${e.interconnectionsDesc || ''}
+   ${e.riversBorn ? `- Ríos / Aguas: ${e.riversBorn}` : ''}`).join('\n')}
+
+Por favor, genera un análisis profundo, poético, telúrico y multidimensional en formato Markdown:
+1. ✨ **Vínculo Telúrico y Geometría de Circuito**: Explica cómo se interconectan estos territorios específicos, qué figura geométrica (eje, triángulo o polígono sagrado) forman y cómo circula la corriente telúrica entre ellos.
+2. 💧 **Continuo Hidro-Energético y Memoria de las Aguas**: Si hay ríos, nieblas, páramos, acuíferos o mares que los comunican (por ejemplo páramos andinos, ríos voladores amazónicos, acuífero guaraní o cuencas fluviales), describe este flujo vivo.
+3. 🎵 **Resonancia Armónica y Frecuencias**: Cómo armonizan sus frecuencias vibratorias en un acorde unificado para la rejilla planetaria.
+4. 🔮 **Misión y Propósito Unificado**: Qué portal o propósito colectivo despierta la activación simultánea de estos ${entities.length} territorios para la Nueva Era.
+
+Mantén un tono de alta sabiduría, inspirador y riguroso con la geografía sagrada y la bioregionalidad. Sé conciso pero elocuente.`;
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1200
+          }
+        })
+      });
+
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(errData.error?.message || `HTTP ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error('Respuesta vacía de Gemini API');
+      return text;
+    }
+
+    // Análisis de Vínculos Telúricos (Motor Híbrido: Local + Gemini Opcional)
+    async function analyzeTelluricLink(entities) {
+      if (!entities || entities.length < 2) {
+        appendAstMessage('assistant', `
+          🔮 <strong>Selecciona al menos 2 territorios para analizar su vínculo telúrico.</strong><br><br>
+          Puedes hacerlo de dos formas:<br>
+          • Haz clic en el botón <strong>🔮 Multiselección: ON</strong> en la barra superior y selecciona los nodos que quieras (en el mapa o en el directorio lateral).<br>
+          • O mantén presionada la tecla <strong>Shift</strong> al hacer clic sobre cualquier territorio.<br><br>
+          <em>Actualmente tienes ${entities ? entities.length : 0} territorio(s) seleccionado(s).</em>
+        `);
+        return;
+      }
+
+      // Acorde armónico polifónico
+      const freqs = entities.map(e => e.freq || 528);
+      playPolyphonicChord(freqs);
+
+      // Cálculos geodésicos par a par
+      let totalDistKm = 0;
+      const segments = [];
+      for (let i = 0; i < entities.length; i++) {
+        const e1 = entities[i];
+        const e2 = entities[(i + 1) % entities.length];
+        const dist = calculateGeodesicDistanceKm(e1.lat, e1.lon, e2.lat, e2.lon);
+        totalDistKm += dist;
+        segments.push({ from: e1, to: e2, dist });
+      }
+
+      const isWaterCircuit = entities.some(e => 
+        (e.riversBorn || e.id?.includes('san_agustin') || e.id?.includes('iguazu') || e.id?.includes('amazonas') || e.id?.includes('plata') || e.id?.includes('aurora') || e.id?.includes('erks'))
+      );
+
+      const freqString = entities.map(e => e.freq || '432 Hz').join(' ⊕ ');
+      const rays = entities.map(e => e.ray || 'Cristalino').filter(Boolean);
+
+      const geminiKey = localStorage.getItem('GEMINI_API_KEY');
+
+      if (geminiKey && geminiKey.trim()) {
+        const loaderId = `loader_${Date.now()}`;
+        appendAstMessage('assistant', `
+          <div id="${loaderId}">
+            <span class="thinking-spinner"></span>
+            <em>Sintonizando con Google Gemini AI (gemini-2.5-flash) para canalizar la interconexión telúrica...</em>
+          </div>
+        `);
+
+        try {
+          const geminiText = await callGeminiTelluricSynthesis(entities, geminiKey.trim());
+          const loaderEl = document.getElementById(loaderId);
+          if (loaderEl) {
+            loaderEl.parentElement.innerHTML = `
+              <div style="margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:4px;">
+                <span style="font-size:10px; font-weight:700; color:#06d6a0;">🟢 Síntesis Telúrica Gemini AI</span>
+                <span style="font-size:9px; color:var(--text-muted);">Circuito de ${entities.length} Vórtices</span>
+              </div>
+              ${formatMarkdown(geminiText)}
+              <div style="margin-top:10px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.08); font-size:9.5px; color:var(--accent-cyan);">
+                🌐 Perímetro geodésico total: <strong>${totalDistKm.toLocaleString()} km</strong> | Acorde: <strong>${freqString}</strong>
+              </div>
+            `;
+          }
+          return;
+        } catch (err) {
+          console.warn('Error en Gemini API:', err);
+          const loaderEl = document.getElementById(loaderId);
+          if (loaderEl) {
+            loaderEl.innerHTML = `<span style="color:#ff6b6b; font-size:10px;">⚠️ Error de conexión con Gemini (${err.message}). Activando síntesis del Motor Local:</span>`;
+          }
+        }
+      }
+
+      // Modo Local Autónomo (100% Offline)
+      let waterNarrative = '';
+      if (isWaterCircuit) {
+        waterNarrative = `
+          <div style="margin-top:8px; padding:6px 10px; background:rgba(0,229,255,0.08); border-left:3px solid var(--accent-cyan); border-radius:4px; font-size:10.5px; line-height:1.4;">
+            💧 <strong>Continuo Hidro-Telúrico Activado:</strong><br>
+            Esta selección entrelaza la <em>Fábrica Continental del Agua</em>. Las aguas y la niebla ordeñada por los frailejones andinos descienden hacia las arterias del Amazonas, se elevan como Ríos Voladores, nutren el manto freático del Acuífero Guaraní y calibran la frecuencia telúrica en las sierras centrales antes de irrigar la Cuenca del Plata.
+          </div>
+        `;
+      }
+
+      let segmentsHtml = segments.map(s => 
+        `• <strong>${s.from.shortName || s.from.name}</strong> ➔ <strong>${s.to.shortName || s.to.name}</strong>: <code>${s.dist.toLocaleString()} km</code>`
+      ).join('<br>');
+
+      const synthesisHtml = `
+        ✨ <strong>Vínculo Telúrico e Interconexiones:</strong><br>
+        Circuito sagrado entre <strong>${entities.map(e => e.shortName || e.name).join(' ↔ ')}</strong>.<br><br>
+        
+        🌐 <strong>Geometría Geodésica & Distancias:</strong><br>
+        ${segmentsHtml}<br>
+        📏 <em>Perímetro telúrico total:</em> <strong>${totalDistKm.toLocaleString()} km</strong>.<br><br>
+
+        ${waterNarrative}
+
+        🎵 <strong>Resonancia de Frecuencias:</strong><br>
+        Acorde polifónico activo: <strong>${freqString}</strong>.<br>
+        Se ha emitido el acorde armónico en vivo por el canal de audio.<br><br>
+
+        🔮 <strong>Sinergia de Rayos:</strong><br>
+        ${rays.map(r => `• <em>${r}</em>`).join('<br>')}<br><br>
+
+        🎯 <strong>Misión Colectiva del Circuito:</strong><br>
+        ${entities.map((e, idx) => `<strong>${idx + 1}. ${e.shortName || e.name}:</strong> ${e.purpose}`).join('<br><br>')}
+
+        <div style="margin-top:10px; font-size:9.5px; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.08); padding-top:6px;">
+          💡 <em>Nota: Este análisis fue generado por el <strong>Motor Telúrico Local</strong> (100% offline). Si deseas una lectura poética oracular con IA de última generación, pulsa <strong>⚙️</strong> arriba para ingresar tu clave de <strong>Google Gemini</strong>.</em>
+        </div>
+      `;
+
+      appendAstMessage('assistant', synthesisHtml);
+    }
+
+    // Buscar nodos más cercanos para interconectar
+    function findNearestEntities(lat, lon, count = 2) {
+      const all = [...BIOREGIONS, ...INTRATERRENAS, ...SACRED_SITES];
+      return all
+        .filter(e => e.lat !== undefined && e.lon !== undefined)
+        .map(e => ({ entity: e, dist: getSphericalDistance(lat, lon, e.lat, e.lon) }))
+        .sort((a, b) => a.dist - b.dist)
+        .slice(0, count)
+        .map(item => item.entity);
+    }
+
+    // =========================================================================
+    // MOTOR CONVERSACIONAL DEL ASISTENTE SINCRÓNICO
+    // =========================================================================
+    const astPanel = document.getElementById('assistant-dialog-panel');
+    const btnToggleAst = document.getElementById('btn-toggle-assistant');
+    const triggerAst = document.getElementById('floating-chat-trigger');
+    const btnCloseAst = document.getElementById('btn-ast-minimize');
+    const btnClearAst = document.getElementById('btn-ast-clear');
+    const astMessages = document.getElementById('ast-messages');
+    const astForm = document.getElementById('ast-form');
+    const astInput = document.getElementById('ast-input');
+
+    let isAssistantOpen = false;
+
+    function openAssistant() {
+      isAssistantOpen = true;
+      astPanel.classList.add('open');
+      astInput.focus();
+      triggerAst.style.display = 'none';
+      if (astMessages.children.length === 0) {
+        showWelcomeMessage();
+      }
+    }
+
+    function closeAssistant() {
+      isAssistantOpen = false;
+      astPanel.classList.remove('open');
+      triggerAst.style.display = 'flex';
+    }
+
+    btnToggleAst.addEventListener('click', () => {
+      if (isAssistantOpen) closeAssistant(); else openAssistant();
+    });
+    triggerAst.addEventListener('click', openAssistant);
+    btnCloseAst.addEventListener('click', closeAssistant);
+    btnClearAst.addEventListener('click', () => {
+      astMessages.innerHTML = '';
+      showWelcomeMessage();
+    });
+
+    function showWelcomeMessage() {
+      appendAstMessage('assistant', `
+        ✨ <strong>¡Saludos! Soy el Asistente Sincrónico de la Red.</strong><br>
+        Estoy listo para tejer nuevos puntos clave, santuarios y bioregiones directamente contigo.<br><br>
+        💡 <em>Puedes pedirme en lenguaje natural:</em><br>
+        • <strong>"Agregá el Monte Kailash en Tíbet"</strong><br>
+        • <strong>"Sumá las Pirámides de Palenque en México"</strong><br>
+        • <strong>"Agregá el Cerro Champaquí en Córdoba"</strong><br>
+        • O ingresar un punto libre: <em>"Agregá Laguna de Guatavita lat: 4.97 lon: -73.77"</em>.<br><br>
+        ¿Qué vórtice te gustaría activar en el planeta?
+      `);
+    }
+
+    function appendAstMessage(role, htmlContent, cardData = null) {
+      const msg = document.createElement('div');
+      msg.className = `ast-msg ${role}`;
+      
+      let innerHTML = `<div class="ast-bubble">${htmlContent}</div>`;
+
+      if (cardData) {
+        const badgeColor = cardData.color || '#00e5ff';
+        const badgeText = cardData.category === 'intraterrena' ? '🏛️ Intraterrena' : (cardData.category === 'bioregion' ? '🗺️ Biorregión' : '💧 Agua Sagrada');
+        innerHTML += `
+          <div class="ast-card" style="border-color:${badgeColor};">
+            <div class="ast-card-title">
+              <span>${cardData.shortName || cardData.name}</span>
+              <span class="ast-card-badge" style="background:${badgeColor}22; color:${badgeColor}; border:1px solid ${badgeColor};">${badgeText}</span>
+            </div>
+            <div class="ast-card-info">
+              📍 <strong>Ubicación:</strong> ${cardData.territory || cardData.region || 'Tierra'}<br>
+              🌐 <strong>Coordenadas:</strong> Lat ${cardData.lat.toFixed(2)}°, Lon ${cardData.lon.toFixed(2)}° | <strong>${cardData.freq || '528 Hz'}</strong><br>
+              ✨ <strong>Rayo:</strong> ${cardData.ray || 'Cristalino'}
+            </div>
+            <div class="ast-card-actions">
+              <button class="ast-card-btn btn-focus-card">🎯 Enfocar en el Globo</button>
+              <button class="ast-card-btn btn-view-insp">📋 Ver en Inspector</button>
+            </div>
+          </div>
+        `;
+      }
+
+      msg.innerHTML = innerHTML;
+
+      if (cardData) {
+        msg.querySelector('.btn-focus-card')?.addEventListener('click', () => {
+          flyTo(cardData);
+          selectEntity(cardData);
+          playHarmonicChime(cardData.freq || 528);
+        });
+        msg.querySelector('.btn-view-insp')?.addEventListener('click', () => {
+          selectEntity(cardData);
+          flyTo(cardData);
+        });
+      }
+
+      astMessages.appendChild(msg);
+      astMessages.scrollTop = astMessages.scrollHeight;
+    }
+
+    // Gestión del Drawer de Configuración de Gemini AI
+    const btnAstSettings = document.getElementById('btn-ast-settings');
+    const astSettingsDrawer = document.getElementById('ast-settings-drawer');
+    const btnCloseSettings = document.getElementById('btn-close-settings');
+    const inpGeminiKey = document.getElementById('inp-gemini-key');
+    const btnToggleKeyVis = document.getElementById('btn-toggle-key-vis');
+    const btnSaveGeminiKey = document.getElementById('btn-save-gemini-key');
+    const btnClearGeminiKey = document.getElementById('btn-clear-gemini-key');
+    const txtGeminiStatus = document.getElementById('txt-gemini-status');
+
+    function updateGeminiStatusUI() {
+      const key = localStorage.getItem('GEMINI_API_KEY');
+      if (key && key.trim()) {
+        if (txtGeminiStatus) txtGeminiStatus.innerHTML = '<span style="color:#06d6a0; font-weight:700;">🟢 Google Gemini Conectado</span>';
+        if (inpGeminiKey) inpGeminiKey.value = key;
+      } else {
+        if (txtGeminiStatus) txtGeminiStatus.innerHTML = '<span style="color:var(--accent-gold);">⚪ Motor Local Offline Activo</span>';
+        if (inpGeminiKey) inpGeminiKey.value = '';
+      }
+    }
+
+    btnAstSettings?.addEventListener('click', () => {
+      const isOpen = astSettingsDrawer.style.display === 'block';
+      astSettingsDrawer.style.display = isOpen ? 'none' : 'block';
+      updateGeminiStatusUI();
+    });
+
+    btnCloseSettings?.addEventListener('click', () => {
+      astSettingsDrawer.style.display = 'none';
+    });
+
+    btnToggleKeyVis?.addEventListener('click', () => {
+      inpGeminiKey.type = inpGeminiKey.type === 'password' ? 'text' : 'password';
+    });
+
+    btnSaveGeminiKey?.addEventListener('click', () => {
+      const val = inpGeminiKey.value.trim();
+      if (val) {
+        localStorage.setItem('GEMINI_API_KEY', val);
+        appendAstMessage('assistant', `🔑 <strong>Google Gemini API Key guardada con éxito.</strong> A partir de ahora, el asistente empleará el modelo <code>gemini-2.5-flash</code> para canalizaciones telúricas y síntesis de interconexiones en tiempo real.`);
+      } else {
+        localStorage.removeItem('GEMINI_API_KEY');
+      }
+      updateGeminiStatusUI();
+      astSettingsDrawer.style.display = 'none';
+    });
+
+    btnClearGeminiKey?.addEventListener('click', () => {
+      localStorage.removeItem('GEMINI_API_KEY');
+      updateGeminiStatusUI();
+      appendAstMessage('assistant', `⚪ <strong>Modo Local Offline activado.</strong> El asistente usará su motor matemático y conocimiento telúrico sin dependencias externas.`);
+      astSettingsDrawer.style.display = 'none';
+    });
+
+    updateGeminiStatusUI();
+
+    // Procesar Entrada del Usuario en Lenguaje Natural
+    astForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = astInput.value.trim();
+      if (!text) return;
+      astInput.value = '';
+      processUserPrompt(text);
+    });
+
+    // Chips de sugerencias
+    document.querySelectorAll('.ast-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const action = chip.getAttribute('data-action');
+        if (action === 'analyze-link') {
+          openAssistant();
+          analyzeTelluricLink(selectedEntities);
+          return;
+        }
+        const query = chip.getAttribute('data-query');
+        if (query) {
+          openAssistant();
+          processUserPrompt(query);
+        }
+      });
+    });
+
+    function processUserPrompt(query) {
+      // 1. Mostrar mensaje del usuario
+      appendAstMessage('user', query);
+
+      const q = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      // ── 1a. MOTOR DE AUTO-MEJORA: el asistente modifica el sistema en sí mismo ──
+      // Rotación
+      if (q.includes('rotacion') || q.includes('rotar') || q.includes('girar')) {
+        if (q.includes('doble') || q.includes('rapido') || q.includes('acelera') || q.includes('mas rapido')) {
+          rotationSpeed = Math.min(rotationSpeed * 2, 0.03);
+          const msg = `🛠️ <strong>Mejora aplicada:</strong> Velocidad de rotación duplicada a <code>${rotationSpeed.toFixed(4)}</code> rad/frame.<br>El planeta gira más rápido para revelar sus vórtices ocultos.`;
+          appliedImprovements.push({ ts: new Date().toISOString(), desc: 'Rotación acelerada x2' });
+          appendAstMessage('assistant', msg);
+          playHarmonicChime(639);
+        } else if (q.includes('lento') || q.includes('frena') || q.includes('desacelera') || q.includes('mas lento')) {
+          rotationSpeed = Math.max(rotationSpeed * 0.5, 0.0002);
+          const msg = `🛠️ <strong>Mejora aplicada:</strong> Velocidad de rotación reducida a <code>${rotationSpeed.toFixed(4)}</code> rad/frame.<br>El planeta entra en un giro contemplativo.`;
+          appliedImprovements.push({ ts: new Date().toISOString(), desc: 'Rotación desacelerada x0.5' });
+          appendAstMessage('assistant', msg);
+          playHarmonicChime(396);
+        } else if (q.includes('deten') || q.includes('para') || q.includes('stop')) {
+          autoRotate = false;
+          appliedImprovements.push({ ts: new Date().toISOString(), desc: 'Rotación detenida' });
+          appendAstMessage('assistant', '🛠️ <strong>Mejora aplicada:</strong> Rotación planetaria detenida. El globo queda en quietud absoluta.');
+        } else {
+          rotationSpeed = Math.min(rotationSpeed * 2, 0.03);
+          appliedImprovements.push({ ts: new Date().toISOString(), desc: 'Rotación acelerada' });
+          appendAstMessage('assistant', `🛠️ <strong>Mejora aplicada:</strong> Velocidad de rotación ajustada a <code>${rotationSpeed.toFixed(4)}</code>.`);
+        }
+        return;
+      }
+
+      // Fondo / Tema
+      if (q.includes('fondo') || q.includes('color') || q.includes('tema') || q.includes('theme') || q.includes('background')) {
+        let newTheme = null;
+        if (q.includes('azul') || q.includes('cosmico') || q.includes('ocean')) {
+          newTheme = { bgColor: '#020a1a', atmoColor: 'rgba(0, 120, 255, 0.28)', leyLineGlow: '#00aaff', name: 'Azul Cósmico' };
+        } else if (q.includes('rojo') || q.includes('fuego') || q.includes('volcan')) {
+          newTheme = { bgColor: '#120205', atmoColor: 'rgba(255, 60, 20, 0.25)', leyLineGlow: '#ff4422', name: 'Fuego Telúrico' };
+        } else if (q.includes('verde') || q.includes('selva') || q.includes('bosque') || q.includes('naturaleza')) {
+          newTheme = { bgColor: '#021208', atmoColor: 'rgba(16, 185, 80, 0.25)', leyLineGlow: '#10b981', name: 'Selva Sagrada' };
+        } else if (q.includes('violeta') || q.includes('purpura') || q.includes('morado') || q.includes('espiritual')) {
+          newTheme = { bgColor: '#0a0218', atmoColor: 'rgba(160, 60, 255, 0.28)', leyLineGlow: '#b366ff', name: 'Éter Violeta' };
+        } else if (q.includes('dorado') || q.includes('oro') || q.includes('gold') || q.includes('solar')) {
+          newTheme = { bgColor: '#0d0a02', atmoColor: 'rgba(255, 211, 42, 0.25)', leyLineGlow: '#ffd32a', name: 'Sol Dorado' };
+        } else if (q.includes('original') || q.includes('clasico') || q.includes('default') || q.includes('reset')) {
+          newTheme = { bgColor: '#040711', atmoColor: 'rgba(0, 229, 255, 0.22)', leyLineGlow: '#00e5ff', name: 'Cósmico Clásico' };
+        }
+        if (newTheme) {
+          Object.assign(systemTheme, newTheme);
+          appliedImprovements.push({ ts: new Date().toISOString(), desc: `Tema cambiado a "${newTheme.name}"` });
+          appendAstMessage('assistant', `🎨 <strong>Mejora aplicada:</strong> Tema visual cambiado a <strong>"${newTheme.name}"</strong>.<br>El cosmos responde con nuevas frecuencias lumínicas.`);
+          playHarmonicChime(741);
+        } else {
+          appendAstMessage('assistant', '🎨 Puedo cambiar el tema a: <strong>Azul Cósmico</strong>, <strong>Fuego Telúrico</strong>, <strong>Selva Sagrada</strong>, <strong>Éter Violeta</strong>, <strong>Sol Dorado</strong>, o <strong>Cósmico Clásico</strong> (original). ¿Cuál resuena contigo?');
+        }
+        return;
+      }
+
+      // Modo Meditación
+      if (q.includes('meditacion') || q.includes('meditar') || q.includes('zen') || q.includes('contempla')) {
+        isMeditationMode = !isMeditationMode;
+        if (isMeditationMode) {
+          document.body.classList.add('meditation-mode-active');
+          rotationSpeed = 0.0004;
+          appliedImprovements.push({ ts: new Date().toISOString(), desc: 'Modo Meditación activado' });
+          appendAstMessage('assistant', '🧘 <strong>Modo Meditación activado.</strong><br>Los paneles se desvanecen, la rotación se vuelve contemplativa. El campo telúrico entra en coherencia alfa (7.83 Hz). Respirá profundo y conectá con Gaia.');
+          playHarmonicChime(432);
+        } else {
+          document.body.classList.remove('meditation-mode-active');
+          rotationSpeed = 0.0015;
+          appliedImprovements.push({ ts: new Date().toISOString(), desc: 'Modo Meditación desactivado' });
+          appendAstMessage('assistant', '🧘 <strong>Modo Meditación desactivado.</strong><br>Los paneles vuelven a su estado operativo. La velocidad de rotación se restaura.');
+        }
+        return;
+      }
+
+      // Reloj Sincrónico Planetario
+      if (q.includes('reloj') || q.includes('clock') || q.includes('sincronico') || q.includes('hora')) {
+        if (!document.getElementById('synchro-clock-widget')) {
+          const clockEl = document.createElement('div');
+          clockEl.id = 'synchro-clock-widget';
+          clockEl.innerHTML = '⏱️ <span id="clock-utc">--:--:--</span> UTC &nbsp;|&nbsp; 🌍 <span id="clock-schumann">7.83</span> Hz';
+          document.body.appendChild(clockEl);
+          setInterval(() => {
+            const now = new Date();
+            const utc = now.toISOString().substring(11, 19);
+            const el = document.getElementById('clock-utc');
+            if (el) el.textContent = utc;
+            // Simulación de Schumann con micro-variación
+            const sch = document.getElementById('clock-schumann');
+            if (sch) sch.textContent = (7.83 + (Math.sin(now.getTime() * 0.0001) * 0.12)).toFixed(2);
+          }, 1000);
+          appliedImprovements.push({ ts: new Date().toISOString(), desc: 'Reloj Sincrónico Planetario activado' });
+          appendAstMessage('assistant', '⏱️ <strong>Mejora aplicada:</strong> Reloj Sincrónico Planetario activado.<br>Muestra la hora UTC y la frecuencia Schumann en tiempo real (esquina superior derecha).');
+          playHarmonicChime(528);
+        } else {
+          const w = document.getElementById('synchro-clock-widget');
+          w.parentNode.removeChild(w);
+          appliedImprovements.push({ ts: new Date().toISOString(), desc: 'Reloj Sincrónico removido' });
+          appendAstMessage('assistant', '⏱️ Reloj Sincrónico Planetario removido.');
+        }
+        return;
+      }
+
+      // Mutear / Activar Sonido
+      if (q.includes('mute') || q.includes('silenci') || q.includes('sonido') || q.includes('audio') || q.includes('unmute')) {
+        soundEnabled = !soundEnabled;
+        const estado = soundEnabled ? 'activado 🔊' : 'silenciado 🔇';
+        appliedImprovements.push({ ts: new Date().toISOString(), desc: `Audio ${estado}` });
+        appendAstMessage('assistant', `🔊 <strong>Mejora aplicada:</strong> Audio del sistema <strong>${estado}</strong>.`);
+        if (soundEnabled) playHarmonicChime(528);
+        return;
+      }
+
+      // Velocidad de partículas
+      if (q.includes('particula') || q.includes('velocidad particula') || q.includes('particle')) {
+        if (q.includes('rapido') || q.includes('acelera') || q.includes('doble')) {
+          particleSpeedFactor = Math.min(particleSpeedFactor * 2, 8);
+        } else if (q.includes('lento') || q.includes('frena')) {
+          particleSpeedFactor = Math.max(particleSpeedFactor * 0.5, 0.1);
+        }
+        appliedImprovements.push({ ts: new Date().toISOString(), desc: `Velocidad de partículas: ${particleSpeedFactor.toFixed(1)}x` });
+        appendAstMessage('assistant', `✨ <strong>Mejora aplicada:</strong> Velocidad de partículas telúricas ajustada a <code>${particleSpeedFactor.toFixed(1)}x</code>.`);
+        return;
+      }
+
+      // Ver mejoras aplicadas
+      if (q.includes('mejora') || q.includes('historial') || q.includes('aplicadas') || q.includes('que cambiaste') || q.includes('que modificaste')) {
+        if (appliedImprovements.length === 0) {
+          appendAstMessage('assistant', '📋 No se han aplicado mejoras aún en esta sesión. Probá pidiendo: <em>"Acelerá la rotación"</em>, <em>"Cambiá el fondo a violeta"</em>, o <em>"Activá modo meditación"</em>.');
+        } else {
+          const list = appliedImprovements.map((imp, i) => `<li><strong>${i + 1}.</strong> ${imp.desc} <span style="color:var(--text-muted); font-size:10px;">(${new Date(imp.ts).toLocaleTimeString()})</span></li>`).join('');
+          appendAstMessage('assistant', `📋 <strong>Mejoras aplicadas en esta sesión (${appliedImprovements.length}):</strong><br><ul style="margin:6px 0 0 14px; padding:0; list-style:none;">${list}</ul>`);
+        }
+        return;
+      }
+
+      // ── FIN MOTOR DE AUTO-MEJORA ──
+
+      // 1b. Comprobar si pide analizar vínculos o interconexiones entre los territorios
+      if (q.includes('vinculo') || q.includes('vínculo') || q.includes('interconexion') || q.includes('interconexión') || 
+          q.includes('flujo') || q.includes('relacion') || q.includes('relación') || q.includes('como se conectan') || 
+          q.includes('cómo se conectan') || q.includes('telurico') || q.includes('telúrico') || q.includes('analizar')) {
+        analyzeTelluricLink(selectedEntities);
+        return;
+      }
+
+      // 2. Comprobar si coincide con la Base de Conocimiento
+      const matched = SACRED_KNOWLEDGE_BASE.find(item => {
+        return item.keys.some(k => q.includes(k.normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
+      });
+
+      if (matched) {
+        // Verificar si ya existe en la matriz
+        const existing = findEntity(matched.name) || SACRED_SITES.find(s => s.name === matched.name);
+        if (existing) {
+          appendAstMessage('assistant', `
+            ✨ El punto <strong>${matched.name}</strong> ya forma parte viva de la matriz.<br>
+            He enfocado la cámara y desplegado sus detalles telúricos en el inspector.
+          `, existing);
+          flyTo(existing);
+          selectEntity(existing);
+          playHarmonicChime(existing.freq || 528);
+          return;
+        }
+
+        // Crear y activar nuevo nodo
+        const newSite = { ...matched, id: `site_${Date.now()}` };
+        
+        // Conectar automáticamente con nodos más cercanos
+        const nearest = findNearestEntities(newSite.lat, newSite.lon, 2);
+        newSite.connectedIds = [...(newSite.connectedIds || [])];
+        nearest.forEach(n => {
+          if (!newSite.connectedIds.includes(n.id)) newSite.connectedIds.push(n.id);
+          if (n.connectedIds && !n.connectedIds.includes(newSite.id)) n.connectedIds.push(newSite.id);
+        });
+
+        // Insertar en la colección
+        if (newSite.category === 'intraterrena') INTRATERRENAS.push(newSite);
+        else if (newSite.category === 'bioregion') BIOREGIONS.push(newSite);
+        else SACRED_SITES.push(newSite);
+
+        saveCustomSite(newSite);
+        populateDirectory();
+        flyTo(newSite);
+        selectEntity(newSite);
+        playHarmonicChime(newSite.freq || 528);
+
+        appendAstMessage('assistant', `
+          ✨ <strong>¡Vórtice anclado con éxito!</strong><br>
+          He integrado a <strong>${newSite.name}</strong> en la trama sagrada del planeta.<br>
+          Vibra a <strong>${newSite.freq}</strong> en sintonía con <em>${newSite.ray}</em>.<br>
+          Se establecieron canales telúricos con: <strong>${nearest.map(n => n.shortName || n.name).join(', ')}</strong>.
+        `, newSite);
+        return;
+      }
+
+      // 3. Comprobar si el usuario pasó coordenadas numéricas explícitas
+      const latMatch = q.match(/lat(?:itud)?[:=\s]*([+\-]?\d+(?:\.\d+)?)/);
+      const lonMatch = q.match(/lon(?:gitud)?[:=\s]*([+\-]?\d+(?:\.\d+)?)/);
+
+      if (latMatch && lonMatch) {
+        const lat = parseFloat(latMatch[1]);
+        const lon = parseFloat(lonMatch[1]);
+        
+        // Limpiar el nombre
+        let rawName = query
+          .replace(/agreg[aá]|sum[aá]|crea[r]?|nodo|sitio|punto|en|con|lat(?:itud)?[:=\s]*[+\-]?\d+(?:\.\d+)?|lon(?:gitud)?[:=\s]*[+\-]?\d+(?:\.\d+)?/gi, '')
+          .replace(/[,\.:]/g, ' ')
+          .trim();
+        if (!rawName) rawName = 'Vórtice Sagrado Personalizado';
+
+        const customNode = {
+          id: `site_custom_${Date.now()}`,
+          name: rawName,
+          shortName: `✨ ${rawName}`,
+          category: 'sacred_site',
+          territory: 'Punto Anclado por Diálogo',
+          region: 'Red Planetaria',
+          lat: lat,
+          lon: lon,
+          color: '#06d6a0',
+          freq: '528 Hz',
+          ray: 'Rayo Esmeralda & Agua Viva',
+          circle: 'Círculo de Tejedores de la Red',
+          purpose: 'Punto telúrico anclado a través del diálogo interactivo con el Asistente.',
+          interconnectionsDesc: 'Canal de resonancia integrado a la matriz.',
+          connectedIds: []
+        };
+
+        const nearest = findNearestEntities(lat, lon, 2);
+        nearest.forEach(n => {
+          customNode.connectedIds.push(n.id);
+          if (n.connectedIds && !n.connectedIds.includes(customNode.id)) n.connectedIds.push(customNode.id);
+        });
+
+        SACRED_SITES.push(customNode);
+        saveCustomSite(customNode);
+        populateDirectory();
+        flyTo(customNode);
+        selectEntity(customNode);
+        playHarmonicChime(528);
+
+        appendAstMessage('assistant', `
+          ✨ <strong>¡Punto creado con coordenadas exactas!</strong><br>
+          He anclado a <strong>${customNode.name}</strong> en Lat: ${lat.toFixed(3)}°, Lon: ${lon.toFixed(3)}°.<br>
+          Conectado por resonancia con: <strong>${nearest.map(n => n.shortName || n.name).join(', ')}</strong>.
+        `, customNode);
+        return;
+      }
+
+      // 4. Si es consulta general o resumen
+      if (q.includes('cuant') || q.includes('listar') || q.includes('puntos') || q.includes('resumen')) {
+        appendAstMessage('assistant', `
+          📊 <strong>Estado Actual de la Matriz Planetaria:</strong><br>
+          • <strong>${BIOREGIONS.length}</strong> Biorregiones principales activas.<br>
+          • <strong>${INTRATERRENAS.length}</strong> Ciudades Intraterrenas conectadas.<br>
+          • <strong>${SACRED_SITES.length}</strong> Vórtices Sagrados y Fábricas del Agua.<br>
+          • <strong>${LEY_LINES.length}</strong> Grandes Líneas Ley & Corredores Telúricos.<br><br>
+          ¿Quieres sumar un nuevo sitio específico? Dime su nombre o sus coordenadas.
+        `);
+        return;
+      }
+
+      // 5. Si no coincide con la base ni tiene coordenadas, ofrecer Asistente Guiado
+      const guessedName = query.replace(/agreg[aá]|sum[aá]|crea[r]?|nodo|sitio|punto|en|quiero/gi, '').trim() || 'Nuevo Vórtice';
+
+      const formId = `form_inline_${Date.now()}`;
+      appendAstMessage('assistant', `
+        🌿 <strong>¡Hermoso vórtice para la red!</strong><br>
+        Para anclar a <strong>${guessedName}</strong> con máxima precisión en la esfera, confírmame sus coordenadas o pulsa el botón para ubicarlo:
+        <div class="ast-form-inline" id="${formId}">
+          <div class="ast-form-row">
+            <input type="text" id="${formId}_name" value="${guessedName}" placeholder="Nombre del punto">
+            <select id="${formId}_cat">
+              <option value="sacred_site">💧 Agua Sagrada</option>
+              <option value="intraterrena">🏛️ Intraterrena</option>
+              <option value="bioregion">🗺️ Biorregión</option>
+            </select>
+          </div>
+          <div class="ast-form-row">
+            <input type="number" step="0.001" id="${formId}_lat" placeholder="Latitud (-90 a 90)" value="0.0">
+            <input type="number" step="0.001" id="${formId}_lon" placeholder="Longitud (-180 a 180)" value="0.0">
+          </div>
+          <input type="text" id="${formId}_purpose" placeholder="Propósito biocósmico o ríos">
+          <button class="ast-card-btn btn-submit-inline" style="width:100%; padding:6px; font-size:11px;">✨ Anclar y Tejer en la Matriz</button>
+        </div>
+      `);
+
+      setTimeout(() => {
+        const formEl = document.getElementById(formId);
+        if (!formEl) return;
+        formEl.querySelector('.btn-submit-inline')?.addEventListener('click', () => {
+          const nameVal = document.getElementById(`${formId}_name`).value.trim() || guessedName;
+          const catVal = document.getElementById(`${formId}_cat`).value;
+          const latVal = parseFloat(document.getElementById(`${formId}_lat`).value) || 0;
+          const lonVal = parseFloat(document.getElementById(`${formId}_lon`).value) || 0;
+          const purpVal = document.getElementById(`${formId}_purpose`).value.trim() || 'Vórtice anclado en diálogo armónico.';
+
+          const node = {
+            id: `site_${Date.now()}`,
+            name: nameVal,
+            shortName: (catVal === 'intraterrena' ? '🏛️ ' : (catVal === 'bioregion' ? '🗺️ ' : '💧 ')) + nameVal,
+            category: catVal,
+            territory: 'Territorio Anclado',
+            region: 'Red Planetaria',
+            lat: latVal,
+            lon: lonVal,
+            color: catVal === 'intraterrena' ? '#00bfff' : (catVal === 'bioregion' ? '#b366ff' : '#06d6a0'),
+            freq: '528 Hz',
+            ray: 'Rayo Cristalino',
+            circle: 'Guardianes de la Nueva Era',
+            purpose: purpVal,
+            interconnectionsDesc: 'Canal de resonancia activo.',
+            connectedIds: []
+          };
+
+          const nearest = findNearestEntities(latVal, lonVal, 2);
+          nearest.forEach(n => {
+            node.connectedIds.push(n.id);
+            if (n.connectedIds && !n.connectedIds.includes(node.id)) n.connectedIds.push(node.id);
+          });
+
+          if (catVal === 'intraterrena') INTRATERRENAS.push(node);
+          else if (catVal === 'bioregion') BIOREGIONS.push(node);
+          else SACRED_SITES.push(node);
+
+          saveCustomSite(node);
+          populateDirectory();
+          flyTo(node);
+          selectEntity(node);
+          playHarmonicChime(528);
+
+          appendAstMessage('assistant', `
+            ✨ <strong>¡${node.name} ha sido anclado con éxito!</strong><br>
+            Ubicado en Lat: ${latVal.toFixed(2)}°, Lon: ${lonVal.toFixed(2)}° e interconectado con <strong>${nearest.map(n => n.shortName || n.name).join(', ')}</strong>.
+          `, node);
+        });
+      }, 50);
+    }
+
+    // Cargar puntos previos guardados en localStorage al iniciar
+    loadCustomSites();
+
+    // Inicializar con ERKS seleccionado
+    populateDirectory();
+    selectEntity(INTRATERRENAS[0]); // ERKS
+  </script>
+</body>
+</html>

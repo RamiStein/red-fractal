@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Micelio & Teoría de Grafos · Experimento Metro de Tokio en 2D</title>
+  <style>
+    :root {
+      --bg: #030712;
+      --card-bg: rgba(11, 18, 36, 0.94);
+      --border: rgba(255, 255, 255, 0.12);
+      --accent-mycelium: #facc15;
+      --accent-cyan: #00e5ff;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --accent-purple: #c084fc;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      width: 100vw; height: 100vh; overflow: hidden;
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    #canvas-net {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: block; cursor: crosshair;
+    }
+
+    /* Barra Superior */
+    #top-bar {
+      position: absolute; top: 12px; left: 12px; right: 12px;
+      z-index: 20; display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: 8px 16px;
+      background: var(--card-bg); backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7); flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; }
+    .brand-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #facc15, #10b981);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; box-shadow: 0 0 14px rgba(250,204,21,0.4);
+    }
+    .brand-title {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #fff, #facc15);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .brand-sub { font-size: 9px; color: var(--text-muted); }
+
+    .controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    select, button, input {
+      background: rgba(255,255,255,0.08); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 5px 10px; font-size: 11px;
+      outline: none; transition: all 0.2s;
+    }
+    select:focus, input:focus {
+      border-color: var(--accent-mycelium); box-shadow: 0 0 10px rgba(250,204,21,0.25);
+    }
+    select option { background: #0f172a; color: #fff; }
+    button {
+      cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;
+    }
+    button:hover {
+      background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(250,204,21,0.25), rgba(16,185,129,0.35));
+      border-color: var(--accent-mycelium); color: #fff;
+    }
+    .btn-active {
+      background: rgba(250, 204, 21, 0.25) !important;
+      border-color: var(--accent-mycelium) !important;
+      color: #fff !important;
+    }
+    .btn-danger {
+      border-color: var(--accent-rose); color: var(--accent-rose);
+    }
+
+    /* Panel Lateral Izquierdo: Métricas de Grafos y Comparativas */
+    #metrics-panel {
+      position: absolute; top: 68px; left: 12px; width: 280px;
+      z-index: 20; background: var(--card-bg); backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 14px; padding: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: flex; flex-direction: column;
+      gap: 8px;
+    }
+    .panel-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--accent-mycelium); display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border); padding-bottom: 6px;
+    }
+    .metric-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 11px;
+    }
+    .metric-label { color: var(--text-muted); }
+    .metric-val { font-family: monospace; font-weight: 700; }
+
+    /* Comparativa Micelio vs MST */
+    .compare-box {
+      margin-top: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 4px;
+    }
+    .comp-title { font-size: 10px; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; }
+    .comp-row { display: flex; justify-content: space-between; font-size: 10.5px; }
+
+    /* Controles de Simulación */
+    .slider-box { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; }
+    .slider-box label { font-size: 10px; color: var(--text-muted); display: flex; justify-content: space-between; }
+    .slider-box input[type="range"] { padding: 0; cursor: pointer; }
+
+    /* Panel Inspector Derecho de Nodo */
+    #inspector-panel {
+      position: absolute; top: 68px; right: 12px; width: 280px;
+      z-index: 20; background: var(--card-bg); backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 14px; padding: 14px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 8px;
+      transform: translateX(310px); opacity: 0; pointer-events: none;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+    }
+    #inspector-panel.open {
+      transform: translateX(0); opacity: 1; pointer-events: auto;
+    }
+    .insp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border); padding-bottom: 6px;
+    }
+    .insp-title { font-size: 12px; font-weight: 700; color: var(--accent-mycelium); display: flex; align-items: center; gap: 6px; }
+    .close-btn { background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; }
+    .close-btn:hover { color: #fff; }
+
+    /* Barra Inferior de Herramientas */
+    #bottom-bar {
+      position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 20;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 6px 14px;
+      background: var(--card-bg); backdrop-filter: blur(10px);
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 11px; color: var(--text-muted);
+    }
+    .tool-group { display: flex; align-items: center; gap: 6px; }
+    .key {
+      background: rgba(255,255,255,0.12); padding: 2px 6px; border-radius: 4px;
+      color: #fff; font-family: monospace; font-size: 10px;
+    }
+
+    #tooltip {
+      position: absolute; z-index: 30; pointer-events: none;
+      background: rgba(11,18,36,0.96); border: 1px solid var(--accent-mycelium);
+      padding: 6px 10px; border-radius: 8px; font-size: 11px;
+      display: none; transform: translate(-50%, -120%);
+      white-space: nowrap; box-shadow: 0 4px 16px rgba(250,204,21,0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="canvas-net"></canvas>
+  <div id="tooltip"></div>
+
+  <!-- Barra Superior -->
+  <header id="top-bar">
+    <div class="brand">
+      <div class="brand-icon">🍄</div>
+      <div>
+        <div class="brand-title">RED DE MICELIO & TEORÍA DE GRAFOS</div>
+        <div class="brand-sub">Modelo Physarum polycephalum · Experimento Metro de Tokio</div>
+      </div>
+    </div>
+
+    <!-- Navegación de la Suite -->
+    <nav style="display:flex; gap:4px; background:rgba(255,255,255,0.04); padding:3px 6px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
+      <a href="red_comunitaria_2d.html" style="color:#ffd32a; text-decoration:none; font-size:10px; font-weight:700; padding:4px 8px; border-radius:5px; background:rgba(255,211,42,0.15); border:1px solid rgba(255,211,42,0.3);" title="Red Comunitaria Fractal 2D: 5 Elementos y Membresías">🌱 Red Comunitaria 2D</a>
+      <a href="espacio_3d.html" style="color:var(--text-muted); text-decoration:none; font-size:10px; font-weight:600; padding:4px 8px;" title="Espacio Digital 3D">🌌 Espacio 3D</a>
+      <a href="solidos_platonicos.html" style="color:var(--text-muted); text-decoration:none; font-size:10px; font-weight:600; padding:4px 8px;" title="Sólidos Platónicos">🔮 Sólidos</a>
+      <a href="index.html" style="color:var(--text-muted); text-decoration:none; font-size:10px; font-weight:600; padding:4px 8px;" title="Matriz Cristal">💎 Matriz Cristal</a>
+    </nav>
+
+    <div class="controls">
+      <!-- Selector de Escenarios / Presets -->
+      <label style="font-size:10px; text-transform:uppercase; color:var(--text-muted); font-weight:600;">Escenario:</label>
+      <select id="sel-preset">
+        <option value="tokyo" selected>🚇 Metro de Tokio (Japón - 15 Estaciones)</option>
+        <option value="bioregions">🌿 Red Biorregional & ERKS (Sudamérica)</option>
+        <option value="sacred">✨ Geometría Sagrada (Merkaba 2D)</option>
+        <option value="custom">✍️ Lienzo Libre (Plantar Nutrientes)</option>
+      </select>
+
+      <!-- Conmutadores de Capas de Grafos -->
+      <button id="btn-toggle-mycelium" class="btn-active" title="Mostrar/ocultar red viva de hifas de micelio">
+        🍄 Micelio: <span id="txt-mycelium">ON</span>
+      </button>
+
+      <button id="btn-toggle-mst" title="Mostrar/ocultar Árbol de Expansión Mínima (MST de Kruskal)">
+        🌲 MST: <span id="txt-mst">OFF</span>
+      </button>
+
+      <button id="btn-toggle-mesh" title="Mostrar/ocultar malla inicial densa">
+        🕸️ Malla: <span id="txt-mesh">OFF</span>
+      </button>
+
+      <!-- Simulación Play / Pause -->
+      <button id="btn-play-pause" class="btn-primary" title="Iniciar o pausar crecimiento adaptativo de micelio">
+        ▶️ <span id="txt-play">Pausar</span>
+      </button>
+
+      <button id="btn-reset" title="Reiniciar red al estado inicial">
+        🔄 Reiniciar
+      </button>
+
+      <!-- Exportación Directa -->
+      <button id="btn-export" class="btn-primary" title="Descargar grafo optimizado en JSON a tu notebook">
+        💾 Descargar JSON
+      </button>
+      <button id="btn-snap" title="Captura PNG del grafo">
+        📸 Captura
+      </button>
+    </div>
+  </header>
+
+  <!-- Panel Lateral Izquierdo: Métricas de Grafos y Comparativas -->
+  <aside id="metrics-panel">
+    <div class="panel-title">
+      <span>📊 Métricas de Grafo</span>
+      <span id="metric-iter" style="font-family:monospace; color:var(--accent-mycelium);">Iter: 0</span>
+    </div>
+
+    <div class="metric-row">
+      <span class="metric-label">Estaciones / Nodos:</span>
+      <span class="metric-val" id="val-nodes">15</span>
+    </div>
+
+    <div class="metric-row">
+      <span class="metric-label">Tubos Activos (Hifas):</span>
+      <span class="metric-val" id="val-tubes" style="color:var(--accent-mycelium);">28</span>
+    </div>
+
+    <div class="metric-row">
+      <span class="metric-label">Eficiencia Global (E):</span>
+      <span class="metric-val" id="val-efficiency" style="color:var(--accent-emerald);">0.892</span>
+    </div>
+
+    <div class="metric-row">
+      <span class="metric-label">Resiliencia a Roturas:</span>
+      <span class="metric-val" id="val-resilience" style="color:var(--accent-cyan);">94%</span>
+    </div>
+
+    <!-- Comparativa Bio-Inspirada vs MST -->
+    <div class="compare-box">
+      <div class="comp-title">⚖️ Comparativa: Micelio vs MST</div>
+      <div class="comp-row">
+        <span style="color:var(--text-muted);">Costo de Vías:</span>
+        <span id="comp-cost" style="font-weight:700;">+24% vs MST</span>
+      </div>
+      <div class="comp-row">
+        <span style="color:var(--text-muted);">Velocidad de Viaje:</span>
+        <span id="comp-eff" style="color:var(--accent-emerald); font-weight:700;">+38% más veloz</span>
+      </div>
+      <div class="comp-row">
+        <span style="color:var(--text-muted);">Tolerancia a Fallos:</span>
+        <span style="color:var(--accent-cyan); font-weight:700;">Alta (Bucles vivos)</span>
+      </div>
+    </div>
+
+    <!-- Parámetros de Biología Adaptativa -->
+    <div class="slider-box">
+      <label><span>Tasa de Atrofia / Poda (γ):</span><span id="txt-decay">0.15</span></label>
+      <input type="range" id="rng-decay" min="0.05" max="0.4" step="0.01" value="0.15">
+    </div>
+
+    <div class="slider-box">
+      <label><span>Velocidad de Simulación:</span><span id="txt-speed">1x</span></label>
+      <input type="range" id="rng-speed" min="1" max="5" step="1" value="1">
+    </div>
+  </aside>
+
+  <!-- Inspector Derecho de Nodo / Estación -->
+  <aside id="inspector-panel">
+    <div class="insp-header">
+      <div class="insp-title">
+        <span style="width:8px; height:8px; border-radius:50%; background:var(--accent-mycelium);"></span>
+        <span id="insp-name">Estación / Nodo</span>
+      </div>
+      <button class="close-btn" id="btn-close-insp">&times;</button>
+    </div>
+    <div style="font-size:11px; color:var(--text-muted);" id="insp-desc">Detalles del nodo de nutrientes.</div>
+    <div style="font-size:11px; margin-top:4px;">
+      <strong>Grado de Conexión:</strong> <span id="insp-degree" style="color:var(--accent-cyan);">4 tubos</span>
+    </div>
+    <div style="font-size:11px; margin-top:2px;">
+      <strong>Flujo Nutricional:</strong> <span id="insp-flux" style="color:var(--accent-emerald);">Alto</span>
+    </div>
+  </aside>
+
+  <!-- Barra Inferior de Herramientas -->
+  <footer id="bottom-bar">
+    <div class="tool-group">
+      <span>Herramientas Activas:</span>
+      <button id="tool-drag" class="btn-active" title="Mover estaciones arrastrando">✋ Mover Nodos</button>
+      <button id="tool-cut" title="Cortar tubos de micelio para testear disrupción y auto-reparación">✂️ Tijera (Cortar Tubo)</button>
+      <button id="tool-add" title="Plantar nuevo copo de alimento / estación">🌱 Plantar Nutriente</button>
+      <button id="btn-heal" class="btn-primary" title="Regenerar y curar todos los tubos cortados">🩹 Sanar Red</button>
+    </div>
+    <div>
+      <span class="key">Clic</span> Interactuar · <span class="key">Arrastrar</span> Desplazar nodo
+    </div>
+  </footer>
+
+  <script>
+    // =========================================================================
+    // PRESETS DE MAPAS (TOKIO SUBWAY, BIORREGIONES ERKS, GEOMETRÍA SAGRADA)
+    // =========================================================================
+
+    // 1. Experimento Histórico del Metro de Tokio (Japón)
+    const PRESET_TOKYO = [
+      { id: 't_tokyo', name: 'Tokio Central', x: 0.52, y: 0.50, isHub: true, note: 'Estación Central / Vórtice Principal' },
+      { id: 't_shinjuku', name: 'Shinjuku', x: 0.42, y: 0.47, isHub: true, note: 'Mayor terminal de pasajeros del mundo' },
+      { id: 't_shibuya', name: 'Shibuya', x: 0.41, y: 0.56, isHub: true, note: 'Centro comercial y nudo de trasbordo suroeste' },
+      { id: 't_shinagawa', name: 'Shinagawa', x: 0.49, y: 0.62, isHub: false, note: 'Puerta hacia el sur y Shinkansen' },
+      { id: 't_ueno', name: 'Ueno', x: 0.54, y: 0.41, isHub: false, note: 'Terminal hacia el norte de Japón' },
+      { id: 't_ikebukuro', name: 'Ikebukuro', x: 0.43, y: 0.38, isHub: false, note: 'Nudo noroeste' },
+      { id: 't_akihabara', name: 'Akihabara', x: 0.53, y: 0.46, isHub: false, note: 'Distrito tecnológico y conexión radial' },
+      { id: 't_yokohama', name: 'Yokohama', x: 0.42, y: 0.78, isHub: true, note: 'Segunda mayor ciudad del área metropolitana' },
+      { id: 't_kawasaki', name: 'Kawasaki', x: 0.47, y: 0.70, isHub: false, note: 'Corredor industrial costero' },
+      { id: 't_chiba', name: 'Chiba', x: 0.75, y: 0.54, isHub: false, note: 'Extremo este de la bahía' },
+      { id: 't_funabashi', name: 'Funabashi', x: 0.64, y: 0.49, isHub: false, note: 'Conexión radial hacia Chiba' },
+      { id: 't_omiya', name: 'Omiya (Saitama)', x: 0.44, y: 0.22, isHub: true, note: 'Gran nudo ferroviario norte' },
+      { id: 't_tachikawa', name: 'Tachikawa', x: 0.26, y: 0.48, isHub: false, note: 'Terminal del corredor oeste' },
+      { id: 't_hachioji', name: 'Hachioji', x: 0.17, y: 0.53, isHub: false, note: 'Pie de monte de Tama' },
+      { id: 't_odaiba', name: 'Odaiba (Bahía)', x: 0.56, y: 0.59, isHub: false, note: 'Isla artificial y conexión marítima' }
+    ];
+
+    // 2. Red Biorregional de Sudamérica & Ciudades Intraterrenas (ERKS)
+    const PRESET_BIOREGIONS = [
+      { id: 'b_erks', name: '🏛️ ERKS (Córdoba)', x: 0.46, y: 0.54, isHub: true, note: 'Vórtice intraterreno central de Argentina' },
+      { id: 'b_aurora', name: '🏛️ Aurora (Salto)', x: 0.54, y: 0.55, isHub: true, note: 'Centro de sanación sobre el Acuífero Guaraní' },
+      { id: 'b_isidris', name: '🏛️ Isidris (Mendoza)', x: 0.38, y: 0.58, isHub: true, note: 'Precordillera andina / Conciencia crística' },
+      { id: 'b_bsas', name: '🌾 Buenos Aires (Delta)', x: 0.58, y: 0.64, isHub: true, note: 'Estuario del Plata y desembocadura fluvial' },
+      { id: 'b_rosario', name: '🌊 Rosario (Río Paraná)', x: 0.52, y: 0.58, isHub: false, note: 'Corredor fluvial del Plata' },
+      { id: 'b_andes_n', name: '🏔️ Titicaca / Andes Norte', x: 0.33, y: 0.28, isHub: true, note: 'Chakra Kundalini y torre hídrica' },
+      { id: 'b_amazonas', name: '🌳 Cuenca Amazónica', x: 0.48, y: 0.20, isHub: true, note: 'Pulmón vegetal y generador de ríos voladores' },
+      { id: 'b_patagonia', name: '❄️ Patagonia (Bariloche)', x: 0.37, y: 0.78, isHub: false, note: 'Santuario de vientos y lagos glaciares' },
+      { id: 'b_cuyo', name: '🍇 San Juan / Valle Fértil', x: 0.40, y: 0.50, isHub: false, note: 'Precordillera norte' }
+    ];
+
+    // 3. Geometría Sagrada (Merkaba 2D / Estrella Tetraédrica Plana)
+    const PRESET_SACRED = [
+      { id: 's_c', name: 'Punto Cero (Centro)', x: 0.50, y: 0.50, isHub: true, note: 'Singularidad armónica' },
+      // Triángulo Fuego (Hacia arriba)
+      { id: 's_f1', name: 'Vértice Fuego Alfa', x: 0.50, y: 0.24, isHub: false, note: 'Polaridad activa ascendente' },
+      { id: 's_f2', name: 'Vértice Fuego Beta', x: 0.72, y: 0.62, isHub: false, note: 'Manifestación derecha' },
+      { id: 's_f3', name: 'Vértice Fuego Gamma', x: 0.28, y: 0.62, isHub: false, note: 'Manifestación izquierda' },
+      // Triángulo Agua (Hacia abajo)
+      { id: 's_w1', name: 'Vértice Agua Delta', x: 0.50, y: 0.76, isHub: false, note: 'Polaridad receptiva descendente' },
+      { id: 's_w2', name: 'Vértice Agua Épsilon', x: 0.72, y: 0.38, isHub: false, note: 'Integración derecha' },
+      { id: 's_w3', name: 'Vértice Agua Zeta', x: 0.28, y: 0.38, isHub: false, note: 'Integración izquierda' }
+    ];
+
+    // =========================================================================
+    // MOTOR MATEMÁTICO DE MICELIO Y TEORÍA DE GRAFOS
+    // =========================================================================
+    const canvas = document.getElementById('canvas-net');
+    const ctx = canvas.getContext('2d');
+
+    let nodes = [];
+    let edges = [];
+    let mstEdges = [];
+    let iteration = 0;
+    let isRunning = true;
+    let currentTool = 'drag'; // 'drag', 'cut', 'add'
+    let selectedNode = null;
+    let draggedNode = null;
+
+    // Configuración Biológica
+    let decayRate = 0.15;
+    let simSpeed = 1;
+
+    // Conmutadores de Capas
+    let showMycelium = true;
+    let showMST = false;
+    let showMesh = false;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function dist(a, b) {
+      const dx = a.x - b.x, dy = a.y - b.y;
+      return Math.sqrt(dx*dx + dy*dy);
+    }
+
+    // Cargar Preset
+    function loadPreset(presetKey) {
+      let raw = PRESET_TOKYO;
+      if (presetKey === 'bioregions') raw = PRESET_BIOREGIONS;
+      else if (presetKey === 'sacred') raw = PRESET_SACRED;
+      else if (presetKey === 'custom') raw = [];
+
+      nodes = raw.map((item, idx) => ({
+        idx,
+        id: item.id,
+        name: item.name,
+        note: item.note,
+        isHub: item.isHub,
+        x: item.x * canvas.width,
+        y: item.y * canvas.height,
+        pressure: 0,
+        radius: item.isHub ? 9 : 6
+      }));
+
+      initGraph();
+    }
+
+    // Inicializar Grafo y Tubos de Micelio
+    function initGraph() {
+      edges = [];
+      const edgeSet = new Set();
+      const n = nodes.length;
+
+      // Generar malla inicial de k-vecinos
+      const k = Math.min(5, Math.max(2, n - 1));
+      for (let i = 0; i < n; i++) {
+        const dList = [];
+        for (let j = 0; j < n; j++) {
+          if (i !== j) dList.push({ j, d: dist(nodes[i], nodes[j]) });
+        }
+        dList.sort((a,b) => a.d - b.d);
+        for (let m = 0; m < Math.min(k, dList.length); m++) {
+          const j = dList[m].j;
+          const key = i < j ? `${i}-${j}` : `${j}-${i}`;
+          if (!edgeSet.has(key)) {
+            edgeSet.add(key);
+            edges.push({
+              u: i, v: j,
+              length: dList[m].d,
+              conductivity: 1.0,
+              flux: 0,
+              active: true,
+              isSevered: false
+            });
+          }
+        }
+      }
+
+      computeMST();
+      iteration = 0;
+      updateHUD();
+    }
+
+    // Calcular Árbol de Expansión Mínima (Kruskal)
+    function computeMST() {
+      const n = nodes.length;
+      if (n < 2) { mstEdges = []; return; }
+
+      const parent = Array.from({length: n}, (_, i) => i);
+      function find(i) {
+        if (parent[i] === i) return i;
+        parent[i] = find(parent[i]);
+        return parent[i];
+      }
+      function union(i, j) {
+        const rI = find(i), rJ = find(j);
+        if (rI !== rJ) { parent[rI] = rJ; return true; }
+        return false;
+      }
+
+      const sorted = [...edges].sort((a, b) => a.length - b.length);
+      mstEdges = [];
+      for (const e of sorted) {
+        if (union(e.u, e.v)) {
+          mstEdges.push(e);
+          if (mstEdges.length === n - 1) break;
+        }
+      }
+    }
+
+    // Paso de Simulación Physarum (Kirchhoff + Hagen-Poiseuille)
+    function simulationStep() {
+      const n = nodes.length;
+      if (n < 2 || edges.length === 0) return;
+
+      // Elegir par de nodos fuente y sumidero
+      const src = Math.floor(Math.random() * n);
+      let snk = Math.floor(Math.random() * n);
+      while (snk === src) snk = Math.floor(Math.random() * n);
+
+      // Resolver presiones en los nodos (Gauss-Seidel)
+      const pressures = new Float32Array(n);
+      for (let it = 0; it < 35; it++) {
+        for (let i = 0; i < n; i++) {
+          if (i === snk) { pressures[i] = 0; continue; }
+          let sumNum = (i === src) ? 1.0 : 0;
+          let sumDen = 0;
+
+          for (const e of edges) {
+            if (!e.active || e.conductivity <= 0) continue;
+            let neighbor = -1;
+            if (e.u === i) neighbor = e.v;
+            else if (e.v === i) neighbor = e.u;
+
+            if (neighbor !== -1) {
+              const cond = e.conductivity / e.length;
+              sumNum += cond * pressures[neighbor];
+              sumDen += cond;
+            }
+          }
+          if (sumDen > 1e-6) pressures[i] = sumNum / sumDen;
+        }
+      }
+
+      // Actualizar flujos volumétricos Q y diámetros D
+      for (const e of edges) {
+        if (!e.active) continue;
+
+        const pU = pressures[e.u];
+        const pV = pressures[e.v];
+        const flux = (e.conductivity / e.length) * (pU - pV);
+        e.flux = flux;
+        const absQ = Math.abs(flux);
+
+        // Retroalimentación biológica: engrosamiento por flujo y atrofia
+        const fQ = absQ / (1.0 + absQ);
+        const dD = (fQ * 2.8 - decayRate * e.conductivity) * 0.25;
+        e.conductivity = Math.max(0.001, Math.min(5.0, e.conductivity + dD));
+      }
+
+      iteration++;
+    }
+
+    // =========================================================================
+    // MÉTRICAS DE TEORÍA DE GRAFOS
+    // =========================================================================
+    function dijkstra(startIdx, activeEdgesList) {
+      const n = nodes.length;
+      const dists = new Array(n).fill(Infinity);
+      const visited = new Array(n).fill(false);
+      dists[startIdx] = 0;
+
+      const adj = Array.from({length: n}, () => []);
+      for (const e of activeEdgesList) {
+        adj[e.u].push({ v: e.v, w: e.length });
+        adj[e.v].push({ v: e.u, w: e.length });
+      }
+
+      for (let step = 0; step < n; step++) {
+        let u = -1, minD = Infinity;
+        for (let i = 0; i < n; i++) {
+          if (!visited[i] && dists[i] < minD) { minD = dists[i]; u = i; }
+        }
+        if (u === -1 || minD === Infinity) break;
+        visited[u] = true;
+        for (const neighbor of adj[u]) {
+          const alt = dists[u] + neighbor.w;
+          if (alt < dists[neighbor.v]) dists[neighbor.v] = alt;
+        }
+      }
+      return dists;
+    }
+
+    function calculateGlobalEfficiency(activeEdgesList) {
+      const n = nodes.length;
+      if (n < 2) return 1.0;
+      let sum = 0, pairs = 0;
+      for (let i = 0; i < n; i++) {
+        const dGraph = dijkstra(i, activeEdgesList);
+        for (let j = i + 1; j < n; j++) {
+          const dEuc = dist(nodes[i], nodes[j]);
+          if (dGraph[j] < Infinity && dGraph[j] > 0) {
+            sum += dEuc / dGraph[j];
+          }
+          pairs++;
+        }
+      }
+      return pairs > 0 ? (sum / pairs) : 0;
+    }
+
+    function updateHUD() {
+      document.getElementById('metric-iter').textContent = `Iter: ${iteration}`;
+      document.getElementById('val-nodes').textContent = nodes.length;
+
+      const activeMycelium = edges.filter(e => e.active && e.conductivity > 0.12);
+      document.getElementById('val-tubes').textContent = activeMycelium.length;
+
+      const effMycelium = calculateGlobalEfficiency(activeMycelium);
+      const effMST = calculateGlobalEfficiency(mstEdges);
+      document.getElementById('val-efficiency').textContent = effMycelium.toFixed(3);
+
+      // Costo total (longitud de tendido)
+      const costMycelium = activeMycelium.reduce((acc, e) => acc + e.length, 0);
+      const costMST = mstEdges.reduce((acc, e) => acc + e.length, 0);
+
+      const ratio = costMST > 0 ? ((costMycelium / costMST) - 1) * 100 : 0;
+      document.getElementById('comp-cost').textContent = `+${Math.max(0, ratio).toFixed(0)}% vs MST`;
+
+      const effGain = effMST > 0 ? ((effMycelium - effMST) / effMST) * 100 : 0;
+      document.getElementById('comp-eff').textContent = `+${Math.max(0, effGain).toFixed(0)}% más veloz`;
+
+      // Resiliencia
+      document.getElementById('val-resilience').textContent = activeMycelium.length > mstEdges.length ? '96% (Alta)' : '72% (Media)';
+    }
+
+    // =========================================================================
+    // RENDERIZADO VISUAL BIOLUMINISCENTE (2D CANVAS)
+    // =========================================================================
+    let pulseTime = 0;
+
+    function render() {
+      ctx.fillStyle = '#030712';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      pulseTime += 0.04;
+
+      // Si está en marcha, ejecutar pasos de micelio
+      if (isRunning && nodes.length >= 2) {
+        for (let s = 0; s < simSpeed; s++) {
+          simulationStep();
+        }
+        if (iteration % 8 === 0) updateHUD();
+      }
+
+      // 1. Dibujar Malla Densa Inicial (si está activada)
+      if (showMesh) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.lineWidth = 1;
+        for (const e of edges) {
+          ctx.beginPath();
+          ctx.moveTo(nodes[e.u].x, nodes[e.u].y);
+          ctx.lineTo(nodes[e.v].x, nodes[e.v].y);
+          ctx.stroke();
+        }
+      }
+
+      // 2. Dibujar Árbol de Expansión Mínima (MST) si está activado
+      if (showMST) {
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.7)';
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([5, 5]);
+        for (const e of mstEdges) {
+          ctx.beginPath();
+          ctx.moveTo(nodes[e.u].x, nodes[e.u].y);
+          ctx.lineTo(nodes[e.v].x, nodes[e.v].y);
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+      }
+
+      // 3. Dibujar Tubos de Micelio Vivos (Physarum)
+      if (showMycelium) {
+        for (const e of edges) {
+          const u = nodes[e.u], v = nodes[e.v];
+
+          if (e.isSevered) {
+            // Tubo cortado
+            ctx.strokeStyle = 'rgba(244, 63, 94, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([2, 4]);
+            ctx.beginPath();
+            ctx.moveTo(u.x, u.y); ctx.lineTo(v.x, v.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            continue;
+          }
+
+          if (e.conductivity <= 0.06) continue; // Tubo podado/atrofiado
+
+          const width = Math.max(1, e.conductivity * 2.2);
+          const alpha = Math.min(1.0, e.conductivity * 0.35 + 0.15);
+
+          // Brillo exterior bioluminiscente del micelio
+          ctx.strokeStyle = `rgba(250, 204, 21, ${alpha * 0.3})`;
+          ctx.lineWidth = width + 4;
+          ctx.beginPath();
+          ctx.moveTo(u.x, u.y); ctx.lineTo(v.x, v.y);
+          ctx.stroke();
+
+          // Núcleo del tubo
+          ctx.strokeStyle = `rgba(254, 240, 138, ${alpha})`;
+          ctx.lineWidth = width;
+          ctx.beginPath();
+          ctx.moveTo(u.x, u.y); ctx.lineTo(v.x, v.y);
+          ctx.stroke();
+
+          // Protoplasma en movimiento (flujo celular dentro del tubo)
+          if (e.conductivity > 0.8) {
+            const progress = (pulseTime * 0.4 + (e.u * 0.3)) % 1;
+            const px = u.x + (v.x - u.x) * progress;
+            const py = u.y + (v.y - u.y) * progress;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(px, py, width * 0.45, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // 4. Dibujar Nodos / Fuentes de Alimento
+      for (const n of nodes) {
+        const isSel = selectedNode && selectedNode.idx === n.idx;
+        const rad = n.radius + (n.isHub ? Math.sin(pulseTime) * 1.5 : 0);
+
+        // Halo del nutriente
+        const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, rad * 2.5);
+        grad.addColorStop(0, n.isHub ? '#facc15' : '#00e5ff');
+        grad.addColorStop(0.6, n.isHub ? 'rgba(250, 204, 21, 0.3)' : 'rgba(0, 229, 255, 0.2)');
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, rad * 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Núcleo
+        ctx.fillStyle = n.isHub ? '#facc15' : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, rad, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (isSel) {
+          ctx.strokeStyle = '#00e5ff';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, rad + 6, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Etiqueta del nodo
+        ctx.font = n.isHub ? 'bold 11px -apple-system, sans-serif' : '10px -apple-system, sans-serif';
+        const txtW = ctx.measureText(n.name).width;
+
+        ctx.fillStyle = 'rgba(3, 7, 18, 0.85)';
+        ctx.fillRect(n.x - txtW/2 - 4, n.y - rad - 18, txtW + 8, 14);
+
+        ctx.fillStyle = n.isHub ? '#facc15' : '#e2e8f0';
+        ctx.textAlign = 'center';
+        ctx.fillText(n.name, n.x, n.y - rad - 7);
+      }
+
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+
+    // =========================================================================
+    // INTERACCIÓN: ARRASTRAR, CORTAR TUBOS Y AGREGAR NUTRIENTES
+    // =========================================================================
+    const tooltip = document.getElementById('tooltip');
+
+    canvas.addEventListener('mousedown', (e) => {
+      const mx = e.clientX, my = e.clientY;
+
+      if (currentTool === 'cut') {
+        // Buscar tubo más cercano para cortar
+        let closestEdge = -1, minDist = 18;
+        for (let idx = 0; idx < edges.length; idx++) {
+          const edge = edges[idx];
+          if (!edge.active) continue;
+          const u = nodes[edge.u], v = nodes[edge.v];
+          // Distancia de punto a segmento de recta
+          const d = distToSegment({x: mx, y: my}, u, v);
+          if (d < minDist) { minDist = d; closestEdge = idx; }
+        }
+
+        if (closestEdge !== -1) {
+          edges[closestEdge].active = false;
+          edges[closestEdge].conductivity = 0;
+          edges[closestEdge].isSevered = true;
+          computeMST();
+          updateHUD();
+          return;
+        }
+      }
+
+      if (currentTool === 'add') {
+        // Plantar nuevo nodo
+        const newId = `n_${nodes.length}`;
+        nodes.push({
+          idx: nodes.length,
+          id: newId,
+          name: `Estación #${nodes.length + 1}`,
+          note: 'Nodo de nutrientes añadido por el usuario.',
+          isHub: false,
+          x: mx, y: my,
+          pressure: 0,
+          radius: 6
+        });
+        initGraph();
+        return;
+      }
+
+      // Herramienta Mover / Seleccionar Nodo
+      for (const n of nodes) {
+        if (Math.hypot(mx - n.x, my - n.y) < n.radius + 8) {
+          draggedNode = n;
+          selectedNode = n;
+          openInspector(n);
+          return;
+        }
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      const mx = e.clientX, my = e.clientY;
+
+      if (draggedNode && currentTool === 'drag') {
+        draggedNode.x = mx;
+        draggedNode.y = my;
+        // Recalcular distancias de aristas
+        for (const ed of edges) {
+          if (ed.u === draggedNode.idx || ed.v === draggedNode.idx) {
+            ed.length = dist(nodes[ed.u], nodes[ed.v]);
+          }
+        }
+        computeMST();
+      } else {
+        // Tooltip hover
+        let hovered = null;
+        for (const n of nodes) {
+          if (Math.hypot(mx - n.x, my - n.y) < n.radius + 8) {
+            hovered = n; break;
+          }
+        }
+        if (hovered) {
+          tooltip.style.left = `${mx}px`;
+          tooltip.style.top = `${my - 10}px`;
+          tooltip.style.display = 'block';
+          tooltip.innerHTML = `<strong>${hovered.name}</strong><br><span style="color:var(--text-muted);">${hovered.note}</span>`;
+        } else {
+          tooltip.style.display = 'none';
+        }
+      }
+    });
+
+    window.addEventListener('mouseup', () => { draggedNode = null; });
+
+    function distToSegment(p, v, w) {
+      const l2 = (v.x - w.x)**2 + (v.y - w.y)**2;
+      if (l2 === 0) return dist(p, v);
+      let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+      t = Math.max(0, Math.min(1, t));
+      return dist(p, { x: v.x + t * (w.x - v.x), y: v.y + t * (w.y - v.y) });
+    }
+
+    // Inspector
+    const inspector = document.getElementById('inspector-panel');
+    function openInspector(n) {
+      document.getElementById('insp-name').textContent = n.name;
+      document.getElementById('insp-desc').textContent = n.note;
+      const deg = edges.filter(e => e.active && e.conductivity > 0.12 && (e.u === n.idx || e.v === n.idx)).length;
+      document.getElementById('insp-degree').textContent = `${deg} tubos activos`;
+      document.getElementById('insp-flux').textContent = n.isHub ? 'Crítico (Hub Regional)' : 'Normal';
+      inspector.classList.add('open');
+    }
+    document.getElementById('btn-close-insp').addEventListener('click', () => inspector.classList.remove('open'));
+
+    // =========================================================================
+    // BOTONES Y CONTROLES SUPERIORES
+    // =========================================================================
+    document.getElementById('sel-preset').addEventListener('change', (e) => {
+      loadPreset(e.target.value);
+    });
+
+    document.getElementById('btn-toggle-mycelium').addEventListener('click', (e) => {
+      showMycelium = !showMycelium;
+      document.getElementById('txt-mycelium').textContent = showMycelium ? 'ON' : 'OFF';
+      e.currentTarget.classList.toggle('btn-active', showMycelium);
+    });
+
+    document.getElementById('btn-toggle-mst').addEventListener('click', (e) => {
+      showMST = !showMST;
+      document.getElementById('txt-mst').textContent = showMST ? 'ON' : 'OFF';
+      e.currentTarget.classList.toggle('btn-active', showMST);
+    });
+
+    document.getElementById('btn-toggle-mesh').addEventListener('click', (e) => {
+      showMesh = !showMesh;
+      document.getElementById('txt-mesh').textContent = showMesh ? 'ON' : 'OFF';
+      e.currentTarget.classList.toggle('btn-active', showMesh);
+    });
+
+    const btnPlay = document.getElementById('btn-play-pause');
+    btnPlay.addEventListener('click', () => {
+      isRunning = !isRunning;
+      document.getElementById('txt-play').textContent = isRunning ? 'Pausar' : 'Reanudar';
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      loadPreset(document.getElementById('sel-preset').value);
+    });
+
+    // Herramientas inferiores
+    const tDrag = document.getElementById('tool-drag');
+    const tCut = document.getElementById('tool-cut');
+    const tAdd = document.getElementById('tool-add');
+
+    tDrag.addEventListener('click', () => setTool('drag', tDrag));
+    tCut.addEventListener('click', () => setTool('cut', tCut));
+    tAdd.addEventListener('click', () => setTool('add', tAdd));
+
+    function setTool(tool, btn) {
+      currentTool = tool;
+      [tDrag, tCut, tAdd].forEach(b => b.classList.remove('btn-active'));
+      btn.classList.add('btn-active');
+      canvas.style.cursor = tool === 'cut' ? 'crosshair' : (tool === 'add' ? 'cell' : 'grab');
+    }
+
+    document.getElementById('btn-heal').addEventListener('click', () => {
+      for (const e of edges) {
+        if (e.isSevered) {
+          e.active = true;
+          e.isSevered = false;
+          e.conductivity = 0.8;
+        }
+      }
+      computeMST();
+      updateHUD();
+      alert('¡Red de micelio sanada! Los tubos cortados se han reactivado.');
+    });
+
+    // Sliders
+    document.getElementById('rng-decay').addEventListener('input', (e) => {
+      decayRate = parseFloat(e.target.value);
+      document.getElementById('txt-decay').textContent = decayRate.toFixed(2);
+    });
+    document.getElementById('rng-speed').addEventListener('input', (e) => {
+      simSpeed = parseInt(e.target.value);
+      document.getElementById('txt-speed').textContent = `${simSpeed}x`;
+    });
+
+    // Descarga Directa JSON
+    document.getElementById('btn-export').addEventListener('click', () => {
+      const payload = {
+        schema: 'PhysarumGraph-v1.0',
+        preset: document.getElementById('sel-preset').value,
+        iteration,
+        nodes,
+        edges: edges.filter(e => e.active && e.conductivity > 0.1)
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `red_micelio_${document.getElementById('sel-preset').value}_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    // Captura PNG
+    document.getElementById('btn-snap').addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `micelio_grafos_${Date.now()}.png`;
+      a.click();
+    });
+
+    // Inicializar con Tokio
+    loadPreset('tokyo');
+  </script>
+</body>
+</html>

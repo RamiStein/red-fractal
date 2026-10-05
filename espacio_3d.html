@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Red Humana Fractal 3D</title>
+  <style>
+    :root {
+      --bg: #070a14;
+      --card-bg: rgba(15, 22, 42, 0.88);
+      --border: rgba(255, 255, 255, 0.12);
+      --accent-cyan: #00e5ff;
+      --accent-gold: #f59e0b;
+      --accent-purple: #a855f7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    #canvas-3d {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    #canvas-3d:active { cursor: grabbing; }
+
+    /* Barra Superior */
+    #top-bar {
+      position: absolute;
+      top: 14px; left: 14px; right: 14px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 18px;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #00e5ff, #a855f7);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 0 14px rgba(0,229,255,0.4);
+    }
+    .brand-title {
+      font-size: 14px; font-weight: 700; letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #fff, #00e5ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .brand-sub { font-size: 10px; color: var(--text-muted); }
+
+    .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .control-group { display: flex; align-items: center; gap: 6px; }
+    .control-group label {
+      font-size: 11px; text-transform: uppercase; font-weight: 600; color: var(--text-muted);
+    }
+    select, button, input, textarea {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0,229,255,0.25);
+    }
+    select option { background: #0f172a; color: #fff; }
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    button:hover {
+      background: rgba(255,255,255,0.18);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(0,229,255,0.25), rgba(168,85,247,0.35));
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, rgba(0,229,255,0.45), rgba(168,85,247,0.55));
+      box-shadow: 0 0 12px rgba(0,229,255,0.4);
+    }
+
+    /* Panel Lateral Izquierdo: HUD */
+    #hud-panel {
+      position: absolute;
+      top: 80px; left: 14px;
+      width: 250px;
+      z-index: 20;
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .hud-title {
+      font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--accent-gold); margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .hud-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 11px;
+    }
+    .hud-row span:first-child { color: var(--text-muted); }
+    .hud-row span:last-child { font-weight: 600; font-family: monospace; }
+    
+    .category-pills {
+      margin-top: 10px;
+      display: flex; flex-direction: column; gap: 5px;
+      max-height: 180px; overflow-y: auto;
+    }
+    .pill {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 4px 8px; border-radius: 6px;
+      background: rgba(255,255,255,0.04);
+      font-size: 11px; cursor: pointer; transition: all 0.15s;
+    }
+    .pill:hover { background: rgba(255,255,255,0.1); }
+    .pill-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
+    /* Panel Lateral Derecho: Inspector */
+    #inspector-panel {
+      position: absolute;
+      top: 80px; right: 14px; bottom: 20px;
+      width: 320px;
+      z-index: 20;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      display: flex; flex-direction: column; gap: 12px;
+      transform: translateX(350px);
+      opacity: 0; pointer-events: none;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+    }
+    #inspector-panel.open {
+      transform: translateX(0);
+      opacity: 1; pointer-events: auto;
+    }
+    .insp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border); padding-bottom: 8px;
+    }
+    .insp-title { font-size: 14px; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px; }
+    .close-btn { background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; }
+    .close-btn:hover { color: #fff; }
+    
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 10px; text-transform: uppercase; font-weight: 600; color: var(--text-muted); }
+    .field input, .field select, .field textarea { width: 100%; }
+    .field textarea { min-height: 60px; resize: vertical; }
+
+    .coords-box {
+      background: rgba(0,0,0,0.3);
+      padding: 6px 10px; border-radius: 6px;
+      font-family: monospace; font-size: 11px;
+      color: var(--accent-cyan); display: flex; justify-content: space-between;
+    }
+    .connections-box {
+      display: flex; flex-wrap: wrap; gap: 4px; max-height: 80px; overflow-y: auto;
+    }
+    .conn-tag {
+      padding: 3px 6px; background: rgba(255,255,255,0.08); border-radius: 4px;
+      font-size: 10px; cursor: pointer;
+    }
+    .conn-tag:hover { background: var(--accent-cyan); color: #000; }
+
+    /* Barra Inferior */
+    #bottom-bar {
+      position: absolute;
+      bottom: 14px; left: 14px;
+      z-index: 20;
+      display: flex; align-items: center; gap: 12px;
+      padding: 6px 14px;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 11px; color: var(--text-muted);
+    }
+    .key {
+      background: rgba(255,255,255,0.12); padding: 2px 6px; border-radius: 4px;
+      color: #fff; font-family: monospace;
+    }
+
+    #tooltip {
+      position: absolute; z-index: 30; pointer-events: none;
+      background: rgba(15,23,42,0.95); border: 1px solid var(--accent-cyan);
+      padding: 6px 10px; border-radius: 8px; font-size: 11px;
+      display: none; transform: translate(-50%, -120%);
+      white-space: nowrap; box-shadow: 0 4px 16px rgba(0,229,255,0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="canvas-3d"></canvas>
+  <div id="tooltip"></div>
+
+  <!-- Barra Superior -->
+  <header id="top-bar">
+    <div class="brand">
+      <div class="brand-icon">✨</div>
+      <div>
+        <div class="brand-title">RED HUMANA FRACTAL</div>
+        <div class="brand-sub">Sólidos Platónicos · Geometría Sagrada</div>
+      </div>
+    </div>
+
+    <!-- Navegación de la Suite -->
+    <nav style="display:flex; gap:4px; background:rgba(255,255,255,0.04); padding:3px 6px; border-radius:8px; border:1px solid rgba(255,255,255,0.08);">
+      <a href="red_comunitaria_2d.html" style="color:#ffd32a; text-decoration:none; font-size:10px; font-weight:700; padding:4px 8px; border-radius:5px; background:rgba(255,211,42,0.15); border:1px solid rgba(255,211,42,0.3);" title="Red Comunitaria Fractal 2D: 5 Elementos y Membresías">🌱 Red Comunitaria 2D</a>
+      <a href="micelio_grafos_2d.html" style="color:var(--text-muted); text-decoration:none; font-size:10px; font-weight:600; padding:4px 8px;" title="Micelio 2D">🍄 Micelio 2D</a>
+      <a href="solidos_platonicos.html" style="color:var(--text-muted); text-decoration:none; font-size:10px; font-weight:600; padding:4px 8px;" title="Sólidos Platónicos">🔮 Sólidos</a>
+      <a href="index.html" style="color:var(--text-muted); text-decoration:none; font-size:10px; font-weight:600; padding:4px 8px;" title="Matriz Cristal">💎 Matriz Cristal</a>
+    </nav>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="sel-solid">Geometría:</label>
+        <select id="sel-solid">
+          <option value="dodecahedron" selected>🌌 Dodecaedro (Éter - Red Global)</option>
+          <option value="icosahedron">💧 Icosaedro (Agua - Cohesión Vincular)</option>
+          <option value="cube">🟩 Cubo (Tierra - Hábitat & Sostén)</option>
+          <option value="octahedron">🔶 Octaedro (Aire - Comunicación & Red)</option>
+          <option value="tetrahedron">🔺 Tetraedro (Fuego - Voluntad & Impulso)</option>
+          <option value="merkaba">🔯 Merkaba (Luz - Unión de Polaridades)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="sel-depth">Nivel Fractal:</label>
+        <select id="sel-depth">
+          <option value="0">Nivel 0 (Semilla)</option>
+          <option value="1" selected>Nivel 1 (Círculos)</option>
+          <option value="2">Nivel 2 (Red Planetaria)</option>
+        </select>
+      </div>
+
+      <button id="btn-rot" title="Alternar rotación automática">🔄 Rotación: <span id="txt-rot">ON</span></button>
+      <button id="btn-pulse" title="Alternar pulsaciones armónicas">⚡ Pulsos: <span id="txt-pulse">ON</span></button>
+      <button id="btn-labels" title="Mostrar/Ocultar etiquetas">🏷️ Nombres: <span id="txt-labels">OFF</span></button>
+
+      <button id="btn-export" class="btn-primary" title="Descargar la red actual en JSON a esta notebook">💾 Descargar JSON</button>
+      <button id="btn-import" title="Cargar un archivo JSON desde esta notebook">📂 Cargar JSON</button>
+      <button id="btn-snap" title="Descargar imagen PNG de la geometría">📸 Captura PNG</button>
+      <input type="file" id="inp-file" accept=".json" style="display:none;">
+    </div>
+  </header>
+
+  <!-- HUD Izquierdo -->
+  <aside id="hud-panel">
+    <div class="hud-title">
+      <span id="hud-solid-name">Dodecaedro</span>
+      <span id="hud-archetype" style="color: var(--accent-cyan);">Éter</span>
+    </div>
+    <div class="hud-row"><span>Nivel Fractal:</span><span id="hud-depth">Nivel 1</span></div>
+    <div class="hud-row"><span>Nodos Vivos (V):</span><span id="hud-nodes">420</span></div>
+    <div class="hud-row"><span>Puentes (E):</span><span id="hud-links">650</span></div>
+    <div class="hud-row"><span>Proporción Áurea (ϕ):</span><span>1.618034</span></div>
+    <div class="hud-row"><span>Euler (V - E + F = 2):</span><span style="color:#2ecc71;">Verificado</span></div>
+
+    <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-size:10px; text-transform:uppercase; color:var(--text-muted); font-weight:600;">Roles & Categorías</span>
+      <button id="btn-add-cat" style="padding:2px 6px; font-size:10px;">+ Nueva</button>
+    </div>
+    <div class="category-pills" id="cat-list"></div>
+  </aside>
+
+  <!-- Inspector Derecho -->
+  <aside id="inspector-panel">
+    <div class="insp-header">
+      <div class="insp-title">
+        <span id="insp-dot" style="width:8px; height:8px; border-radius:50%; background:var(--accent-cyan);"></span>
+        <span id="insp-node-id">Nodo</span>
+      </div>
+      <button class="close-btn" id="btn-close-insp">&times;</button>
+    </div>
+
+    <div class="field">
+      <label for="inp-node-name">Nombre del Nodo / Círculo:</label>
+      <input type="text" id="inp-node-name" placeholder="Ej. Semilla de Sabiduría">
+    </div>
+
+    <div class="field">
+      <label for="sel-node-cat">Categoría / Rol Humano:</label>
+      <select id="sel-node-cat"></select>
+    </div>
+
+    <div class="field">
+      <label>Color Resonante:</label>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <input type="color" id="inp-node-color" style="width:34px; height:28px; padding:0; cursor:pointer;">
+        <span id="txt-node-color" style="font-family:monospace; font-size:11px; color:var(--text-muted);">#00e5ff</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Resonancia Armónica: <span id="txt-resonance">100%</span></label>
+      <input type="range" id="rng-resonance" min="0" max="1" step="0.05" value="1">
+    </div>
+
+    <div class="field">
+      <label>Coordenadas 3D [X, Y, Z]:</label>
+      <div class="coords-box" id="box-coords">
+        <span>X: 0.00</span><span>Y: 0.00</span><span>Z: 0.00</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="txt-node-desc">Propósito & Acuerdos:</label>
+      <textarea id="txt-node-desc" placeholder="Función humana, visión o personas asignadas a este punto..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Nodos Vecinos (<span id="txt-conn-count">0</span>):</label>
+      <div class="connections-box" id="box-conns"></div>
+    </div>
+
+    <button id="btn-save-insp" class="btn-primary" style="margin-top:auto;">💾 Guardar Cambios</button>
+  </aside>
+
+  <!-- Barra Inferior -->
+  <footer id="bottom-bar">
+    <span>Navegación 3D:</span>
+    <span><span class="key">Arrastrar</span> Rotar</span>
+    <span><span class="key">Rueda</span> Zoom</span>
+    <span><span class="key">Shift + Arrastrar</span> Desplazar</span>
+    <span><span class="key">Clic en Nodo</span> Editar</span>
+  </footer>
+
+  <script>
+    // =========================================================================
+    // NÚCLEO MATEMÁTICO DE SÓLIDOS PLATÓNICOS Y FRACTALES (Puro Vanilla JS)
+    // =========================================================================
+    const PHI = (1 + Math.sqrt(5)) / 2; // ~1.6180339887
+    const INV_PHI = 1 / PHI;
+
+    function normalize(v, r = 1) {
+      const len = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]) || 1;
+      return [v[0]*r/len, v[1]*r/len, v[2]*r/len];
+    }
+    function dist3D(a, b) {
+      const dx = a[0]-b[0], dy = a[1]-b[1], dz = a[2]-b[2];
+      return Math.sqrt(dx*dx + dy*dy + dz*dz);
+    }
+    function getNeighbors(verts) {
+      const edges = [];
+      const seen = new Set();
+      for (let i = 0; i < verts.length; i++) {
+        let dList = [];
+        for (let j = 0; j < verts.length; j++) {
+          if (i !== j) dList.push({ j, d: dist3D(verts[i], verts[j]) });
+        }
+        dList.sort((a,b) => a.d - b.d);
+        const minD = dList[0].d;
+        for (const item of dList) {
+          if (Math.abs(item.d - minD) <= 0.05 * minD) {
+            const k = i < item.j ? `${i}-${item.j}` : `${item.j}-${i}`;
+            if (!seen.has(k)) {
+              seen.add(k);
+              edges.push([i, item.j]);
+            }
+          }
+        }
+      }
+      return edges;
+    }
+
+    const SOLIDS = {
+      tetrahedron: (r = 2) => {
+        const raw = [[1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1]];
+        const v = raw.map(p => normalize(p, r));
+        return { name: 'Tetraedro', archetype: 'Fuego', color: '#ef4444', v, e: getNeighbors(v) };
+      },
+      octahedron: (r = 2) => {
+        const raw = [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+        const v = raw.map(p => normalize(p, r));
+        return { name: 'Octaedro', archetype: 'Aire', color: '#f59e0b', v, e: getNeighbors(v) };
+      },
+      cube: (r = 2) => {
+        const raw = [];
+        for (const x of [-1,1]) for (const y of [-1,1]) for (const z of [-1,1]) raw.push([x,y,z]);
+        const v = raw.map(p => normalize(p, r));
+        return { name: 'Cubo', archetype: 'Tierra', color: '#10b981', v, e: getNeighbors(v) };
+      },
+      icosahedron: (r = 2) => {
+        const raw = [];
+        for (const y of [-1,1]) for (const z of [-PHI, PHI]) raw.push([0, y, z]);
+        for (const x of [-1,1]) for (const y of [-PHI, PHI]) raw.push([x, y, 0]);
+        for (const x of [-PHI, PHI]) for (const z of [-1,1]) raw.push([x, 0, z]);
+        const v = raw.map(p => normalize(p, r));
+        return { name: 'Icosaedro', archetype: 'Agua', color: '#3b82f6', v, e: getNeighbors(v) };
+      },
+      dodecahedron: (r = 2) => {
+        const raw = [];
+        for (const x of [-1,1]) for (const y of [-1,1]) for (const z of [-1,1]) raw.push([x,y,z]);
+        for (const y of [-INV_PHI, INV_PHI]) for (const z of [-PHI, PHI]) raw.push([0, y, z]);
+        for (const x of [-INV_PHI, INV_PHI]) for (const y of [-PHI, PHI]) raw.push([x, y, 0]);
+        for (const x of [-PHI, PHI]) for (const z of [-INV_PHI, INV_PHI]) raw.push([x, 0, z]);
+        const v = raw.map(p => normalize(p, r));
+        return { name: 'Dodecaedro', archetype: 'Éter', color: '#a855f7', v, e: getNeighbors(v) };
+      },
+      merkaba: (r = 2) => {
+        const t1 = [[1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1]].map(p => normalize(p, r));
+        const t2 = [[-1,-1,-1],[-1,1,1],[1,-1,1],[1,1,-1]].map(p => normalize(p, r));
+        const v = [...t1, ...t2];
+        const e = [
+          [0,1],[0,2],[0,3],[1,2],[1,3],[2,3],
+          [4,5],[4,6],[4,7],[5,6],[5,7],[6,7],
+          [0,4],[1,5],[2,6],[3,7]
+        ];
+        return { name: 'Merkaba', archetype: 'Luz & Equilibrio', color: '#00e5ff', v, e };
+      }
+    };
+
+    const CATEGORIES = {
+      'Gobernanza & Sabiduría': '#b366ff',
+      'Iniciación & Voluntad': '#ef4444',
+      'Sostén & Regeneración': '#10b981',
+      'Comunicación & Red': '#f59e0b',
+      'Cohesión & Relaciones': '#3b82f6',
+      'Catalizador Comunitario': '#f97316',
+      'Arquitecto de Recursos': '#14b8a6',
+      'Guardián de Visión': '#8b5cf6',
+      'Personalizada': '#00e5ff'
+    };
+
+    // =========================================================================
+    // GENERADOR DE RED FRACTAL
+    // =========================================================================
+    function generateFractalNetwork(solidType, depth) {
+      const solidFn = SOLIDS[solidType] || SOLIDS.dodecahedron;
+      const base = solidFn(3.2);
+      const nodes = [];
+      const links = [];
+      let idCounter = 0;
+
+      function spawn(center, radius, currentDepth, parentId = null) {
+        const s = solidFn(radius);
+        const clusterIds = [];
+
+        for (let i = 0; i < s.v.length; i++) {
+          const pos = [center[0] + s.v[i][0], center[1] + s.v[i][1], center[2] + s.v[i][2]];
+          const id = `nodo_${idCounter++}`;
+          clusterIds.push(id);
+
+          let cat = 'Gobernanza & Sabiduría';
+          if (s.archetype === 'Fuego') cat = 'Iniciación & Voluntad';
+          if (s.archetype === 'Tierra') cat = 'Sostén & Regeneración';
+          if (s.archetype === 'Aire') cat = 'Comunicación & Red';
+          if (s.archetype === 'Agua') cat = 'Cohesión & Relaciones';
+
+          nodes.push({
+            id,
+            name: `${s.name} #${i + 1}`,
+            level: currentDepth,
+            archetype: s.archetype,
+            category: cat,
+            color: CATEGORIES[cat] || s.color,
+            pos,
+            radius: Math.max(2.5, 7.5 / (currentDepth * 1.2 + 1)),
+            connections: [],
+            resonance: Number((1 / (currentDepth + 1)).toFixed(2)),
+            desc: `Nodo fractal nivel ${currentDepth} en estructura de ${s.name}.`
+          });
+        }
+
+        // Enlaces internos del sólido
+        for (const [a, b] of s.e) {
+          const idA = clusterIds[a], idB = clusterIds[b];
+          links.push({ source: idA, target: idB, isBridge: false });
+          const nA = nodes.find(n => n.id === idA);
+          const nB = nodes.find(n => n.id === idB);
+          if (nA) nA.connections.push(idB);
+          if (nB) nB.connections.push(idA);
+        }
+
+        // Puente con el nodo padre
+        if (parentId) {
+          const targetId = clusterIds[0];
+          links.push({ source: parentId, target: targetId, isBridge: true });
+          const pN = nodes.find(n => n.id === parentId);
+          const tN = nodes.find(n => n.id === targetId);
+          if (pN) pN.connections.push(targetId);
+          if (tN) tN.connections.push(parentId);
+        }
+
+        // Recursión en los vértices
+        if (currentDepth < depth) {
+          const nextR = radius * (INV_PHI * 0.7);
+          for (let i = 0; i < s.v.length; i++) {
+            const nextCenter = [
+              center[0] + s.v[i][0] * 1.3,
+              center[1] + s.v[i][1] * 1.3,
+              center[2] + s.v[i][2] * 1.3
+            ];
+            spawn(nextCenter, nextR, currentDepth + 1, clusterIds[i]);
+          }
+        }
+      }
+
+      spawn([0,0,0], 3.2, 0, null);
+
+      return {
+        meta: { solidType, solidName: base.name, archetype: base.archetype, depth },
+        nodes,
+        links
+      };
+    }
+
+    // =========================================================================
+    // MOTOR 3D PURE CANVAS PERSPECTIVE (Cero librerías externas)
+    // =========================================================================
+    const canvas = document.getElementById('canvas-3d');
+    const ctx = canvas.getContext('2d');
+
+    let currentNetwork = generateFractalNetwork('dodecahedron', 1);
+    let selectedNodeId = null;
+    let hoveredNodeId = null;
+    let focusedCategory = null;
+    let autoRotate = true;
+    let pulsesActive = true;
+    let showLabels = false;
+
+    // Cámara y Transformaciones
+    let rotX = 0.3, rotY = 0.6;
+    let velX = 0, velY = 0;
+    let panX = 0, panY = 0;
+    let zoom = 80;
+    const fov = 400;
+
+    // Estrellas de fondo
+    const stars = [];
+    for (let i = 0; i < 400; i++) {
+      stars.push({
+        x: (Math.random() - 0.5) * 2000,
+        y: (Math.random() - 0.5) * 2000,
+        z: Math.random() * 1000 + 100,
+        size: Math.random() * 1.5 + 0.5,
+        alpha: Math.random() * 0.7 + 0.3
+      });
+    }
+
+    // Partículas de pulso
+    let pulseParticles = [];
+    function resetPulseParticles() {
+      pulseParticles = [];
+      const links = currentNetwork.links;
+      for (let i = 0; i < Math.min(links.length, 120); i++) {
+        pulseParticles.push({
+          linkIdx: i % links.length,
+          progress: Math.random(),
+          speed: 0.004 + Math.random() * 0.008
+        });
+      }
+    }
+    resetPulseParticles();
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Proyección 3D a pantalla
+    function project(p3) {
+      // Aplicar rotación Y luego X
+      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+
+      // Rotación en Y
+      const x1 = p3[0] * cosY + p3[2] * sinY;
+      const z1 = -p3[0] * sinY + p3[2] * cosY;
+
+      // Rotación en X
+      const y2 = p3[1] * cosX - z1 * sinX;
+      const z2 = p3[1] * sinX + z1 * cosX;
+
+      // Perspectiva
+      const zDist = z2 + 25;
+      const scale = fov / (fov + zDist * 20);
+      const cx = canvas.width / 2 + panX;
+      const cy = canvas.height / 2 + panY;
+
+      return {
+        x: cx + x1 * zoom * scale,
+        y: cy - y2 * zoom * scale,
+        z: z2,
+        scale: Math.max(0.1, scale)
+      };
+    }
+
+    // Bucle Principal de Renderizado
+    function render() {
+      ctx.fillStyle = '#060913';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Dibujar Estrellas
+      ctx.fillStyle = '#ffffff';
+      for (const s of stars) {
+        ctx.globalAlpha = s.alpha;
+        ctx.beginPath();
+        ctx.arc(canvas.width/2 + s.x / (s.z * 0.005), canvas.height/2 + s.y / (s.z * 0.005), s.size, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      // Auto-rotación
+      if (autoRotate) {
+        rotY += 0.0025;
+        rotX += Math.sin(Date.now() * 0.0005) * 0.0005;
+      }
+      rotX += velX; rotY += velY;
+      velX *= 0.92; velY *= 0.92;
+
+      // 2. Proyectar Nodos
+      const projectedNodes = new Map();
+      for (const n of currentNetwork.nodes) {
+        projectedNodes.set(n.id, project(n.pos));
+      }
+
+      // 3. Dibujar Aristas
+      ctx.lineWidth = 1.2;
+      for (const link of currentNetwork.links) {
+        const pA = projectedNodes.get(link.source);
+        const pB = projectedNodes.get(link.target);
+        if (!pA || !pB) continue;
+
+        const nodeA = currentNetwork.nodes.find(n => n.id === link.source);
+        const nodeB = currentNetwork.nodes.find(n => n.id === link.target);
+
+        let alpha = 0.35;
+        if (focusedCategory) {
+          const matchA = nodeA && nodeA.category === focusedCategory;
+          const matchB = nodeB && nodeB.category === focusedCategory;
+          alpha = (matchA || matchB) ? 0.7 : 0.06;
+        }
+
+        ctx.strokeStyle = link.isBridge ? `rgba(245, 158, 11, ${alpha * 1.5})` : `rgba(0, 229, 255, ${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(pA.x, pA.y);
+        ctx.lineTo(pB.x, pB.y);
+        ctx.stroke();
+      }
+
+      // 4. Dibujar Pulsos de Energía Armónica
+      if (pulsesActive && currentNetwork.links.length > 0) {
+        for (const p of pulseParticles) {
+          p.progress += p.speed;
+          if (p.progress > 1) p.progress = 0;
+
+          const link = currentNetwork.links[p.linkIdx];
+          if (!link) continue;
+          const pA = projectedNodes.get(link.source);
+          const pB = projectedNodes.get(link.target);
+          if (!pA || !pB) continue;
+
+          const px = pA.x + (pB.x - pA.x) * p.progress;
+          const py = pA.y + (pB.y - pA.y) * p.progress;
+
+          ctx.fillStyle = '#00ffff';
+          ctx.beginPath();
+          ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // 5. Ordenar Nodos por Profundidad Z (Painter's Algorithm)
+      const sortedNodes = [...currentNetwork.nodes].sort((a, b) => {
+        const zA = projectedNodes.get(a.id)?.z || 0;
+        const zB = projectedNodes.get(b.id)?.z || 0;
+        return zA - zB;
+      });
+
+      // 6. Dibujar Nodos
+      for (const node of sortedNodes) {
+        const p = projectedNodes.get(node.id);
+        if (!p) continue;
+
+        let alpha = 1.0;
+        if (focusedCategory && node.category !== focusedCategory) {
+          alpha = 0.15;
+        }
+
+        const radius = Math.max(3, node.radius * p.scale * (zoom / 60));
+        const color = node.color || '#00e5ff';
+
+        // Resaltado de selección
+        if (node.id === selectedNodeId) {
+          ctx.strokeStyle = '#00e5ff';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, radius + 6 + Math.sin(Date.now()*0.006)*2, 0, Math.PI*2);
+          ctx.stroke();
+        }
+
+        // Halo de brillo
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius * 2.2);
+        grad.addColorStop(0, color);
+        grad.addColorStop(0.5, color);
+        grad.addColorStop(1, 'transparent');
+
+        ctx.globalAlpha = alpha * 0.4;
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, radius * 2.2, 0, Math.PI*2);
+        ctx.fill();
+
+        // Núcleo del nodo
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, radius, 0, Math.PI*2);
+        ctx.fill();
+
+        // Etiquetas flotantes
+        if (showLabels || node.id === selectedNodeId || node.id === hoveredNodeId) {
+          ctx.font = '10px -apple-system, sans-serif';
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'center';
+          ctx.fillText(node.name, p.x, p.y - radius - 5);
+        }
+      }
+      ctx.globalAlpha = 1;
+
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+
+    // =========================================================================
+    // INTERACCIÓN RATÓN / TÁCTIL (Rotación, Paneo, Zoom y Clic en Nodos)
+    // =========================================================================
+    let isDragging = false;
+    let isPanning = false;
+    let startX = 0, startY = 0;
+    const tooltip = document.getElementById('tooltip');
+
+    canvas.addEventListener('mousedown', (e) => {
+      startX = e.clientX;
+      startY = e.clientY;
+      if (e.button === 2 || e.shiftKey) {
+        isPanning = true;
+      } else {
+        isDragging = true;
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      isPanning = false;
+    });
+
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+    canvas.addEventListener('mousemove', (e) => {
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      if (isDragging) {
+        velY = dx * 0.005;
+        velX = dy * 0.005;
+        rotY += velY;
+        rotX += velX;
+        startX = e.clientX;
+        startY = e.clientY;
+      } else if (isPanning) {
+        panX += dx;
+        panY += dy;
+        startX = e.clientX;
+        startY = e.clientY;
+      } else {
+        // Detección de Hover en Nodos
+        hoveredNodeId = null;
+        for (const n of currentNetwork.nodes) {
+          const p = project(n.pos);
+          const r = Math.max(6, n.radius * p.scale * (zoom / 60) + 4);
+          const dist = Math.hypot(e.clientX - p.x, e.clientY - p.y);
+          if (dist < r) {
+            hoveredNodeId = n.id;
+            tooltip.style.left = `${e.clientX}px`;
+            tooltip.style.top = `${e.clientY - 12}px`;
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = `<strong>${n.name}</strong><br><span style="color:${n.color}">●</span> ${n.category} (Nivel ${n.level})`;
+            break;
+          }
+        }
+        if (!hoveredNodeId) tooltip.style.display = 'none';
+      }
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      zoom -= e.deltaY * 0.08;
+      zoom = Math.max(20, Math.min(250, zoom));
+    }, { passive: false });
+
+    canvas.addEventListener('click', (e) => {
+      for (const n of currentNetwork.nodes) {
+        const p = project(n.pos);
+        const r = Math.max(6, n.radius * p.scale * (zoom / 60) + 4);
+        if (Math.hypot(e.clientX - p.x, e.clientY - p.y) < r) {
+          selectNode(n.id);
+          return;
+        }
+      }
+    });
+
+    // =========================================================================
+    // INSPECTOR Y EDICIÓN DE NODOS
+    // =========================================================================
+    const inspector = document.getElementById('inspector-panel');
+    const inpNodeName = document.getElementById('inp-node-name');
+    const selNodeCat = document.getElementById('sel-node-cat');
+    const inpNodeColor = document.getElementById('inp-node-color');
+    const txtNodeColor = document.getElementById('txt-node-color');
+    const rngResonance = document.getElementById('rng-resonance');
+    const txtResonance = document.getElementById('txt-resonance');
+    const boxCoords = document.getElementById('box-coords');
+    const txtNodeDesc = document.getElementById('txt-node-desc');
+    const boxConns = document.getElementById('box-conns');
+    const txtConnCount = document.getElementById('txt-conn-count');
+
+    function selectNode(id) {
+      selectedNodeId = id;
+      const node = currentNetwork.nodes.find(n => n.id === id);
+      if (!node) return;
+
+      document.getElementById('insp-node-id').textContent = node.id;
+      document.getElementById('insp-dot').style.background = node.color;
+      inpNodeName.value = node.name;
+      txtNodeDesc.value = node.desc || '';
+
+      // Opciones de categoría
+      selNodeCat.innerHTML = '';
+      Object.keys(CATEGORIES).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        if (c === node.category) opt.selected = true;
+        selNodeCat.appendChild(opt);
+      });
+
+      inpNodeColor.value = node.color;
+      txtNodeColor.textContent = node.color;
+
+      rngResonance.value = node.resonance ?? 1;
+      txtResonance.textContent = `${Math.round((node.resonance ?? 1) * 100)}%`;
+
+      boxCoords.innerHTML = `
+        <span>X: ${node.pos[0].toFixed(2)}</span>
+        <span>Y: ${node.pos[1].toFixed(2)}</span>
+        <span>Z: ${node.pos[2].toFixed(2)}</span>
+      `;
+
+      // Vecinos
+      boxConns.innerHTML = '';
+      txtConnCount.textContent = node.connections.length;
+      node.connections.forEach(cId => {
+        const cNode = currentNetwork.nodes.find(n => n.id === cId);
+        if (!cNode) return;
+        const tag = document.createElement('div');
+        tag.className = 'conn-tag';
+        tag.textContent = cNode.name;
+        tag.addEventListener('click', () => selectNode(cId));
+        boxConns.appendChild(tag);
+      });
+
+      inspector.classList.add('open');
+    }
+
+    function saveInspectorChanges() {
+      const node = currentNetwork.nodes.find(n => n.id === selectedNodeId);
+      if (!node) return;
+
+      node.name = inpNodeName.value;
+      node.category = selNodeCat.value;
+      node.color = inpNodeColor.value;
+      node.desc = txtNodeDesc.value;
+      node.resonance = parseFloat(rngResonance.value);
+
+      document.getElementById('insp-dot').style.background = node.color;
+      updateHUD();
+    }
+
+    inpNodeName.addEventListener('input', saveInspectorChanges);
+    selNodeCat.addEventListener('change', () => {
+      inpNodeColor.value = CATEGORIES[selNodeCat.value] || '#00e5ff';
+      txtNodeColor.textContent = inpNodeColor.value;
+      saveInspectorChanges();
+    });
+    inpNodeColor.addEventListener('input', (e) => {
+      txtNodeColor.textContent = e.target.value;
+      saveInspectorChanges();
+    });
+    rngResonance.addEventListener('input', (e) => {
+      txtResonance.textContent = `${Math.round(parseFloat(e.target.value)*100)}%`;
+      saveInspectorChanges();
+    });
+    txtNodeDesc.addEventListener('input', saveInspectorChanges);
+
+    document.getElementById('btn-save-insp').addEventListener('click', () => {
+      saveInspectorChanges();
+      inspector.classList.remove('open');
+    });
+    document.getElementById('btn-close-insp').addEventListener('click', () => {
+      inspector.classList.remove('open');
+    });
+
+    // =========================================================================
+    // HUD Y CONTROLES SUPERIORES
+    // =========================================================================
+    const selSolid = document.getElementById('sel-solid');
+    const selDepth = document.getElementById('sel-depth');
+
+    function updateHUD() {
+      const meta = currentNetwork.meta;
+      document.getElementById('hud-solid-name').textContent = meta.solidName;
+      document.getElementById('hud-archetype').textContent = meta.archetype;
+      document.getElementById('hud-depth').textContent = `Nivel ${meta.depth}`;
+      document.getElementById('hud-nodes').textContent = currentNetwork.nodes.length;
+      document.getElementById('hud-links').textContent = currentNetwork.links.length;
+
+      // Pastillas de categoría
+      const catList = document.getElementById('cat-list');
+      catList.innerHTML = '';
+      const counts = {};
+      currentNetwork.nodes.forEach(n => counts[n.category] = (counts[n.category] || 0) + 1);
+
+      Object.entries(CATEGORIES).forEach(([cat, col]) => {
+        const count = counts[cat] || 0;
+        if (count === 0 && !counts[cat]) return;
+
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+        if (focusedCategory === cat) pill.style.background = 'rgba(255,255,255,0.2)';
+        pill.innerHTML = `
+          <div style="display:flex; align-items:center;">
+            <div class="pill-dot" style="background:${col};"></div>
+            <span>${cat}</span>
+          </div>
+          <span style="font-family:monospace; color:var(--text-muted);">${count}</span>
+        `;
+        pill.addEventListener('click', () => {
+          focusedCategory = focusedCategory === cat ? null : cat;
+          updateHUD();
+        });
+        catList.appendChild(pill);
+      });
+    }
+
+    function recompute() {
+      currentNetwork = generateFractalNetwork(selSolid.value, parseInt(selDepth.value));
+      selectedNodeId = null;
+      inspector.classList.remove('open');
+      resetPulseParticles();
+      updateHUD();
+    }
+
+    selSolid.addEventListener('change', recompute);
+    selDepth.addEventListener('change', recompute);
+
+    document.getElementById('btn-rot').addEventListener('click', () => {
+      autoRotate = !autoRotate;
+      document.getElementById('txt-rot').textContent = autoRotate ? 'ON' : 'OFF';
+    });
+
+    document.getElementById('btn-pulse').addEventListener('click', () => {
+      pulsesActive = !pulsesActive;
+      document.getElementById('txt-pulse').textContent = pulsesActive ? 'ON' : 'OFF';
+    });
+
+    document.getElementById('btn-labels').addEventListener('click', () => {
+      showLabels = !showLabels;
+      document.getElementById('txt-labels').textContent = showLabels ? 'ON' : 'OFF';
+    });
+
+    document.getElementById('btn-add-cat').addEventListener('click', () => {
+      const name = prompt('Nombre de la nueva categoría comunitaria:');
+      if (name && name.trim()) {
+        const palette = ['#00e5ff','#ff007f','#39ff14','#ffea00','#9d00ff','#ff6b00'];
+        CATEGORIES[name.trim()] = palette[Math.floor(Math.random() * palette.length)];
+        updateHUD();
+      }
+    });
+
+    // =========================================================================
+    // EXPORTAR Y DESCARGAR DIRECTAMENTE A ESTA NOTEBOOK (Browser Blob)
+    // =========================================================================
+    document.getElementById('btn-export').addEventListener('click', () => {
+      const payload = {
+        version: '1.0.0',
+        exportedAt: new Date().toISOString(),
+        network: currentNetwork,
+        categories: CATEGORIES
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `red_humana_${currentNetwork.meta.solidType}_nivel${currentNetwork.meta.depth}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    // Importar desde esta notebook
+    const inpFile = document.getElementById('inp-file');
+    document.getElementById('btn-import').addEventListener('click', () => inpFile.click());
+    inpFile.addEventListener('change', (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const data = JSON.parse(evt.target.result);
+          if (data.network) {
+            currentNetwork = data.network;
+            if (data.categories) Object.assign(CATEGORIES, data.categories);
+            selSolid.value = currentNetwork.meta.solidType;
+            selDepth.value = currentNetwork.meta.depth;
+            resetPulseParticles();
+            updateHUD();
+            alert('¡Red fractal cargada con éxito en tu pantalla!');
+          }
+        } catch(err) {
+          alert('Error al leer el archivo JSON.');
+        }
+      };
+      reader.readAsText(f);
+    });
+
+    // Captura PNG directa a la notebook
+    document.getElementById('btn-snap').addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `red_fractal_${Date.now()}.png`;
+      a.click();
+    });
+
+    // Inicializar HUD
+    updateHUD();
+  </script>
+</body>
+</html>

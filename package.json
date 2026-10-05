@@ -1,0 +1,22 @@
+{
+  "name": "red-fractal-humana",
+  "version": "1.0.0",
+  "description": "Red Humana de la Nueva Era - Modelos Matemáticos y Espacio Digital Fractal basado en Sólidos Platónicos",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/verify_community.js && node tests/verify_math.js && node tests/verify_crystal.js && node tests/verify_mycelium.js",
+    "test:community": "node tests/verify_community.js",
+    "test:math": "node tests/verify_math.js",
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "sacred-geometry",
+    "platonic-solids",
+    "fractals",
+    "human-network",
+    "threejs",
+    "3d"
+  ],
+  "author": "Red Humana Fractal",
+  "license": "MIT"
+}
