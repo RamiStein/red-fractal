@@ -136,6 +136,22 @@ export const INTRATERRENA_CITIES = [
     associatedBioregion: 'Biorregión Himalayas & Meseta Central',
     teluricFlows: ['bio_himalayas', 'bio_taiga'],
     description: 'La mítica sede de la Gran Fraternidad Blanca y centro supremo de la red intraterrena mundial.'
+  },
+  {
+    id: 'intra_polo_sur',
+    name: 'Portal Diamantino del Polo Sur (Rainbow City / Domo Austral)',
+    shortName: '🏛️ Portal Polo Sur (-90°)',
+    location: 'Polo Sur Geográfico Exacto (-90.000°, 0.000°), Meseta Antártica',
+    region: 'Antártida',
+    lat: -90.000,
+    lon: 0.000,
+    ray: 'Rayo Platino-Diamantino del Ancla Terrestre & Luz Polar',
+    color: '#38bdf8',
+    vibrationalFreq: 963,
+    purpose: 'Ancla meridional del eje axial de rotación de la Tierra. Vórtice cósmico de conexión con las bibliotecas de luz subglaciales de la Antártida y calibrador del campo magnético toroidal planetario.',
+    associatedBioregion: 'Biorregión Antártida & Polo Sur Geográfico Exacto',
+    teluricFlows: ['site_polo_sur_exacto', 'site_lago_vostok', 'site_monte_erebus', 'bio_patagonia', 'site_jasuka_venda', 'site_aoraki_nz', 'site_table_mountain'],
+    description: 'El ancla meridional suprema de la red intraterrena: punto focal donde converge la energía de todos los meridianos terrestres y se proyecta el toroide electromagnético del planeta.'
   }
 ];
 
@@ -240,6 +256,132 @@ export const SACRED_SITES = [
     purpose: 'El "Río de los Siete Colores", encuentro biogeográfico del Escudo Guayanés, los Andes y la Amazonía. Pulsación cromática de algas vivas y aguas cristalinas.',
     teluricFlows: ['site_san_agustin', 'bio_amazonas'],
     description: 'Canal de luz acuática donde la geología más antigua se tiñe de vida con los rayos solares.'
+  },
+  {
+    id: 'site_polo_sur_exacto',
+    name: 'Polo Sur Geográfico Exacto (Vórtice Polar del Hielo Sagrado)',
+    shortName: '❄️ Polo Sur Exacto (-90°)',
+    category: 'sacred_site',
+    location: 'Latitud -90.000°, Longitud 0.000°, Antártida',
+    region: 'Antártida (Vórtice Polar)',
+    lat: -90.000,
+    lon: 0.000,
+    ray: 'Rayo Cristalino Diamantino / Foco Polar Primordial',
+    color: '#00e5ff',
+    vibrationalFreq: 1080,
+    ecosystem: 'Inlandsis Antártico / Desierto polar hiperárido de hielo / Altitud 2.835m',
+    riversBorn: 'Corrientes abisales termohalinas de fondo oceánico hacia todos los océanos',
+    purpose: 'El punto geográfico exacto donde convergen todos los meridianos del globo terráqueo. Centro inmóvil del vórtice polar que almacena la memoria climática y cósmica de millones de años en testigos de hielo no perturbados. Ancla sagrada del Eje de la Tierra.',
+    teluricFlows: ['intra_polo_sur', 'site_lago_vostok', 'site_monte_erebus', 'bio_patagonia', 'site_jasuka_venda', 'site_aoraki_nz', 'site_table_mountain', 'site_uluru'],
+    description: 'El eje meridional exacto de la Tierra: el punto matemático y geodésico cero de la latitud sur, guardián del silencio criogénico del planeta.'
+  },
+  {
+    id: 'site_jasuka_venda',
+    name: 'Cerro Jasuka Venda / Cerro Guasú (Yvyty Jasuka Venda)',
+    shortName: '🌿 Jasuka Venda (Amambay)',
+    category: 'sacred_site',
+    location: 'Cordillera del Amambay / Yby Ya\'u - Capitán Bado, Paraguay',
+    region: 'Sudamérica (Cuenca del Plata / Guaraní)',
+    lat: -23.077,
+    lon: -55.995,
+    ray: 'Rayo Esmeralda-Dorado de la Palabra Sagrada (Ñe\'ẽ Porã) & Sustancia Creadora (Jasuka)',
+    color: '#10b981',
+    vibrationalFreq: 528,
+    ecosystem: 'Bosque Atlántico del Alto Paraná / Cerros de arenisca y abrigos de Itaguy Guasu',
+    riversBorn: 'Nacientes de los ríos Apa, Aquidabán y afluentes del Río Paraguay hacia el Acuífero Guaraní',
+    purpose: 'El Ombligo de la Tierra y Cuna Cósmica de la Creación según el pueblo Paĩ Tavyterã. Aquí Ñande Ru Tenonde se auto-creó y manifestó el universo mediante el Jasuka (energía sutil primordial) y la palabra sagrada. Abrigo de arte rupestre milenario y corona espiritual septentrional del Acuífero Guaraní conectada al Polo Sur.',
+    teluricFlows: ['site_iguazu', 'intra_aurora', 'intra_erks', 'bio_plata', 'site_polo_sur_exacto'],
+    description: 'Santuario primordial de origen de la nación Guaraní; axis mundi que une el cielo, la selva y las aguas subterráneas del continente.'
+  },
+  {
+    id: 'site_lago_vostok',
+    name: 'Lago Vostok Subglacial (Cápsula de Agua Primigenia)',
+    shortName: '💧 Lago Vostok (-77.4°)',
+    category: 'sacred_site',
+    location: 'Meseta Antártica Oriental / Base Vostok (4.000m bajo el hielo)',
+    region: 'Antártida (Meseta Oriental)',
+    lat: -77.400,
+    lon: 106.840,
+    ray: 'Rayo Platino-Diamantino del Agua Cósmica Subglacial',
+    color: '#38bdf8',
+    vibrationalFreq: 963,
+    ecosystem: 'Lago de agua líquida pura aislado por más de 15 a 20 millones de años bajo extrema presión',
+    riversBorn: 'Flujos hidrotérmicos subglaciales profundos hacia el Océano Austral',
+    purpose: 'La mayor reserva de agua líquida fósil del planeta, sellada antes del inicio de la historia humana. Archivo molecular de la pureza primigenia de Gaia y antena resonadora del eje polar.',
+    teluricFlows: ['site_polo_sur_exacto', 'intra_polo_sur', 'site_monte_erebus', 'site_table_mountain'],
+    description: 'El santuario acuífero subglacial más antiguo de la Tierra, espejo subterráneo de la sabiduría de los orígenes.'
+  },
+  {
+    id: 'site_monte_erebus',
+    name: 'Monte Erebus (Volcán Sagrado de Fuego y Hielo)',
+    shortName: '🌋 Monte Erebus (-77.5°)',
+    category: 'sacred_site',
+    location: 'Isla de Ross, Mar de Ross, Antártida',
+    region: 'Antártida (Mar de Ross)',
+    lat: -77.530,
+    lon: 167.170,
+    ray: 'Rayo Fuego-Cristal / Alquimia de Fuego y Hielo',
+    color: '#f97316',
+    vibrationalFreq: 741,
+    ecosystem: 'Estratovolcán activo más austral de la Tierra con lago de lava permanente y torres de hielo',
+    riversBorn: 'Glaciares de Ross y corrientes marinas del Océano Austral',
+    purpose: 'El faro ígneo del casquete antártico: el matrimonio sagrado del fuego magmático interior con el manto criogénico polar. Calibra la energía térmica del núcleo terrestre con la atmósfera polar.',
+    teluricFlows: ['site_polo_sur_exacto', 'site_lago_vostok', 'site_aoraki_nz', 'bio_patagonia'],
+    description: 'Antorcha volcánica perpetua en el hielo austral; portal alquímico que conecta el núcleo de la Tierra con el cosmos.'
+  },
+  {
+    id: 'site_aoraki_nz',
+    name: 'Aoraki / Monte Cook (Altar de las Nieves de Aotearoa)',
+    shortName: '🏔️ Aoraki / Monte Cook',
+    category: 'sacred_site',
+    location: 'Alpes del Sur / Isla Sur (Te Waipounamu), Nueva Zelanda',
+    region: 'Oceanía (Aotearoa)',
+    lat: -43.595,
+    lon: 170.141,
+    ray: 'Rayo Blanco-Turquesa de los Hielos del Pacífico',
+    color: '#00e5ff',
+    vibrationalFreq: 528,
+    ecosystem: 'Glaciares alpinos (Tasman) y selva templada lluviosa austral',
+    riversBorn: 'Río Tasman y afluentes glaciares hacia el Mar de Tasmania y Océano Austral',
+    purpose: 'El ancestro sagrado más reverenciado de la tradición maorí en la Isla Sur. Pilar de conexión entre las nieves alpinas de Oceanía y el influjo del vórtice polar antártico que asciende por el Mar de Ross.',
+    teluricFlows: ['site_polo_sur_exacto', 'site_monte_erebus', 'site_uluru', 'bio_pacifico'],
+    description: 'Cumbre sagrada de Aotearoa que canaliza las corrientes polares del Pacífico Sur hacia la Polinesia.'
+  },
+  {
+    id: 'site_uluru',
+    name: 'Uluru & Kata Tjuta (Plexo Solar Planetario / Altar Rojo)',
+    shortName: '🔴 Uluru (Australia)',
+    category: 'sacred_site',
+    location: 'Parque Nacional Uluru-Kata Tjuta, Territorio del Norte, Australia',
+    region: 'Oceanía (Desierto Australiano)',
+    lat: -25.344,
+    lon: 131.036,
+    ray: 'Rayo Rojo-Dorado del Tiempo del Sueño (Tjukurpa)',
+    color: '#ef4444',
+    vibrationalFreq: 528,
+    ecosystem: 'Monolito gigante de arcosa en el corazón del desierto rojo australiano',
+    riversBorn: 'Pozos sagrados de agua perenne (Mutitjulu) y cuencas subterráneas',
+    purpose: 'El corazón telúrico y plexo solar de la red planetaria. Ancla viva del Tiempo del Sueño (Tjukurpa) y receptor del rayo cósmico austral transmitido desde el Polo Sur a través de Aotearoa y el Océano Índico.',
+    teluricFlows: ['site_aoraki_nz', 'site_polo_sur_exacto', 'site_table_mountain', 'bio_pacifico'],
+    description: 'El ombligo rojo del hemisferio sur: receptor solar y magnético que armoniza los cantos de la Tierra.'
+  },
+  {
+    id: 'site_table_mountain',
+    name: 'Table Mountain / Montaña de la Mesa (Vórtice del Cabo de Buena Esperanza)',
+    shortName: '⛰️ Table Mountain (Cabo)',
+    category: 'sacred_site',
+    location: 'Península del Cabo, Ciudad del Cabo, Sudáfrica',
+    region: 'África Austral',
+    lat: -33.957,
+    lon: 18.423,
+    ray: 'Rayo Dorado de la Síntesis Oceánica Atlántico-Índico',
+    color: '#f59e0b',
+    vibrationalFreq: 432,
+    ecosystem: 'Meseta arenisca milenaria de 330 millones de años con flora endémica del Fynbos',
+    riversBorn: 'Arroyos de la Península del Cabo hacia las bahías atlántica e índica',
+    purpose: 'El vórtice receptor meridional del continente africano. Punto donde convergen y se sintetizan las corrientes del Atlántico Sur y del Océano Índico, canalizando la energía telúrica del Polo Sur hacia el Gran Valle del Rift.',
+    teluricFlows: ['site_polo_sur_exacto', 'site_lago_vostok', 'bio_rift', 'site_uluru'],
+    description: 'La meseta guardiana del extremo sur de África, portal donde se abrazan los dos grandes océanos australes.'
   }
 ];
 
@@ -263,8 +405,18 @@ export const LEY_LINES_DATA = [
     color: '#00e5ff',
     width: 3.5,
     type: 'Gran Línea Ley Planetaria',
-    purpose: 'Conduce el flujo principal de energía vital y espiritual planetaria en la Nueva Era desde la Patagonia hasta Alaska.',
-    path: ['bio_patagonia', 'intra_isidris', 'intra_erks', 'site_uyuni', 'intra_titicaca', 'intra_paititi', 'intra_tayos', 'site_san_agustin', 'site_sierra_nevada', 'bio_mesoamerica', 'intra_shasta']
+    purpose: 'Conduce el flujo principal de energía vital y espiritual planetaria en la Nueva Era, enraizada en el Polo Sur Exacto y ascendiendo por la Patagonia hasta Alaska.',
+    path: ['site_polo_sur_exacto', 'bio_patagonia', 'intra_isidris', 'intra_erks', 'site_uyuni', 'intra_titicaca', 'intra_paititi', 'intra_tayos', 'site_san_agustin', 'site_sierra_nevada', 'bio_mesoamerica', 'intra_shasta']
+  },
+  {
+    id: 'ley_eje_axial_polar',
+    name: 'Eje Axial Polar Austral (Polo Sur Exacto ↔ Kundalini Andina)',
+    shortName: '⚡ Eje Axial Polar Austral (-90°)',
+    color: '#38bdf8',
+    width: 4.0,
+    type: 'Eje Axial de Anclaje Planetario',
+    purpose: 'Conexión sagrada directa entre el vórtice matemático del Polo Sur Exacto (-90°) y el despertar del Eje Kundalini Andino en Patagonia, Isidris y ERKS.',
+    path: ['site_polo_sur_exacto', 'intra_polo_sur', 'bio_patagonia', 'intra_isidris', 'intra_erks']
   },
   {
     id: 'ley_rios_voladores',
@@ -301,6 +453,46 @@ export const LEY_LINES_DATA = [
     type: 'Canal Primordial Intraterreno',
     purpose: 'Emisión de la frecuencia de síntesis y memoria cósmica hacia los grandes nodos montañosos del mundo.',
     path: ['intra_shamballa', 'bio_himalayas', 'bio_taiga']
+  },
+  {
+    id: 'ley_corredor_jasuka_guarani',
+    name: 'Corredor Sagrado Jasuka Venda & Acuífero Guaraní',
+    shortName: '🌿 Corredor Jasuka Venda ↔ Polo Sur',
+    color: '#10b981',
+    width: 3.8,
+    type: 'Corredor Hidro-Telúrico Ancestral',
+    purpose: 'Articula el origen cósmico del pueblo Guaraní en el Cerro Jasuka Venda (Amambay, Paraguay) con las aguas de Iguazú, Aurora, ERKS, la Patagonia Austral y el ancla criogénica del Polo Sur Exacto.',
+    path: ['site_polo_sur_exacto', 'bio_patagonia', 'intra_erks', 'intra_aurora', 'site_iguazu', 'site_jasuka_venda']
+  },
+  {
+    id: 'ley_eje_transoceanico_pacifico',
+    name: 'Eje Telúrico Austral Pacífico (Polo Sur ↔ Erebus ↔ Aoraki ↔ Uluru)',
+    shortName: '🌊 Eje Polar Austral Pacífico',
+    color: '#00e5ff',
+    width: 3.5,
+    type: 'Gran Línea Ley Transoceánica',
+    purpose: 'Línea ley transoceánica meridional que proyecta la pulsación polar antártica a través del Volcán Erebus, los glaciares de Aoraki en Aotearoa (Nueva Zelanda) y el monolito sagrado de Uluru en Australia.',
+    path: ['site_polo_sur_exacto', 'site_monte_erebus', 'site_aoraki_nz', 'site_uluru', 'bio_pacifico']
+  },
+  {
+    id: 'ley_eje_meridiano_atlantico_africa',
+    name: 'Eje Meridiano Polar-Africano (Polo Sur ↔ Vostok ↔ Table Mountain ↔ Rift)',
+    shortName: '⚡ Eje Polar-Africano Meridional',
+    color: '#f59e0b',
+    width: 3.2,
+    type: 'Eje Meridiano Intercontinental',
+    purpose: 'Conecta el vórtice del Polo Sur y las aguas primordiales del Lago Vostok con la Montaña de la Mesa en Sudáfrica y la columna vertebral del Valle del Rift.',
+    path: ['site_polo_sur_exacto', 'site_lago_vostok', 'site_table_mountain', 'bio_rift']
+  },
+  {
+    id: 'ley_anillo_antartico_primordial',
+    name: 'Anillo Telúrico Criogénico de la Antártida',
+    shortName: '❄️ Anillo Criogénico Antártico',
+    color: '#38bdf8',
+    width: 4.0,
+    type: 'Anillo Peripolar de Estabilidad Toroidal',
+    purpose: 'Circuito cerrado polar que estabiliza el vórtice toroidal antártico integrando el Polo Sur Geográfico, el Lago Vostok, el Monte Erebus y el salto hacia la Patagonia Austral.',
+    path: ['site_polo_sur_exacto', 'intra_polo_sur', 'site_lago_vostok', 'site_monte_erebus', 'bio_patagonia']
   }
 ];
 

@@ -146,6 +146,19 @@ export const SEED_TERRITORIES = [
     regenerativeFocus: 'Sumidero Global de Carbono, Conservación de Turberas y Bosque Antiguo',
     communityCircle: 'Guardianes de la Taiga',
     notes: 'Cinturón verde que abraza el hemisferio norte.'
+  },
+  {
+    idx: 11,
+    name: 'Biorregión Antártida & Polo Sur Geográfico Exacto',
+    territory: 'Meseta Polar Antártica / Domo C / Amundsen-Scott',
+    bioregionType: 'Montañas & Cabeceras de Cuenca',
+    archetype: 'Agua-Tierra / Éter',
+    lat: -90.000,
+    lon: 0.000,
+    synchronicFreq: 1080,
+    regenerativeFocus: 'Reserva Criogénica Primordial, Ancla Geomagnética y Regulación del Vórtice Polar',
+    communityCircle: 'Guardianes del Domo Polar Antártico',
+    notes: 'Vórtice meridional exacto de la Tierra (-90.000°). Ancla del eje de rotación planetario y raíz del Eje Kundalini transcontinental.'
   }
 ];
 

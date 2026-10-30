@@ -563,6 +563,10 @@
         🎯 Convergencias: <span id="txt-conv">ON</span>
       </button>
 
+      <button id="btn-toggle-volcanoes" class="btn-active" title="Mostrar/ocultar Volcanes Sagrados y Fuegos Telúricos">
+        🌋 Volcanes: <span id="txt-volcanoes">ON</span>
+      </button>
+
       <button id="btn-toggle-earth" class="btn-active" title="Mostrar/ocultar geografía del Planeta Tierra">
         🌍 Tierra: <span id="txt-earth">ON</span>
       </button>
@@ -573,6 +577,16 @@
 
       <button id="btn-toggle-rot" title="Alternar rotación automática">
         🔄 Rotación: <span id="txt-rot">ON</span>
+      </button>
+
+      <!-- Salto al Polo Sur Exacto -->
+      <button id="btn-focus-south-pole" style="background:rgba(0,229,255,0.18); border-color:var(--accent-cyan); color:#fff; font-weight:700;" title="Centrar cámara inmediatamente en el Polo Sur Geográfico Exacto (-90.0°)">
+        ❄️ Polo Sur (-90°)
+      </button>
+
+      <!-- Salto a Cerro Jasuka Venda -->
+      <button id="btn-focus-jasuka" style="background:rgba(16,185,129,0.18); border-color:#10b981; color:#fff; font-weight:700;" title="Centrar cámara inmediatamente en el Cerro Jasuka Venda (Amambay, Paraguay - Axis Mundi Guaraní)">
+        🌿 Jasuka Venda
       </button>
 
       <!-- Control de Zoom en Barra Superior -->
@@ -616,6 +630,7 @@
       <div class="dir-tab" id="tab-intraterrenas">🏛️ Intraterrenas</div>
       <div class="dir-tab" id="tab-sacred">💧 Agua Sagrada</div>
       <div class="dir-tab" id="tab-leylines">⚡ Líneas Ley</div>
+      <div class="dir-tab" id="tab-volcanoes">🌋 Volcanes</div>
     </div>
 
     <!-- Lista Desplazable de Elementos -->
@@ -964,6 +979,22 @@
         purpose: 'Gran filtro y sumidero global de carbono; preservación de turberas y estabilidad climática del hemisferio norte.',
         interconnectionsDesc: 'Canal telúrico con Shamballa y los Himalayas.',
         connectedIds: ['intra_shamballa', 'bio_himalayas']
+      },
+      {
+        id: 'bio_polo_sur',
+        name: 'Biorregión Antártida & Polo Sur Geográfico Exacto',
+        shortName: '❄️ Polo Sur Exacto (-90°)',
+        category: 'bioregion',
+        territory: 'Meseta Polar Antártica / Domo C / Amundsen-Scott',
+        region: 'Antártida',
+        lat: -90.000, lon: 0.000,
+        color: '#00e5ff',
+        freq: '1080 Hz / 432 Hz',
+        ray: 'Rayo Platino-Diamantino del Ancla Terrestre & Cristal Primigenio',
+        circle: 'Custodios del Domo de Hielo & Matriz Criogénica',
+        purpose: 'Vórtice axial meridional absoluto de la Tierra (-90.000°). Custodio de la memoria criogénica más pura y arcaica del planeta (hielos de millones de años). Ancla del eje de rotación terrestre, generador del campo toroidal planetario y condensador del frío sagrado que estabiliza el equilibrio térmico global.',
+        interconnectionsDesc: 'Punto de partida y ancla meridional del Eje Kundalini Andino, del Eje Axial Planetario, de la Ruta Jasuka-Acuífero Guaraní y de los corredores polares hacia Aotearoa (Nueva Zelanda), Uluru y Sudáfrica.',
+        connectedIds: ['bio_patagonia', 'intra_polo_sur', 'site_jasuka_venda', 'site_lago_vostok', 'site_monte_erebus', 'site_aoraki_nz', 'site_table_mountain', 'site_uluru']
       }
     ];
 
@@ -1096,6 +1127,22 @@
         purpose: 'Corazón directriz de la Red de Agartha y emisión del Plan Evolutivo para la Tierra; irradiación de luz de síntesis universal.',
         interconnectionsDesc: 'Nutre la espina de los Himalayas y las estepas boreales.',
         connectedIds: ['bio_himalayas', 'bio_taiga']
+      },
+      {
+        id: 'intra_polo_sur',
+        name: 'Portal Diamantino del Polo Sur (Rainbow City / Domo Austral)',
+        shortName: '🏛️ Portal Polo Sur (-90°)',
+        category: 'intraterrena',
+        territory: 'Meseta Polar Subglacial / Domo A-C, Antártida',
+        region: 'Antártida',
+        lat: -90.000, lon: 0.000,
+        color: '#38bdf8',
+        freq: '963 Hz',
+        ray: 'Rayo Arcoíris Diamantino de la Resonancia Polar',
+        circle: 'Hermandad de los Hielos Eternos & Guardianes del Ancla',
+        purpose: 'Centro intraterreno y portal dimensional en el punto meridional del eje axial terrestre. Regula el flujo de ondas de plasma y preserva las bibliotecas de luz antárticas bajo el manto de hielo.',
+        interconnectionsDesc: 'Conecta con la Biorregión de Patagonia Austral (-50.5°), el Lago Vostok, el Monte Erebus, el Cerro Jasuka Venda en el Acuífero Guaraní, Aoraki en Aotearoa y Table Mountain en Sudáfrica.',
+        connectedIds: ['bio_patagonia', 'site_polo_sur_exacto', 'site_lago_vostok', 'site_monte_erebus', 'site_jasuka_venda', 'site_aoraki_nz', 'site_table_mountain']
       }
     ];
 
@@ -1208,6 +1255,334 @@
         purpose: 'El "Río de los Siete Colores", punto de encrucijada biocósmica entre el Escudo Guayanés, la Cordillera Oriental y la Hilea Amazónica. Pulsación de vida vegetal cromática que vibra al unísono con el sol.',
         interconnectionsDesc: 'Canal de conexión entre San Agustín (Kusiyaku) y la planicie amazónica hacia Paititi.',
         connectedIds: ['site_san_agustin', 'bio_amazonas']
+      },
+      {
+        id: 'site_polo_sur_exacto',
+        name: 'Polo Sur Geográfico Exacto (Vórtice Polar del Hielo Sagrado)',
+        shortName: '❄️ Polo Sur Exacto (-90°)',
+        category: 'sacred_site',
+        territory: 'Polo Sur Geográfico / Inlandsis Antártico (2.835m)',
+        region: 'Antártida (Vórtice Polar)',
+        lat: -90.000, lon: 0.000,
+        color: '#00e5ff',
+        freq: '1080 Hz',
+        ray: 'Rayo Cristalino Diamantino / Foco Polar Primordial',
+        circle: 'Centinelas del Eje de la Tierra',
+        ecosystem: 'Desierto polar hiperárido de hielo / Manto de 3 km de espesor',
+        riversBorn: 'Corrientes abisales termohalinas oceánicas profundas',
+        purpose: 'El punto geográfico exacto donde convergen los 360 meridianos del planeta Tierra. Punto matemático y geodésico cero de la latitud sur, guardián del silencio criogénico y generador del campo toroidal planetario.',
+        interconnectionsDesc: 'Punto geodésico cero y vórtice axial. Conecta con la Patagonia Austral, Lago Vostok, Monte Erebus, Cerro Jasuka Venda (Paraguay), Aoraki (Aotearoa), Table Mountain (Sudáfrica) y Uluru (Australia).',
+        connectedIds: ['bio_patagonia', 'intra_polo_sur', 'site_jasuka_venda', 'site_lago_vostok', 'site_monte_erebus', 'site_aoraki_nz', 'site_table_mountain', 'site_uluru']
+      },
+      {
+        id: 'site_jasuka_venda',
+        name: 'Cerro Jasuka Venda / Cerro Guasú (Yvyty Jasuka Venda)',
+        shortName: '🌿 Jasuka Venda (Amambay)',
+        category: 'sacred_site',
+        territory: 'Cordillera del Amambay / Yby Ya\'u - Capitán Bado, Paraguay',
+        region: 'Sudamérica (Cuenca del Plata / Guaraní)',
+        lat: -23.077, lon: -55.995,
+        color: '#10b981',
+        freq: '528 Hz',
+        ray: 'Rayo Esmeralda-Dorado de la Palabra Sagrada (Ñe\'ẽ Porã) & Sustancia Creadora (Jasuka)',
+        circle: 'Círculo de Guardianes Paĩ Tavyterã & Tekoha Guasu',
+        ecosystem: 'Bosque Atlántico del Alto Paraná / Cerros de arenisca y abrigos de Itaguy Guasu',
+        riversBorn: 'Nacientes de los ríos Apa, Aquidabán y afluentes del Río Paraguay hacia el Acuífero Guaraní',
+        purpose: 'El Ombligo de la Tierra y Cuna Cósmica de la Creación según el pueblo Paĩ Tavyterã. Aquí Ñande Ru Tenonde se auto-creó y manifestó el universo mediante el Jasuka (energía creadora primordial) y la palabra sagrada. Abrigo de arte rupestre milenario y corona espiritual septentrional del Acuífero Guaraní conectada al Polo Sur.',
+        interconnectionsDesc: 'Conexión sagrada con las Cataratas del Iguazú, Aurora, ERKS, la Cuenca del Plata y el enraizamiento al Polo Sur Exacto.',
+        connectedIds: ['site_iguazu', 'intra_aurora', 'intra_erks', 'bio_plata', 'site_polo_sur_exacto']
+      },
+      {
+        id: 'site_lago_vostok',
+        name: 'Lago Vostok Subglacial (Cápsula de Agua Primigenia)',
+        shortName: '💧 Lago Vostok (-77.4°)',
+        category: 'sacred_site',
+        territory: 'Meseta Antártica Oriental / Base Vostok (4.000m bajo el hielo)',
+        region: 'Antártida (Meseta Oriental)',
+        lat: -77.400, lon: 106.840,
+        color: '#38bdf8',
+        freq: '963 Hz',
+        ray: 'Rayo Platino-Diamantino del Agua Cósmica Subglacial',
+        circle: 'Custodios de la Memoria Hídrica Primordial',
+        ecosystem: 'Lago de agua líquida pura aislado por más de 15 a 20 millones de años bajo extrema presión',
+        riversBorn: 'Flujos hidrotérmicos subglaciales profundos hacia el Océano Austral',
+        purpose: 'La mayor reserva de agua líquida fósil del planeta, sellada antes de la historia humana moderna. Archivo molecular de la pureza primigenia de Gaia y antena resonadora del eje polar.',
+        interconnectionsDesc: 'Canal telúrico con el Polo Sur Geográfico Exacto, el Monte Erebus y la Montaña de la Mesa en Sudáfrica.',
+        connectedIds: ['site_polo_sur_exacto', 'intra_polo_sur', 'site_monte_erebus', 'site_table_mountain']
+      },
+      {
+        id: 'site_monte_erebus',
+        name: 'Monte Erebus (Volcán Sagrado de Fuego y Hielo)',
+        shortName: '🌋 Monte Erebus (-77.5°)',
+        category: 'sacred_site',
+        territory: 'Isla de Ross, Mar de Ross, Antártida',
+        region: 'Antártida (Mar de Ross)',
+        lat: -77.530, lon: 167.170,
+        color: '#f97316',
+        freq: '741 Hz',
+        ray: 'Rayo Fuego-Cristal / Alquimia de Fuego y Hielo',
+        circle: 'Vigilantes de la Llama Polar',
+        ecosystem: 'Estratovolcán activo más austral de la Tierra con lago de lava permanente y torres de hielo',
+        riversBorn: 'Glaciares de Ross y corrientes marinas del Océano Austral',
+        purpose: 'El faro ígneo del casquete antártico: el matrimonio sagrado del fuego magmático interior con el manto criogénico polar. Calibra la energía térmica del núcleo terrestre con la atmósfera polar.',
+        interconnectionsDesc: 'Vínculo ígneo-polar con el Polo Sur Geográfico, el Lago Vostok, Aoraki (Nueva Zelanda) y la Patagonia Austral.',
+        connectedIds: ['site_polo_sur_exacto', 'site_lago_vostok', 'site_aoraki_nz', 'bio_patagonia']
+      },
+      {
+        id: 'site_aoraki_nz',
+        name: 'Aoraki / Monte Cook (Altar de las Nieves de Aotearoa)',
+        shortName: '🏔️ Aoraki / Monte Cook',
+        category: 'sacred_site',
+        territory: 'Alpes del Sur / Isla Sur (Te Waipounamu), Nueva Zelanda',
+        region: 'Oceanía (Aotearoa)',
+        lat: -43.595, lon: 170.141,
+        color: '#00e5ff',
+        freq: '528 Hz',
+        ray: 'Rayo Blanco-Turquesa de los Hielos del Pacífico',
+        circle: 'Guardianes del Waitaha & Ngāi Tahu',
+        ecosystem: 'Glaciares alpinos (Tasman) y selva templada lluviosa austral',
+        riversBorn: 'Río Tasman y afluentes glaciares hacia el Mar de Tasmania y Océano Austral',
+        purpose: 'El ancestro sagrado más reverenciado de la tradición maorí en la Isla Sur. Pilar de conexión entre las nieves alpinas de Oceanía y el influjo del vórtice polar antártico que asciende por el Mar de Ross.',
+        interconnectionsDesc: 'Puente oceánico entre el Polo Sur Exacto, el Monte Erebus, Uluru y la red de la Polinesia.',
+        connectedIds: ['site_polo_sur_exacto', 'site_monte_erebus', 'site_uluru', 'bio_pacifico']
+      },
+      {
+        id: 'site_uluru',
+        name: 'Uluru & Kata Tjuta (Plexo Solar Planetario / Altar Rojo)',
+        shortName: '🔴 Uluru (Australia)',
+        category: 'sacred_site',
+        territory: 'Parque Nacional Uluru-Kata Tjuta, Territorio del Norte, Australia',
+        region: 'Oceanía (Desierto Australiano)',
+        lat: -25.344, lon: 131.036,
+        color: '#ef4444',
+        freq: '528 Hz',
+        ray: 'Rayo Rojo-Dorado del Tiempo del Sueño (Tjukurpa)',
+        circle: 'Anangu Traditional Owners & Custodios del Tiempo del Sueño',
+        ecosystem: 'Monolito gigante de arcosa en el corazón del desierto rojo australiano',
+        riversBorn: 'Pozos sagrados de agua perenne (Mutitjulu) y cuencas subterráneas',
+        purpose: 'El corazón telúrico y plexo solar de la red planetaria. Ancla viva del Tiempo del Sueño (Tjukurpa) y receptor del rayo cósmico austral transmitido desde el Polo Sur a través de Aotearoa y el Océano Índico.',
+        interconnectionsDesc: 'Receptor solar de la corriente antártica a través de Aotearoa y puente con la Montaña de la Mesa en Sudáfrica.',
+        connectedIds: ['site_aoraki_nz', 'site_polo_sur_exacto', 'site_table_mountain', 'bio_pacifico']
+      },
+      {
+        id: 'site_table_mountain',
+        name: 'Table Mountain / Montaña de la Mesa (Vórtice del Cabo de Buena Esperanza)',
+        shortName: '⛰️ Table Mountain (Cabo)',
+        category: 'sacred_site',
+        territory: 'Península del Cabo, Ciudad del Cabo, Sudáfrica',
+        region: 'África Austral',
+        lat: -33.957, lon: 18.423,
+        color: '#f59e0b',
+        freq: '432 Hz',
+        ray: 'Rayo Dorado de la Síntesis Oceánica Atlántico-Índico',
+        circle: 'Guardianes del Reino Floral del Cabo (Fynbos)',
+        ecosystem: 'Meseta arenisca milenaria de 330 millones de años con flora endémica del Fynbos',
+        riversBorn: 'Arroyos de la Península del Cabo hacia las bahías atlántica e índica',
+        purpose: 'El vórtice receptor meridional del continente africano. Punto donde convergen y se sintetizan las corrientes del Atlántico Sur y del Océano Índico, canalizando la energía telúrica del Polo Sur hacia el Gran Valle del Rift.',
+        interconnectionsDesc: 'Conexión directa entre el Polo Sur Exacto, el Lago Vostok, el Valle del Rift y Uluru.',
+        connectedIds: ['site_polo_sur_exacto', 'site_lago_vostok', 'bio_rift', 'site_uluru']
+      }
+    ];
+
+    // 3b. Volcanes Sagrados y Fuegos Telúricos
+    const VOLCANOES = [
+      {
+        id: 'volc_licancabur', name: 'Volcán Licancabur', shortName: '🌋 Licancabur',
+        category: 'volcano', territory: 'Desierto de Atacama, frontera Chile-Bolivia',
+        region: 'Sudamérica', lat: -22.833, lon: -67.883, color: '#ff4422',
+        freq: '396 Hz', ray: 'Fuego Primordial Andino',
+        circle: 'Guardianes del Fuego Atacameño',
+        elevation: '5916 m', volcanoType: 'Estratovolcán',
+        purpose: 'Centinela de fuego del Desierto de Atacama, el lugar más seco del planeta. Sus aguas termales de cumbre, a casi 6000m, albergan vida extremófila — testimonio del fuego creador que nutre incluso en la aridez absoluta.',
+        interconnectionsDesc: 'Eje ígneo con la Biorregión Andina; portal de transmutación térmica conectado con el Lago Titicaca.',
+        connectedIds: ['bio_andes', 'intra_titicaca']
+      },
+      {
+        id: 'volc_cotopaxi', name: 'Volcán Cotopaxi', shortName: '🌋 Cotopaxi',
+        category: 'volcano', territory: 'Cordillera Oriental, Ecuador',
+        region: 'Sudamérica', lat: -0.677, lon: -78.436, color: '#ff4422',
+        freq: '417 Hz', ray: 'Fuego Ecuatorial de Transmutación',
+        circle: 'Círculo del Fuego Equinoccial',
+        elevation: '5897 m', volcanoType: 'Estratovolcán activo',
+        purpose: 'Uno de los volcanes activos más altos del mundo, guardián de la línea ecuatorial. Su fuego purificador genera glaciares que alimentan ríos sagrados hacia la Amazonía.',
+        interconnectionsDesc: 'Eje vertical entre el cinturón de fuego ecuatorial y la Cuenca Amazónica.',
+        connectedIds: ['bio_amazonas', 'bio_andes']
+      },
+      {
+        id: 'volc_popocatepetl', name: 'Volcán Popocatépetl', shortName: '🌋 Popocatépetl',
+        category: 'volcano', territory: 'Puebla/Estado de México, México',
+        region: 'Mesoamérica', lat: 19.023, lon: -98.628, color: '#ff6633',
+        freq: '432 Hz', ray: 'Fuego Sagrado Mexica',
+        circle: 'Guardianes del Fuego Nahua',
+        elevation: '5426 m', volcanoType: 'Estratovolcán activo',
+        purpose: 'El "Cerro que Humea" de la mitología Nahua. Junto a Iztaccíhuatl forma la pareja cósmica de fuego y hielo que custodia el Valle de México. Su actividad constante recuerda el latido de fuego del corazón mesoamericano.',
+        interconnectionsDesc: 'Eje del Cinturón Volcánico Transmexicano; conectado con las pirámides de Teotihuacán y la energía solar de Chichén Itzá.',
+        connectedIds: ['bio_mesoamerica']
+      },
+      {
+        id: 'volc_kilimanjaro', name: 'Monte Kilimanjaro', shortName: '🌋 Kilimanjaro',
+        category: 'volcano', territory: 'Tanzania, África Oriental',
+        region: 'África', lat: -3.076, lon: 37.353, color: '#ff8844',
+        freq: '528 Hz', ray: 'Fuego Solar Africano',
+        circle: 'Guardianes de las Nieves Eternas del Rift',
+        elevation: '5895 m', volcanoType: 'Estratovolcán dormido',
+        purpose: 'La montaña más alta de África, donde el fuego volcánico ancestral sostiene glaciares ecuatoriales en retroceso. Corona energética del Gran Valle del Rift, punto de convergencia del fuego profundo con las aguas celestes.',
+        interconnectionsDesc: 'Corona del Gran Rift Africano; eje con el Monte Kenia, el Lago Victoria y el Nilo Blanco.',
+        connectedIds: ['bio_rift']
+      },
+      {
+        id: 'volc_vesuvio', name: 'Monte Vesubio', shortName: '🌋 Vesubio',
+        category: 'volcano', territory: 'Nápoles, Italia',
+        region: 'Europa', lat: 40.821, lon: 14.426, color: '#ff5533',
+        freq: '639 Hz', ray: 'Fuego Mediterráneo de la Memoria',
+        circle: 'Guardianes del Fuego Romano',
+        elevation: '1281 m', volcanoType: 'Estratovolcán activo',
+        purpose: 'El volcán más famoso de Europa, cuyo fuego sepultó y preservó Pompeya como cápsula del tiempo. Su actividad marca el pulso tectónico del Mediterráneo central, recordando que la destrucción y la preservación son facetas del mismo fuego.',
+        interconnectionsDesc: 'Eje del arco volcánico mediterráneo con el Etna y el Stromboli; conectado con la cultura solar griega.',
+        connectedIds: []
+      },
+      {
+        id: 'volc_etna', name: 'Monte Etna', shortName: '🌋 Etna',
+        category: 'volcano', territory: 'Sicilia, Italia',
+        region: 'Europa', lat: 37.751, lon: 14.994, color: '#ff5533',
+        freq: '741 Hz', ray: 'Fuego de la Forja Cíclope',
+        circle: 'La Forja de Hefesto',
+        elevation: '3357 m', volcanoType: 'Estratovolcán activo',
+        purpose: 'El volcán más activo de Europa, la legendaria forja de Hefesto. Su fuego permanente ilumina el Mediterráneo como faro telúrico, alimentando los suelos más fértiles de Sicilia con sus cenizas volcánicas.',
+        interconnectionsDesc: 'Gemelo de fuego del Vesubio en el arco volcánico tirrénico.',
+        connectedIds: ['volc_vesuvio']
+      },
+      {
+        id: 'volc_fuji', name: 'Monte Fuji', shortName: '🌋 Fuji-san',
+        category: 'volcano', territory: 'Honshu, Japón',
+        region: 'Asia Oriental', lat: 35.361, lon: 138.727, color: '#ff6644',
+        freq: '852 Hz', ray: 'Fuego Sagrado del Sol Naciente',
+        circle: 'Guardianes del Fuego Sintoísta',
+        elevation: '3776 m', volcanoType: 'Estratovolcán activo',
+        purpose: 'La montaña sagrada de Japón, morada de la diosa Konohanasakuya-hime. Su silueta perfecta es el símbolo del equilibrio entre cielo, tierra y fuego. Punto de peregrinación donde la contemplación del amanecer disuelve la ilusión de separación.',
+        interconnectionsDesc: 'Nodo central del Anillo de Fuego del Pacífico; conectado con el eje volcánico Kuril-Kamchatka.',
+        connectedIds: []
+      },
+      {
+        id: 'volc_krakatoa', name: 'Krakatoa (Anak Krakatau)', shortName: '🌋 Krakatoa',
+        category: 'volcano', territory: 'Estrecho de Sunda, Indonesia',
+        region: 'Sudeste Asiático', lat: -6.102, lon: 105.423, color: '#ff3311',
+        freq: '396 Hz', ray: 'Fuego del Renacimiento Oceánico',
+        circle: 'Guardianes del Estrecho de Fuego',
+        elevation: '813 m', volcanoType: 'Caldera activa',
+        purpose: 'Hijo del volcán cuya erupción de 1883 fue escuchada a 4800 km. Anak Krakatau ("hijo de Krakatoa") nace y crece del mar como testimonio del ciclo eterno de destrucción y renacimiento. Su energía conecta las placas tectónicas Euroasiática e Indo-Australiana.',
+        interconnectionsDesc: 'Eslabón central del Anillo de Fuego entre el arco de Sunda y el eje volcánico javanés.',
+        connectedIds: ['volc_fuji']
+      },
+      {
+        id: 'volc_teide', name: 'Volcán Teide', shortName: '🌋 Teide',
+        category: 'volcano', territory: 'Tenerife, Islas Canarias, España',
+        region: 'Atlántico / Macaronesia', lat: 28.272, lon: -16.642, color: '#ff7744',
+        freq: '432 Hz', ray: 'Fuego Atlante del Archipiélago',
+        circle: 'Guardianes del Portal Atlántico',
+        elevation: '3715 m', volcanoType: 'Estratovolcán',
+        purpose: 'El pico más alto de España y las islas atlánticas. Para los guanches era Echeyde, morada del demonio Guayota. Su silueta emerge del océano como remanente volcánico de la dorsal atlántica, puente entre Europa, África y las leyendas de la Atlántida.',
+        interconnectionsDesc: 'Portal atlántico entre África y Europa; eco de la dorsal mesoatlántica.',
+        connectedIds: []
+      },
+      {
+        id: 'volc_erebus', name: 'Monte Erebus', shortName: '🌋 Erebus',
+        category: 'volcano', territory: 'Isla Ross, Antártida',
+        region: 'Antártida', lat: -77.528, lon: 167.170, color: '#ff2200',
+        freq: '174 Hz', ray: 'Fuego Primordial Antártico',
+        circle: 'Centinelas del Fuego Polar',
+        elevation: '3794 m', volcanoType: 'Estratovolcán activo',
+        purpose: 'El volcán activo más austral del planeta. Su lago de lava permanente arde bajo los hielos antárticos, demostrando que el fuego interior de Gaia alcanza hasta los confines helados. Nombrado como el dios primordial de la oscuridad.',
+        interconnectionsDesc: 'Ancla de fuego del continente antártico; conectado con el Polo Sur y el Lago Vostok subglacial.',
+        connectedIds: ['site_polo_sur_exacto', 'site_lago_vostok']
+      },
+      {
+        id: 'volc_chimborazo', name: 'Volcán Chimborazo', shortName: '🌋 Chimborazo',
+        category: 'volcano', territory: 'Provincia de Chimborazo, Ecuador',
+        region: 'Sudamérica', lat: -1.469, lon: -78.816, color: '#ff5544',
+        freq: '528 Hz', ray: 'Fuego Cósmico Ecuatorial',
+        circle: 'Guardián de la Cumbre Más Cercana al Sol',
+        elevation: '6263 m', volcanoType: 'Estratovolcán',
+        purpose: 'El punto más alejado del centro de la Tierra y más cercano al Sol por el abultamiento ecuatorial. Su cumbre es, geométricamente, la cima del planeta. Taita Chimborazo es padre de las aguas y los vientos en la cosmovisión andina ecuatoriana.',
+        interconnectionsDesc: 'Eje ígneo ecuatorial con el Cotopaxi; conectado con la Amazonía a través de sus deshielos.',
+        connectedIds: ['volc_cotopaxi', 'bio_amazonas']
+      },
+      {
+        id: 'volc_lanin', name: 'Volcán Lanín', shortName: '🌋 Lanín',
+        category: 'volcano', territory: 'Neuquén, frontera Argentina-Chile',
+        region: 'Sudamérica', lat: -39.638, lon: -71.503, color: '#ff6655',
+        freq: '432 Hz', ray: 'Fuego de la Araucanía Sagrada',
+        circle: 'Guardianes Mapuche del Fuego Patagónico',
+        elevation: '3776 m', volcanoType: 'Estratovolcán',
+        purpose: 'Volcán sagrado del pueblo Mapuche, custodio de los bosques de araucarias milenarias. Su cono perfecto cubierto de glaciares conecta el fuego interior con las aguas del Lago Huechulafquen. Pilar energético de la Patagonia norte.',
+        interconnectionsDesc: 'Eje de fuego patagónico norte; conectado con la Biorregión Patagonia y los bosques de araucarias.',
+        connectedIds: ['bio_patagonia', 'bio_andes']
+      },
+      {
+        id: 'volc_osorno', name: 'Volcán Osorno', shortName: '🌋 Osorno',
+        category: 'volcano', territory: 'Los Lagos, Chile',
+        region: 'Sudamérica', lat: -41.108, lon: -72.493, color: '#ff6655',
+        freq: '417 Hz', ray: 'Fuego del Lago Esmeralda',
+        circle: 'Guardianes del Bosque Valdiviano',
+        elevation: '2652 m', volcanoType: 'Estratovolcán',
+        purpose: 'Conocido como el "Fuji de Sudamérica" por su cono simétrico perfecto. Se alza sobre el Lago Llanquihue, reflejándose en sus aguas como espejo del fuego cósmico. Guardián del bosque valdiviano, el más antiguo y húmedo del continente.',
+        interconnectionsDesc: 'Par volcánico con el Lanín en el arco de fuego patagónico; nutre los bosques valdivianos.',
+        connectedIds: ['volc_lanin', 'bio_patagonia']
+      },
+      {
+        id: 'volc_villarrica', name: 'Volcán Villarrica (Ruka Pillán)', shortName: '🌋 Villarrica',
+        category: 'volcano', territory: 'Araucanía, Chile',
+        region: 'Sudamérica', lat: -39.42, lon: -71.93, color: '#ff3322',
+        freq: '396 Hz', ray: 'Fuego Vivo del Pillán',
+        circle: 'Morada del Espíritu del Fuego Mapuche',
+        elevation: '2847 m', volcanoType: 'Estratovolcán activo',
+        purpose: 'Ruka Pillán, "la casa del espíritu del fuego" en Mapudungún. Uno de los volcanes más activos de Sudamérica, con un lago de lava permanente en su cráter. Su fuego perpetuo alimenta las aguas termales sagradas de la región mapuche.',
+        interconnectionsDesc: 'Eje activo del arco volcánico sur-andino con Lanín y Osorno; alimenta termas sagradas.',
+        connectedIds: ['volc_lanin', 'volc_osorno']
+      },
+      {
+        id: 'volc_mauna_kea', name: 'Mauna Kea', shortName: '🌋 Mauna Kea',
+        category: 'volcano', territory: 'Isla Grande, Hawái, EE.UU.',
+        region: 'Oceanía / Pacífico', lat: 19.821, lon: -155.468, color: '#ff8855',
+        freq: '963 Hz', ray: 'Fuego del Ombligo del Pacífico',
+        circle: 'Guardianes Hawaianos del Piko del Mundo',
+        elevation: '4207 m (10203 m desde el fondo oceánico)', volcanoType: 'Volcán escudo dormido',
+        purpose: 'La montaña más alta del planeta medida desde su base oceánica (10.203 m). Para los hawaianos nativos es Mauna a Wākea, hijo del dios del cielo. Su cumbre conecta el fuego profundo del manto con la bóveda celeste, siendo el punto más cercano al cosmos desde el Pacífico.',
+        interconnectionsDesc: 'Centro del punto caliente hawaiano; nodo del triángulo polinésico con Aotearoa y Rapa Nui.',
+        connectedIds: ['bio_pacifico']
+      },
+      {
+        id: 'volc_pinatubo', name: 'Monte Pinatubo', shortName: '🌋 Pinatubo',
+        category: 'volcano', territory: 'Luzón, Filipinas',
+        region: 'Sudeste Asiático', lat: 15.143, lon: 120.350, color: '#ff4433',
+        freq: '417 Hz', ray: 'Fuego Purificador del Pacífico Occidental',
+        circle: 'Guardianes Aeta del Fuego',
+        elevation: '1486 m', volcanoType: 'Estratovolcán activo',
+        purpose: 'Su erupción de 1991 fue la segunda más grande del siglo XX, enfriando temporalmente el clima global. Demostró el poder del fuego volcánico para reconfigurar la atmósfera planetaria. El lago de cráter turquesa que lo corona simboliza la regeneración.',
+        interconnectionsDesc: 'Arco volcánico filipino; conectado con Krakatoa a través de la subducción del Pacífico occidental.',
+        connectedIds: ['volc_krakatoa']
+      },
+      {
+        id: 'volc_elbrus', name: 'Monte Elbrus', shortName: '🌋 Elbrus',
+        category: 'volcano', territory: 'Cáucaso, Rusia',
+        region: 'Eurasia', lat: 43.355, lon: 42.439, color: '#ff7766',
+        freq: '741 Hz', ray: 'Fuego del Cáucaso Ancestral',
+        circle: 'Guardianes de la Montaña de Prometeo',
+        elevation: '5642 m', volcanoType: 'Estratovolcán dormido',
+        purpose: 'El pico más alto de Europa y el Cáucaso, donde según la mitología griega Prometeo fue encadenado por robar el fuego divino. Sus dos cumbres gemelas coronadas de hielo eterno guardan el fuego dormido que regaló la conciencia a la humanidad.',
+        interconnectionsDesc: 'Corona del Cáucaso; puente entre las placas euroasiática y arábiga.',
+        connectedIds: []
+      },
+      {
+        id: 'volc_tungurahua', name: 'Volcán Tungurahua', shortName: '🌋 Tungurahua',
+        category: 'volcano', territory: 'Baños de Agua Santa, Ecuador',
+        region: 'Sudamérica', lat: -1.467, lon: -78.442, color: '#ff3322',
+        freq: '396 Hz', ray: 'Garganta de Fuego Andina',
+        circle: 'Guardianes de las Aguas Termales Sagradas',
+        elevation: '5023 m', volcanoType: 'Estratovolcán activo',
+        purpose: '"Garganta de Fuego" en Quechua. Su actividad alimenta las fuentes termales sagradas de Baños, donde el fuego subterráneo calienta el agua que cura. Ejemplo vivo de la alquimia entre fuego y agua que los pueblos andinos veneran como sanación.',
+        interconnectionsDesc: 'Triada volcánica ecuatoriana con Cotopaxi y Chimborazo; alimenta las termas de Baños.',
+        connectedIds: ['volc_cotopaxi', 'volc_chimborazo']
       }
     ];
 
@@ -1229,9 +1604,19 @@
         shortName: '⚡ Eje Kundalini Andino',
         category: 'leyline',
         color: '#00e5ff',
-        nodes: ['bio_patagonia', 'intra_isidris', 'intra_erks', 'intra_titicaca', 'intra_paititi', 'intra_tayos', 'bio_mesoamerica', 'intra_shasta'],
-        purpose: 'Conduce el flujo de energía vital y espiritual de la Nueva Era a lo largo de toda la cordillera americana.',
-        interconnectionsDesc: 'Alinea los centros sagrados de Patagonia, Isidris, ERKS, Titicaca, Paititi, Tayos y Shasta.'
+        nodes: ['site_polo_sur_exacto', 'bio_patagonia', 'intra_isidris', 'intra_erks', 'intra_titicaca', 'intra_paititi', 'intra_tayos', 'bio_mesoamerica', 'intra_shasta'],
+        purpose: 'Conduce el flujo de energía vital y espiritual de la Nueva Era, enraizada en el Polo Sur Exacto y ascendiendo por la cordillera americana.',
+        interconnectionsDesc: 'Alinea el Polo Sur con Patagonia, Isidris, ERKS, Titicaca, Paititi, Tayos y Shasta.'
+      },
+      {
+        id: 'ley_eje_axial_polar',
+        name: 'Eje Axial Polar Austral (Polo Sur Exacto ↔ Kundalini Andina)',
+        shortName: '⚡ Eje Axial Polar Austral (-90°)',
+        category: 'leyline',
+        color: '#38bdf8',
+        nodes: ['site_polo_sur_exacto', 'intra_polo_sur', 'bio_patagonia', 'intra_isidris', 'intra_erks'],
+        purpose: 'Conexión sagrada directa entre el vórtice matemático del Polo Sur Exacto (-90°) y el despertar del Eje Kundalini Andino en Patagonia, Isidris y ERKS.',
+        interconnectionsDesc: 'Polo Sur Exacto (-90°) → Portal Diamantino → Patagonia Austral (-50.5°) → Isidris (-32.9°) → ERKS (-30.8°).'
       },
       {
         id: 'ley_rios_acuifero',
@@ -1252,6 +1637,46 @@
         nodes: ['bio_mediterraneo', 'bio_rift', 'bio_himalayas'],
         purpose: 'Alineación de santuarios solares desde Europa hasta los Himalayas.',
         interconnectionsDesc: 'Conecta el Mediterráneo con África y Asia central.'
+      },
+      {
+        id: 'ley_corredor_jasuka_guarani',
+        name: 'Corredor Sagrado Jasuka Venda & Acuífero Guaraní',
+        shortName: '🌿 Corredor Jasuka Venda ↔ Polo Sur',
+        category: 'leyline',
+        color: '#10b981',
+        nodes: ['site_polo_sur_exacto', 'bio_patagonia', 'intra_erks', 'intra_aurora', 'site_iguazu', 'site_jasuka_venda'],
+        purpose: 'Articula el origen cósmico del pueblo Guaraní en el Cerro Jasuka Venda (Amambay, Paraguay) con las aguas de Iguazú, Aurora, ERKS, la Patagonia Austral y el ancla criogénica del Polo Sur Exacto.',
+        interconnectionsDesc: 'Polo Sur Exacto (-90°) → Patagonia Austral (-50.5°) → ERKS (-30.8°) → Aurora (-31.4°) → Cataratas del Iguazú (-25.7°) → Cerro Jasuka Venda (-23.1°).'
+      },
+      {
+        id: 'ley_eje_transoceanico_pacifico',
+        name: 'Eje Telúrico Austral Pacífico (Polo Sur ↔ Erebus ↔ Aoraki ↔ Uluru)',
+        shortName: '🌊 Eje Polar Austral Pacífico',
+        category: 'leyline',
+        color: '#00e5ff',
+        nodes: ['site_polo_sur_exacto', 'site_monte_erebus', 'site_aoraki_nz', 'site_uluru', 'bio_pacifico'],
+        purpose: 'Línea ley transoceánica meridional que proyecta la pulsación polar antártica a través del Volcán Erebus, los glaciares de Aoraki en Aotearoa (Nueva Zelanda) y el monolito sagrado de Uluru en Australia.',
+        interconnectionsDesc: 'Polo Sur Exacto (-90°) → Monte Erebus (-77.5°) → Aoraki / Monte Cook (-43.6°) → Uluru (-25.3°) → Red Polinesia (-17.7°).'
+      },
+      {
+        id: 'ley_eje_meridiano_atlantico_africa',
+        name: 'Eje Meridiano Polar-Africano (Polo Sur ↔ Vostok ↔ Table Mountain ↔ Rift)',
+        shortName: '⚡ Eje Polar-Africano Meridional',
+        category: 'leyline',
+        color: '#f59e0b',
+        nodes: ['site_polo_sur_exacto', 'site_lago_vostok', 'site_table_mountain', 'bio_rift'],
+        purpose: 'Conecta el vórtice del Polo Sur y las aguas primordiales del Lago Vostok con la Montaña de la Mesa en Sudáfrica y la columna vertebral del Valle del Rift.',
+        interconnectionsDesc: 'Polo Sur Exacto (-90°) → Lago Vostok (-77.4°) → Table Mountain / Cabo (-34.0°) → Valle del Rift (-1.3°).'
+      },
+      {
+        id: 'ley_anillo_antartico_primordial',
+        name: 'Anillo Telúrico Criogénico de la Antártida',
+        shortName: '❄️ Anillo Criogénico Antártico',
+        category: 'leyline',
+        color: '#38bdf8',
+        nodes: ['site_polo_sur_exacto', 'intra_polo_sur', 'site_lago_vostok', 'site_monte_erebus', 'bio_patagonia'],
+        purpose: 'Circuito cerrado polar que estabiliza el vórtice toroidal antártico integrando el Polo Sur Geográfico, el Lago Vostok, el Monte Erebus y el salto hacia la Patagonia Austral.',
+        interconnectionsDesc: 'Polo Sur Exacto (-90°) → Portal Diamantino → Lago Vostok (-77.4°) → Monte Erebus (-77.5°) → Patagonia Austral (-50.5°).'
       }
     ];
 
@@ -1360,6 +1785,7 @@
     let showLey = true;
     let showConv = true;
     let showEarth = true;
+    let showVolcanoes = true;
     let showLabels = true;
     let autoRotate = true;
     let currentTab = 'bioregions'; // 'bioregions', 'intraterrenas', 'sacred', 'leylines'
@@ -1711,6 +2137,7 @@
       const allEntities = [...BIOREGIONS];
       if (showIntra) allEntities.push(...INTRATERRENAS);
       if (showSacred) allEntities.push(...SACRED_SITES);
+      if (showVolcanoes) allEntities.push(...VOLCANOES);
 
       const visibleItems = allEntities.map(e => ({
         ent: e,
@@ -1728,6 +2155,7 @@
         const multiIndex = selectedEntities.findIndex(s => s.id === ent.id);
         const isIntra = ent.category === 'intraterrena';
         const isSacred = ent.category === 'sacred_site';
+        const isVolcano = ent.category === 'volcano';
 
         const phase = (ent.lon / 180) * Math.PI;
         const wave = 0.5 + 0.5 * Math.sin(time * 3.5 + phase);
@@ -1851,6 +2279,7 @@
       return BIOREGIONS.find(b => b.id === id) || 
              INTRATERRENAS.find(i => i.id === id) || 
              SACRED_SITES.find(s => s.id === id) ||
+             VOLCANOES.find(v => v.id === id) ||
              LEY_LINES.find(l => l.id === id) ||
              CONVERGENCES.find(c => c.id === id);
     }
@@ -1868,6 +2297,8 @@
     tabIntra.addEventListener('click', () => switchTab('intraterrenas'));
     tabSacred.addEventListener('click', () => switchTab('sacred'));
     tabLey.addEventListener('click', () => switchTab('leylines'));
+    const tabVolc = document.getElementById('tab-volcanoes');
+    tabVolc.addEventListener('click', () => switchTab('volcanoes'));
 
     function switchTab(tab) {
       currentTab = tab;
@@ -1875,6 +2306,7 @@
       tabIntra.classList.toggle('active', tab === 'intraterrenas');
       tabSacred.classList.toggle('active', tab === 'sacred');
       tabLey.classList.toggle('active', tab === 'leylines');
+      tabVolc.classList.toggle('active', tab === 'volcanoes');
       populateDirectory();
     }
 
@@ -1884,6 +2316,7 @@
       if (currentTab === 'bioregions') dataset = BIOREGIONS;
       else if (currentTab === 'intraterrenas') dataset = INTRATERRENAS;
       else if (currentTab === 'sacred') dataset = SACRED_SITES;
+      else if (currentTab === 'volcanoes') dataset = VOLCANOES;
       else dataset = LEY_LINES;
 
       const filtered = dataset.filter(item => {
@@ -2064,7 +2497,7 @@
       } else {
         // Detección de Hover
         hoveredEntity = null;
-        const all = [...BIOREGIONS, ...(showIntra ? INTRATERRENAS : []), ...(showSacred ? SACRED_SITES : [])];
+        const all = [...BIOREGIONS, ...(showIntra ? INTRATERRENAS : []), ...(showSacred ? SACRED_SITES : []), ...(showVolcanoes ? VOLCANOES : [])];
         for (const ent of all) {
           const pr = project(ent.lat, ent.lon, globeRadius * 1.03);
           if (pr.isFront && Math.hypot(e.clientX - pr.x, e.clientY - pr.y) < 18) {
@@ -2117,7 +2550,7 @@
     }
 
     canvas.addEventListener('click', (e) => {
-      const all = [...BIOREGIONS, ...(showIntra ? INTRATERRENAS : []), ...(showSacred ? SACRED_SITES : [])];
+      const all = [...BIOREGIONS, ...(showIntra ? INTRATERRENAS : []), ...(showSacred ? SACRED_SITES : []), ...(showVolcanoes ? VOLCANOES : [])];
       for (const ent of all) {
         const pr = project(ent.lat, ent.lon, globeRadius * 1.03);
         if (pr.isFront && Math.hypot(e.clientX - pr.x, e.clientY - pr.y) < 20) {
@@ -2179,6 +2612,15 @@
       btnConv.classList.toggle('btn-active', showConv);
     });
 
+    // Conmutador Volcanes
+    const btnVolc = document.getElementById('btn-toggle-volcanoes');
+    const txtVolc = document.getElementById('txt-volcanoes');
+    btnVolc.addEventListener('click', () => {
+      showVolcanoes = !showVolcanoes;
+      txtVolc.textContent = showVolcanoes ? 'ON' : 'OFF';
+      btnVolc.classList.toggle('btn-active', showVolcanoes);
+    });
+
     // Conmutador Tierra
     const btnEarth = document.getElementById('btn-toggle-earth');
     const txtEarth = document.getElementById('txt-earth');
@@ -2203,6 +2645,25 @@
     btnRot.addEventListener('click', () => {
       autoRotate = !autoRotate;
       txtRot.textContent = autoRotate ? 'ON' : 'OFF';
+    });
+
+    // Enfoque directo al Polo Sur Exacto (-90°)
+    document.getElementById('btn-focus-south-pole')?.addEventListener('click', () => {
+      const southPole = findEntity('bio_polo_sur') || findEntity('site_polo_sur_exacto') || { lat: -90, lon: 0, name: 'Polo Sur Exacto (-90°)' };
+      autoRotate = false;
+      if (txtRot) txtRot.textContent = 'OFF';
+      selectEntity(southPole);
+      flyTo(southPole);
+    });
+
+    // Enfoque directo a Cerro Jasuka Venda (Amambay, Paraguay)
+    document.getElementById('btn-focus-jasuka')?.addEventListener('click', () => {
+      const jasuka = findEntity('site_jasuka_venda') || { lat: -23.077, lon: -55.995, name: 'Cerro Jasuka Venda' };
+      autoRotate = false;
+      if (txtRot) txtRot.textContent = 'OFF';
+      selectEntity(jasuka);
+      flyTo(jasuka);
+      playHarmonicChime(528);
     });
 
     // Exportar JSON a la notebook
@@ -2244,6 +2705,132 @@
     // BASE DE CONOCIMIENTO DE VÓRTICES Y SITIOS SAGRADOS PARA EL ASISTENTE
     // =========================================================================
     const SACRED_KNOWLEDGE_BASE = [
+      {
+        keys: ['polo sur', 'antartida', 'antartica', 'south pole', 'domo polar', 'vortice polar', 'amundsen'],
+        name: 'Polo Sur Geográfico Exacto (Vórtice Polar del Hielo Sagrado)',
+        shortName: '❄️ Polo Sur Exacto (-90°)',
+        category: 'sacred_site',
+        territory: 'Polo Sur Geográfico / Inlandsis Antártico (2.835m)',
+        region: 'Antártida (Vórtice Polar)',
+        lat: -90.000, lon: 0.000,
+        color: '#00e5ff',
+        freq: '1080 Hz',
+        ray: 'Rayo Cristalino Diamantino / Foco Polar Primordial',
+        circle: 'Centinelas del Eje de la Tierra',
+        ecosystem: 'Desierto polar hiperárido de hielo / Manto de 3 km de espesor',
+        riversBorn: 'Corrientes abisales termohalinas oceánicas profundas',
+        purpose: 'El punto geográfico exacto donde convergen los 360 meridianos del planeta Tierra. Punto matemático y geodésico cero de la latitud sur, guardián del silencio criogénico y generador del campo toroidal planetario.',
+        interconnectionsDesc: 'Conexión axial con Patagonia Austral, el Acuífero Guaraní, ERKS y el Eje Kundalini Andino.',
+        connectedIds: ['bio_patagonia', 'intra_polo_sur', 'intra_isidris', 'intra_erks']
+      },
+      {
+        keys: ['jasuka venda', 'jasuka', 'cerro guasu', 'yvyty jasuka', 'pai tavytera', 'amambay', 'paraguay'],
+        name: 'Cerro Jasuka Venda / Cerro Guasú (Yvyty Jasuka Venda)',
+        shortName: '🌿 Jasuka Venda (Amambay)',
+        category: 'sacred_site',
+        territory: 'Cordillera del Amambay / Yby Ya\'u - Capitán Bado, Paraguay',
+        region: 'Sudamérica (Cuenca del Plata / Guaraní)',
+        lat: -23.077, lon: -55.995,
+        color: '#10b981',
+        freq: '528 Hz',
+        ray: 'Rayo Esmeralda-Dorado de la Palabra Sagrada (Ñe\'ẽ Porã) & Sustancia Creadora (Jasuka)',
+        circle: 'Círculo de Guardianes Paĩ Tavyterã & Tekoha Guasu',
+        ecosystem: 'Bosque Atlántico del Alto Paraná / Cerros de arenisca y abrigos de Itaguy Guasu',
+        riversBorn: 'Nacientes de los ríos Apa, Aquidabán y afluentes del Río Paraguay hacia el Acuífero Guaraní',
+        purpose: 'El Ombligo de la Tierra y Cuna Cósmica de la Creación según el pueblo Paĩ Tavyterã. Aquí Ñande Ru Tenonde se auto-creó y manifestó el universo mediante el Jasuka (energía creadora primordial) y la palabra sagrada. Abrigo de arte rupestre milenario y corona espiritual septentrional del Acuífero Guaraní conectada al Polo Sur.',
+        interconnectionsDesc: 'Conexión sagrada con las Cataratas del Iguazú, Aurora, ERKS, la Cuenca del Plata y el enraizamiento al Polo Sur Exacto.',
+        connectedIds: ['site_iguazu', 'intra_aurora', 'intra_erks', 'bio_plata', 'site_polo_sur_exacto']
+      },
+      {
+        keys: ['lago vostok', 'vostok', 'subglacial'],
+        name: 'Lago Vostok Subglacial (Cápsula de Agua Primigenia)',
+        shortName: '💧 Lago Vostok (-77.4°)',
+        category: 'sacred_site',
+        territory: 'Meseta Antártica Oriental / Base Vostok (4.000m bajo el hielo)',
+        region: 'Antártida (Meseta Oriental)',
+        lat: -77.400, lon: 106.840,
+        color: '#38bdf8',
+        freq: '963 Hz',
+        ray: 'Rayo Platino-Diamantino del Agua Cósmica Subglacial',
+        circle: 'Custodios de la Memoria Hídrica Primordial',
+        ecosystem: 'Lago de agua líquida pura aislado por más de 15 a 20 millones de años bajo extrema presión',
+        riversBorn: 'Flujos hidrotérmicos subglaciales profundos hacia el Océano Austral',
+        purpose: 'La mayor reserva de agua líquida fósil del planeta, sellada antes de la historia humana moderna. Archivo molecular de la pureza primigenia de Gaia y antena resonadora del eje polar.',
+        interconnectionsDesc: 'Canal telúrico con el Polo Sur Geográfico Exacto, el Monte Erebus y la Montaña de la Mesa en Sudáfrica.',
+        connectedIds: ['site_polo_sur_exacto', 'intra_polo_sur', 'site_monte_erebus', 'site_table_mountain']
+      },
+      {
+        keys: ['erebus', 'monte erebus', 'volcan antartida', 'fuego y hielo'],
+        name: 'Monte Erebus (Volcán Sagrado de Fuego y Hielo)',
+        shortName: '🌋 Monte Erebus (-77.5°)',
+        category: 'sacred_site',
+        territory: 'Isla de Ross, Mar de Ross, Antártida',
+        region: 'Antártida (Mar de Ross)',
+        lat: -77.530, lon: 167.170,
+        color: '#f97316',
+        freq: '741 Hz',
+        ray: 'Rayo Fuego-Cristal / Alquimia de Fuego y Hielo',
+        circle: 'Vigilantes de la Llama Polar',
+        ecosystem: 'Estratovolcán activo más austral de la Tierra con lago de lava permanente y torres de hielo',
+        riversBorn: 'Glaciares de Ross y corrientes marinas del Océano Austral',
+        purpose: 'El faro ígneo del casquete antártico: el matrimonio sagrado del fuego magmático interior con el manto criogénico polar. Calibra la energía térmica del núcleo terrestre con la atmósfera polar.',
+        interconnectionsDesc: 'Vínculo ígneo-polar con el Polo Sur Geográfico, el Lago Vostok, Aoraki (Nueva Zelanda) y la Patagonia Austral.',
+        connectedIds: ['site_polo_sur_exacto', 'site_lago_vostok', 'site_aoraki_nz', 'bio_patagonia']
+      },
+      {
+        keys: ['aoraki', 'monte cook', 'mount cook', 'nueva zelanda', 'aotearoa'],
+        name: 'Aoraki / Monte Cook (Altar de las Nieves de Aotearoa)',
+        shortName: '🏔️ Aoraki / Monte Cook',
+        category: 'sacred_site',
+        territory: 'Alpes del Sur / Isla Sur (Te Waipounamu), Nueva Zelanda',
+        region: 'Oceanía (Aotearoa)',
+        lat: -43.595, lon: 170.141,
+        color: '#00e5ff',
+        freq: '528 Hz',
+        ray: 'Rayo Blanco-Turquesa de los Hielos del Pacífico',
+        circle: 'Guardianes del Waitaha & Ngāi Tahu',
+        ecosystem: 'Glaciares alpinos (Tasman) y selva templada lluviosa austral',
+        riversBorn: 'Río Tasman y afluentes glaciares hacia el Mar de Tasmania y Océano Austral',
+        purpose: 'El ancestro sagrado más reverenciado de la tradición maorí en la Isla Sur. Pilar de conexión entre las nieves alpinas de Oceanía y el influjo del vórtice polar antártico que asciende por el Mar de Ross.',
+        interconnectionsDesc: 'Puente oceánico entre el Polo Sur Exacto, el Monte Erebus, Uluru y la red de la Polinesia.',
+        connectedIds: ['site_polo_sur_exacto', 'site_monte_erebus', 'site_uluru', 'bio_pacifico']
+      },
+      {
+        keys: ['uluru', 'ayers rock', 'kata tjuta', 'tjukurpa', 'australia'],
+        name: 'Uluru & Kata Tjuta (Plexo Solar Planetario / Altar Rojo)',
+        shortName: '🔴 Uluru (Australia)',
+        category: 'sacred_site',
+        territory: 'Parque Nacional Uluru-Kata Tjuta, Territorio del Norte, Australia',
+        region: 'Oceanía (Desierto Australiano)',
+        lat: -25.344, lon: 131.036,
+        color: '#ef4444',
+        freq: '528 Hz',
+        ray: 'Rayo Rojo-Dorado del Tiempo del Sueño (Tjukurpa)',
+        circle: 'Anangu Traditional Owners & Custodios del Tiempo del Sueño',
+        ecosystem: 'Monolito gigante de arcosa en el corazón del desierto rojo australiano',
+        riversBorn: 'Pozos sagrados de agua perenne (Mutitjulu) y cuencas subterráneas',
+        purpose: 'El corazón telúrico y plexo solar de la red planetaria. Ancla viva del Tiempo del Sueño (Tjukurpa) y receptor del rayo cósmico austral transmitido desde el Polo Sur a través de Aotearoa y el Océano Índico.',
+        interconnectionsDesc: 'Receptor solar de la corriente antártica a través de Aotearoa y puente con la Montaña de la Mesa en Sudáfrica.',
+        connectedIds: ['site_aoraki_nz', 'site_polo_sur_exacto', 'site_table_mountain', 'bio_pacifico']
+      },
+      {
+        keys: ['table mountain', 'montana de la mesa', 'ciudad del cabo', 'cape town', 'sudafrica', 'africa del sur'],
+        name: 'Table Mountain / Montaña de la Mesa (Vórtice del Cabo de Buena Esperanza)',
+        shortName: '⛰️ Table Mountain (Cabo)',
+        category: 'sacred_site',
+        territory: 'Península del Cabo, Ciudad del Cabo, Sudáfrica',
+        region: 'África Austral',
+        lat: -33.957, lon: 18.423,
+        color: '#f59e0b',
+        freq: '432 Hz',
+        ray: 'Rayo Dorado de la Síntesis Oceánica Atlántico-Índico',
+        circle: 'Guardianes del Reino Floral del Cabo (Fynbos)',
+        ecosystem: 'Meseta arenisca milenaria de 330 millones de años con flora endémica del Fynbos',
+        riversBorn: 'Arroyos de la Península del Cabo hacia las bahías atlántica e índica',
+        purpose: 'El vórtice receptor meridional del continente africano. Punto donde convergen y se sintetizan las corrientes del Atlántico Sur y del Océano Índico, canalizando la energía telúrica del Polo Sur hacia el Gran Valle del Rift.',
+        interconnectionsDesc: 'Conexión directa entre el Polo Sur Exacto, el Lago Vostok, el Valle del Rift y Uluru.',
+        connectedIds: ['site_polo_sur_exacto', 'site_lago_vostok', 'bio_rift', 'site_uluru']
+      },
       {
         keys: ['kailash', 'gang rinpoche', 'tibet'],
         name: 'Monte Kailash (Gang Rinpoche)',
@@ -2845,7 +3432,7 @@ Mantén un tono de alta sabiduría, inspirador y riguroso con la geografía sagr
 
     // Buscar nodos más cercanos para interconectar
     function findNearestEntities(lat, lon, count = 2) {
-      const all = [...BIOREGIONS, ...INTRATERRENAS, ...SACRED_SITES];
+      const all = [...BIOREGIONS, ...INTRATERRENAS, ...SACRED_SITES, ...VOLCANOES];
       return all
         .filter(e => e.lat !== undefined && e.lon !== undefined)
         .map(e => ({ entity: e, dist: getSphericalDistance(lat, lon, e.lat, e.lon) }))
