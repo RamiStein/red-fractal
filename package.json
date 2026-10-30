@@ -4,7 +4,8 @@
   "description": "Red Humana de la Nueva Era - Modelos Matemáticos y Espacio Digital Fractal basado en Sólidos Platónicos",
   "type": "module",
   "scripts": {
-    "test": "node tests/verify_community.js && node tests/verify_math.js && node tests/verify_crystal.js && node tests/verify_mycelium.js",
+    "test": "node tests/verify_community.js && node tests/verify_math.js && node tests/verify_crystal.js && node tests/verify_mycelium.js && node tests/verify_hypergraph.js",
+    "test:hypergraph": "node tests/verify_hypergraph.js",
     "test:community": "node tests/verify_community.js",
     "test:math": "node tests/verify_math.js",
     "start": "npx serve ."

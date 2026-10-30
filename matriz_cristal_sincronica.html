@@ -563,6 +563,10 @@
         🎯 Convergencias: <span id="txt-conv">ON</span>
       </button>
 
+      <button id="btn-pulse-fire" title="⚛️ Simular Pulso Sincrónico desde el Ojo de Fuego de Sudamérica (Ojos del Salado)" style="background:linear-gradient(135deg, rgba(255,68,34,0.38), rgba(255,211,42,0.25)); border-color:#ff4422; color:#ffd32a; font-weight:700;">
+        ⚛️ Pulso de Fuego
+      </button>
+
       <button id="btn-toggle-volcanoes" class="btn-active" title="Mostrar/ocultar Volcanes Sagrados y Fuegos Telúricos">
         🌋 Volcanes: <span id="txt-volcanoes">ON</span>
       </button>
@@ -788,6 +792,7 @@
     <!-- Sugerencias Rápidas / Chips -->
     <div class="ast-suggestions" id="ast-suggestions">
       <div class="ast-chip" id="chip-analyze-multisel" data-action="analyze-link" style="border-color:var(--accent-purple); color:#fff; background:rgba(179,102,255,0.18);">⚡ Analizar Vínculos Seleccionados</div>
+      <div class="ast-chip" data-action="pulse-fire" style="border-color:#ff4422; color:#ffd32a; background:rgba(255,68,34,0.18);">⚛️ Pulso del Ojo de Fuego</div>
       <div class="ast-chip" data-query="Acelerá la rotación del planeta al doble" style="border-color:#06d6a0; color:#06d6a0; background:rgba(6,214,160,0.12);">🛠️ Acelerar Rotación</div>
       <div class="ast-chip" data-query="Cambiá el fondo a azul cósmico" style="border-color:#00e5ff; color:#00e5ff;">🎨 Fondo Azul Cósmico</div>
       <div class="ast-chip" data-query="Activá el modo meditación" style="border-color:#b366ff; color:#b366ff;">🧘 Modo Meditación</div>
@@ -1012,9 +1017,13 @@
         freq: '777 Hz',
         ray: 'Rayo Azul Cósmico & Espejos de Luz',
         circle: 'Hermandad Blanca de los Espejos de ERKS',
-        purpose: 'Vórtice primordial de despertar de la conciencia cósmica, activación de memorias estelares y portal de contacto interdimensional. Sostiene la llama azul de la transmutación en el centro de Argentina.',
-        interconnectionsDesc: 'Vértice axial de convergencia: emite flujos telúricos hacia la Biorregión de la Plata, hacia los Andes (Isidris), hacia el Acuífero Guaraní (Aurora) y hacia el Lago Titicaca.',
-        connectedIds: ['bio_plata', 'bio_andes', 'intra_aurora', 'intra_isidris', 'intra_titicaca']
+        custodians: 'Hermandad Blanca de los Espejos, Maestro Saruma',
+        hierarchy: 'Consejo de los Espejos Cósmicos — Transmutación Molecular y Activación de la Llama Azul',
+        syncResonance: 'Armónico 7:7:7 — Resonancia Espejo-Cristal',
+        telluricMultiplier: 2.4,
+        purpose: 'Vórtice primordial de despertar de la conciencia cósmica, transmutación molecular y portal de contacto interdimensional. Conectado directamente al Ojo de Fuego como centro de ignición y despertar celular.',
+        interconnectionsDesc: 'Vértice axial de convergencia: recibe la corriente ígnea del Ojo de Fuego (Ojos del Salado) y emite flujos telúricos hacia la Biorregión de la Plata, Aurora, Isidris, Titicaca y Miz Tli Tlan.',
+        connectedIds: ['volc_ojo_del_salado', 'bio_plata', 'bio_andes', 'intra_aurora', 'intra_isidris', 'intra_titicaca', 'intra_miz_tli_tlan', 'site_jasuka_venda']
       },
       {
         id: 'intra_aurora',
@@ -1028,9 +1037,13 @@
         freq: '528 Hz',
         ray: 'Rayo Verde & Dorado de Sanación Planetaria',
         circle: 'Sanadores del Acuífero Sagrado',
-        purpose: 'Centro de sanación celular y espiritual de la Tierra; custodia energética de las inmensas reservas de agua dulce profunda del Acuífero Guaraní.',
-        interconnectionsDesc: 'Articulado directamente con ERKS en Córdoba y con la Cuenca Amazónica; vierte armonía vibracional en la Cuenca del Plata.',
-        connectedIds: ['bio_plata', 'intra_erks', 'bio_amazonas']
+        custodians: 'Hermandad de los Sanadores del Acuífero, Maestro Acuario',
+        hierarchy: 'Consejo de Sanación Planetaria — Regeneración Celular y Flujos Vitales Acuáticos',
+        syncResonance: 'Armónico 5:28 — Frecuencia de Regeneración del ADN Planetario',
+        telluricMultiplier: 2.3,
+        purpose: 'Centro de sanación celular y espiritual de la Tierra; custodia energética de las inmensas reservas de agua dulce profunda del Acuífero Guaraní y anclaje de los flujos vitales hacia la Cuenca del Plata.',
+        interconnectionsDesc: 'Articulado con el Ojo de Fuego, con ERKS en Córdoba, con Jasuka Venda en el Amambay y con la Cuenca Amazónica.',
+        connectedIds: ['volc_ojo_del_salado', 'bio_plata', 'intra_erks', 'site_jasuka_venda', 'bio_amazonas', 'intra_paititi']
       },
       {
         id: 'intra_isidris',
@@ -1127,6 +1140,26 @@
         purpose: 'Corazón directriz de la Red de Agartha y emisión del Plan Evolutivo para la Tierra; irradiación de luz de síntesis universal.',
         interconnectionsDesc: 'Nutre la espina de los Himalayas y las estepas boreales.',
         connectedIds: ['bio_himalayas', 'bio_taiga']
+      },
+      {
+        id: 'intra_miz_tli_tlan',
+        name: 'Miz Tli Tlan (Archivo de la Memoria Cósmica)',
+        shortName: '🏛️ Miz Tli Tlan (Cusco/Paititi)',
+        category: 'intraterrena',
+        territory: 'Valle Sagrado de los Incas / Cusco hacia Paititi, Perú',
+        region: 'Sudamérica (Andes Centrales)',
+        lat: -13.163, lon: -72.545,
+        color: '#ffd32a',
+        freq: '963 Hz',
+        ray: 'Rayo Dorado-Violeta del Archivo Akáshico Planetario',
+        circle: 'Custodios del Disco Solar y la Memoria de las Razas',
+        custodians: 'Maestros Incas Ascendidos, Hermandad de los Siete Rayos',
+        hierarchy: 'Consejo Solar del Cusco — Enlace Directo con Shamballa Central',
+        syncResonance: 'Armónico 13:20 — Frecuencia del Tiempo Sincrónico Maya-Inca',
+        telluricMultiplier: 2.6,
+        purpose: 'El gran archivo etérico del conocimiento cósmico; custodia del Disco Solar de Mú y de los códigos evolutivos de la humanidad. Conectado al Ojo de Fuego de Sudamérica como receptor del pulso ígneo que transmuta los registros de la Tierra.',
+        interconnectionsDesc: 'Eje Cusco-Paititi-Titicaca: enlaza la sabiduría de los Andes con la selva amazónica, irradiando luz hacia ERKS, Aurora y Shamballa.',
+        connectedIds: ['volc_ojo_del_salado', 'intra_titicaca', 'intra_erks', 'intra_paititi', 'intra_shamballa']
       },
       {
         id: 'intra_polo_sur',
@@ -1286,11 +1319,15 @@
         freq: '528 Hz',
         ray: 'Rayo Esmeralda-Dorado de la Palabra Sagrada (Ñe\'ẽ Porã) & Sustancia Creadora (Jasuka)',
         circle: 'Círculo de Guardianes Paĩ Tavyterã & Tekoha Guasu',
+        custodians: 'Comunidad Paĩ Tavyterã, Guardianes del Tekoha Guasu',
+        hierarchy: 'Tekoha Guasu — Puente Receptor del Fuego hacia los Ríos Voladores',
+        syncResonance: 'Armónico 5:28:13 — Frecuencia del Jasuka Creador',
+        telluricMultiplier: 2.2,
         ecosystem: 'Bosque Atlántico del Alto Paraná / Cerros de arenisca y abrigos de Itaguy Guasu',
         riversBorn: 'Nacientes de los ríos Apa, Aquidabán y afluentes del Río Paraguay hacia el Acuífero Guaraní',
-        purpose: 'El Ombligo de la Tierra y Cuna Cósmica de la Creación según el pueblo Paĩ Tavyterã. Aquí Ñande Ru Tenonde se auto-creó y manifestó el universo mediante el Jasuka (energía creadora primordial) y la palabra sagrada. Abrigo de arte rupestre milenario y corona espiritual septentrional del Acuífero Guaraní conectada al Polo Sur.',
-        interconnectionsDesc: 'Conexión sagrada con las Cataratas del Iguazú, Aurora, ERKS, la Cuenca del Plata y el enraizamiento al Polo Sur Exacto.',
-        connectedIds: ['site_iguazu', 'intra_aurora', 'intra_erks', 'bio_plata', 'site_polo_sur_exacto']
+        purpose: 'El Ombligo de la Tierra y Cuna Cósmica de la Creación según el pueblo Paĩ Tavyterã. Nodo sagrado de la chispa creadora primordial de la bioregión guaraní; actúa como un puente receptor de las frecuencias del Ojo de Fuego y distribuidor hacia los flujos voladores de la Cuenca del Plata y el Acuífero Guaraní.',
+        interconnectionsDesc: 'Puente receptor de las corrientes del Ojo de Fuego de Sudamérica; conectado con Aurora, ERKS, Iguazú y la Cuenca del Plata.',
+        connectedIds: ['volc_ojo_del_salado', 'site_iguazu', 'intra_aurora', 'intra_erks', 'bio_plata', 'site_polo_sur_exacto']
       },
       {
         id: 'site_lago_vostok',
@@ -1386,6 +1423,26 @@
 
     // 3b. Volcanes Sagrados y Fuegos Telúricos
     const VOLCANOES = [
+      {
+        id: 'volc_ojo_del_salado',
+        name: 'Nevado Ojos del Salado (El Ojo de Fuego de Sudamérica)',
+        shortName: '🔥 Ojo de Fuego (Ojos del Salado)',
+        category: 'volcano',
+        territory: 'Puna de Atacama, límite Catamarca (Argentina) - Atacama (Chile)',
+        region: 'Sudamérica (Altiplano Andino)',
+        lat: -27.109, lon: -68.541,
+        elevation: '6893 m',
+        volcanoType: 'Estratovolcán gigante (El volcán más alto de la Tierra)',
+        geoState: 'dormant',
+        telluricMultiplier: 3.0,
+        color: '#ff0000',
+        freq: '396 Hz',
+        ray: 'Rayo Rojo-Oro del Núcleo Planetario & Fuego Primordial Crístico',
+        circle: 'Core Router & Distribuidor Central del Fuego Continental',
+        purpose: 'El volcán más alto del planeta Tierra (6893 m). Actúa como el procesador central (Core Router) y dínamo distribuidor del flujo telúrico de Sudamérica. Conecta las profundidades del manto magmático con la Puna andina, encauzando corrientes ígneas hacia la cadena volcánica y activando mediante resonancia piezoeléctrica los centros intraterrenos de ERKS, Isidris, Aurora, Miz Tli Tlan y el puente creador de Jasuka Venda.',
+        interconnectionsDesc: 'Core Router continental: emite pulsos hacia Licancabur, Lanín, Villarrica, Chimborazo; puente de ignición con ERKS, Aurora, Miz Tli Tlan y Jasuka Venda.',
+        connectedIds: ['volc_licancabur', 'volc_lanin', 'volc_villarrica', 'volc_chimborazo', 'intra_erks', 'intra_isidris', 'intra_titicaca', 'intra_miz_tli_tlan', 'site_jasuka_venda', 'intra_aurora']
+      },
       {
         id: 'volc_licancabur', name: 'Volcán Licancabur', shortName: '🌋 Licancabur',
         category: 'volcano', territory: 'Desierto de Atacama, frontera Chile-Bolivia',
@@ -2133,6 +2190,117 @@
         ctx.restore();
       }
 
+      // 4c. Visualización del Pulso Sincrónico Multicapa (HyperGraph Engine)
+      if (typeof HyperGraphEngine !== 'undefined') {
+        const pulseAnim = HyperGraphEngine.getPulseAnimation();
+        if (pulseAnim) {
+          const elapsed = performance.now() - pulseAnim.startTime;
+          const progress = Math.min(1, elapsed / pulseAnim.duration);
+          const { nodes: pulseNodes, edges: pulseEdges, maxDepth } = pulseAnim.result;
+
+          if (progress >= 1 && elapsed > pulseAnim.duration + 5000) {
+            HyperGraphEngine.clearPulseAnimation();
+          } else {
+            const currentWave = Math.floor(progress * (maxDepth + 1.2));
+            const fadeAlpha = progress >= 1 ? Math.max(0, 1 - (elapsed - pulseAnim.duration) / 5000) : 1;
+            const flowColors = { telluric: '#ff4422', etheric: '#00e5ff', cristic: '#ffd32a' };
+
+            // 1. Trazado de aristas del pulso activo (Puentes y Corrientes)
+            ctx.save();
+            for (const edge of pulseEdges) {
+              const srcData = pulseNodes[edge.source];
+              const tgtData = pulseNodes[edge.target];
+              if (!srcData || !tgtData) continue;
+              if (srcData.depth > currentWave) continue;
+
+              const srcNode = findEntity(edge.source);
+              const tgtNode = findEntity(edge.target);
+              if (!srcNode || !tgtNode) continue;
+
+              const p1 = project(srcNode.lat, srcNode.lon, globeRadius * 1.03);
+              const p2 = project(tgtNode.lat, tgtNode.lon, globeRadius * 1.03);
+              if (!p1.isFront && !p2.isFront) continue;
+
+              const color = flowColors[edge.flowType] || '#ff4422';
+              const edgeEnergy = Math.max(0.1, tgtData.energy);
+              const edgeAlpha = Math.min(1, edgeEnergy * 0.85 * fadeAlpha);
+
+              // Rayo de flujo telúrico / etérico
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = color;
+              ctx.globalAlpha = edgeAlpha;
+              ctx.lineWidth = Math.min(6, 1.5 + edgeEnergy * 3.5);
+              ctx.shadowColor = color;
+              ctx.shadowBlur = 12 + edgeEnergy * 10;
+              ctx.stroke();
+
+              // Partícula viajando a lo largo del vector de flujo
+              if (tgtData.depth <= currentWave) {
+                const partT = ((time * 1.4 + tgtData.depth * 0.35) % 1);
+                const px = p1.x + (p2.x - p1.x) * partT;
+                const py = p1.y + (p2.y - p1.y) * partT;
+                ctx.beginPath();
+                ctx.arc(px, py, 3 + edgeEnergy * 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 15;
+                ctx.fill();
+              }
+            }
+            ctx.shadowBlur = 0;
+            ctx.restore();
+
+            // 2. Halos y Ondas Resonantes en los Vórtices Alcanzados
+            ctx.save();
+            for (const [nodeId, data] of Object.entries(pulseNodes)) {
+              if (data.depth > currentWave) continue;
+              const node = findEntity(nodeId);
+              if (!node) continue;
+
+              const pr = project(node.lat, node.lon, globeRadius * 1.03);
+              if (!pr.isFront) continue;
+
+              const color = flowColors[data.flowType] || '#ffd32a';
+              const pulseEnergy = Math.max(0.1, data.energy);
+              const nodeFade = Math.min(1, fadeAlpha * (0.4 + pulseEnergy * 0.6));
+              const haloRadius = 8 + pulseEnergy * 16 + Math.sin(time * 6 + data.depth * 1.5) * 4;
+
+              // Anillo de resonancia expansiva
+              ctx.beginPath();
+              ctx.arc(pr.x, pr.y, haloRadius, 0, Math.PI * 2);
+              ctx.strokeStyle = color;
+              ctx.lineWidth = 2.5;
+              ctx.globalAlpha = nodeFade;
+              ctx.shadowColor = color;
+              ctx.shadowBlur = 18;
+              ctx.stroke();
+
+              // Núcleo brillante
+              ctx.beginPath();
+              ctx.arc(pr.x, pr.y, 4 + pulseEnergy * 4, 0, Math.PI * 2);
+              ctx.fillStyle = color;
+              ctx.globalAlpha = Math.min(1, nodeFade * 1.2);
+              ctx.fill();
+
+              // Etiqueta de Porcentaje de Frecuencia
+              if (showLabels) {
+                ctx.font = 'bold 9px monospace';
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = '#000000';
+                ctx.shadowBlur = 4;
+                ctx.globalAlpha = nodeFade;
+                const pct = Math.round(data.energy * 100);
+                ctx.fillText(`⚡${pct}%`, pr.x + haloRadius + 4, pr.y + 3);
+              }
+            }
+            ctx.shadowBlur = 0;
+            ctx.restore();
+          }
+        }
+      }
+
       // 5. Dibujar Nodos: Biorregiones, Intraterrenas y Sitios Sagrados
       const allEntities = [...BIOREGIONS];
       if (showIntra) allEntities.push(...INTRATERRENAS);
@@ -2610,6 +2778,11 @@
       showConv = !showConv;
       txtConv.textContent = showConv ? 'ON' : 'OFF';
       btnConv.classList.toggle('btn-active', showConv);
+    });
+
+    // Botón Pulso de Fuego (HyperGraph Engine)
+    document.getElementById('btn-pulse-fire').addEventListener('click', () => {
+      HyperGraphEngine.startPulseAnimation('volc_ojo_del_salado');
     });
 
     // Conmutador Volcanes
@@ -3609,6 +3782,10 @@ Mantén un tono de alta sabiduría, inspirador y riguroso con la geografía sagr
     document.querySelectorAll('.ast-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         const action = chip.getAttribute('data-action');
+        if (action === 'pulse-fire') {
+            HyperGraphEngine.startPulseAnimation('volc_ojo_del_salado');
+            return;
+          }
         if (action === 'analyze-link') {
           openAssistant();
           analyzeTelluricLink(selectedEntities);
@@ -3627,6 +3804,21 @@ Mantén un tono de alta sabiduría, inspirador y riguroso con la geografía sagr
       appendAstMessage('user', query);
 
       const q = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      // ── 0. PULSO SINCRÓNICO: simulación de propagación desde el Ojo de Fuego ──
+      if (q.includes('pulso') || q.includes('ojo de fuego') || q.includes('propaga') || q.includes('ojos del salado') || q.includes('hipergrafo')) {
+        let originId = 'volc_ojo_del_salado';
+        // Detectar si quiere pulso desde otro nodo
+        if (q.includes('erks')) originId = 'intra_erks';
+        else if (q.includes('aurora')) originId = 'intra_aurora';
+        else if (q.includes('jasuka') || q.includes('guasu')) originId = 'site_jasuka_venda';
+        else if (q.includes('miz tli') || q.includes('cusco')) originId = 'intra_miz_tli_tlan';
+        else if (q.includes('titicaca')) originId = 'intra_titicaca';
+        else if (q.includes('erebus') || q.includes('antartida')) originId = 'volc_erebus';
+        else if (q.includes('fuji') || q.includes('japon')) originId = 'volc_fuji';
+        HyperGraphEngine.startPulseAnimation(originId);
+        return;
+      }
 
       // ── 1a. MOTOR DE AUTO-MEJORA: el asistente modifica el sistema en sí mismo ──
       // Rotación
@@ -3964,6 +4156,334 @@ Mantén un tono de alta sabiduría, inspirador y riguroso con la geografía sagr
         });
       }, 50);
     }
+
+    // =========================================================================
+    // ⚛️ SUBMÓDULO DE ALTA FIDELIDAD: HIPERGRAFO DE ENERGÍA VIVA (HyperGraph Engine)
+    // =========================================================================
+    // Arquitectura GIS Multicapa:
+    //   - Capa 1: Litosférica / Física (Volcanes, Vórtices Geográficos, Jasuka Venda)
+    //   - Capa 2: Intraterrena / Etérica (ERKS, Aurora, Miz Tli Tlan, Isidris, Titicaca)
+    // Conexiones: Vectores de Fuego Litosférico, Puentes de Ignición y Corrientes Crísticas.
+    // Algoritmo: Propagación de Pulso Sincrónico con atenuación geodésica y amplificación resonante.
+    // =========================================================================
+
+    const HyperGraphEngine = (() => {
+      const EDGES = [];
+      let pulseAnimation = null;
+
+      function addEdge(sourceId, targetId, flowType, intensity = 0.85, bidirectional = true) {
+        const src = findEntity(sourceId);
+        const tgt = findEntity(targetId);
+        if (!src || !tgt) return;
+
+        const distKm = calculateGeodesicDistanceKm(src.lat, src.lon, tgt.lat, tgt.lon);
+        const capacity = Number((intensity * (1 / Math.max(1, distKm / 4000))).toFixed(4));
+
+        const edge = {
+          id: `edge_${sourceId}_${targetId}`,
+          source: sourceId,
+          target: targetId,
+          flowType, // 'telluric' | 'etheric' | 'cristic'
+          intensity,
+          distanceKm: distKm,
+          capacity,
+          direction: bidirectional ? 'bidirectional' : 'unidirectional'
+        };
+
+        EDGES.push(edge);
+        if (bidirectional) {
+          EDGES.push({
+            ...edge,
+            id: `edge_${targetId}_${sourceId}`,
+            source: targetId,
+            target: sourceId
+          });
+        }
+      }
+
+      function buildTopology() {
+        EDGES.length = 0;
+
+        // 1. CAPA 1: VOLCÁN ➔ VOLCÁN (Vectores Litosféricos de Fuego Continuo)
+        addEdge('volc_ojo_del_salado', 'volc_licancabur', 'telluric', 0.96);
+        addEdge('volc_ojo_del_salado', 'volc_lanin', 'telluric', 0.88);
+        addEdge('volc_ojo_del_salado', 'volc_villarrica', 'telluric', 0.90);
+        addEdge('volc_lanin', 'volc_villarrica', 'telluric', 0.94);
+        addEdge('volc_villarrica', 'volc_osorno', 'telluric', 0.91);
+        addEdge('volc_ojo_del_salado', 'volc_chimborazo', 'telluric', 0.84);
+        addEdge('volc_chimborazo', 'volc_cotopaxi', 'telluric', 0.95);
+        addEdge('volc_cotopaxi', 'volc_tungurahua', 'telluric', 0.93);
+        addEdge('volc_cotopaxi', 'volc_popocatepetl', 'telluric', 0.72);
+        addEdge('volc_vesuvio', 'volc_etna', 'telluric', 0.90);
+        addEdge('volc_fuji', 'volc_krakatoa', 'telluric', 0.75);
+        addEdge('volc_erebus', 'volc_ojo_del_salado', 'telluric', 0.68);
+
+        // 2. INTER-CAPA: VOLCÁN ➔ CIUDAD INTRATERRENA (Puentes de Ignición)
+        addEdge('volc_ojo_del_salado', 'intra_erks', 'cristic', 0.98);
+        addEdge('volc_ojo_del_salado', 'intra_isidris', 'telluric', 0.92);
+        addEdge('volc_ojo_del_salado', 'intra_titicaca', 'telluric', 0.88);
+        addEdge('volc_ojo_del_salado', 'intra_aurora', 'etheric', 0.82);
+        addEdge('volc_ojo_del_salado', 'intra_miz_tli_tlan', 'cristic', 0.86);
+        addEdge('volc_ojo_del_salado', 'site_jasuka_venda', 'etheric', 0.80);
+        addEdge('volc_licancabur', 'intra_titicaca', 'telluric', 0.92);
+        addEdge('volc_lanin', 'intra_erks', 'telluric', 0.76);
+        addEdge('volc_chimborazo', 'intra_paititi', 'telluric', 0.78);
+        addEdge('volc_erebus', 'intra_polo_sur', 'telluric', 0.88);
+
+        // 3. CAPA 2: CIUDAD INTRATERRENA ➔ CIUDAD INTRATERRENA (Red de Comunicación Sutil)
+        addEdge('intra_erks', 'intra_aurora', 'etheric', 0.96);
+        addEdge('intra_erks', 'intra_isidris', 'etheric', 0.94);
+        addEdge('intra_erks', 'intra_titicaca', 'cristic', 0.90);
+        addEdge('intra_erks', 'intra_miz_tli_tlan', 'cristic', 0.88);
+        addEdge('intra_titicaca', 'intra_miz_tli_tlan', 'cristic', 0.96);
+        addEdge('intra_miz_tli_tlan', 'intra_paititi', 'cristic', 0.98);
+        addEdge('intra_miz_tli_tlan', 'intra_shamballa', 'cristic', 0.74);
+        addEdge('intra_aurora', 'intra_paititi', 'etheric', 0.78);
+        addEdge('intra_polo_sur', 'intra_shamballa', 'etheric', 0.65);
+
+        // 4. PUENTE RECEPTOR Y DISTRIBUIDOR: JASUKA VENDA
+        addEdge('site_jasuka_venda', 'intra_aurora', 'etheric', 0.92);
+        addEdge('site_jasuka_venda', 'intra_erks', 'cristic', 0.88);
+        addEdge('site_jasuka_venda', 'site_iguazu', 'telluric', 0.94);
+      }
+
+      function getNodeMultiplier(node) {
+        if (!node) return 1.0;
+        if (typeof node.telluricMultiplier === 'number') return node.telluricMultiplier;
+        if (node.category === 'volcano') {
+          const t = (node.volcanoType || '').toLowerCase();
+          const s = (node.geoState || '').toLowerCase();
+          if (s === 'active' || t.includes('activo')) return 2.5;
+          if (s === 'dormant' || t.includes('dormido')) return 1.8;
+          return 1.4;
+        }
+        if (node.category === 'intraterrena') return 2.2;
+        return 1.0;
+      }
+
+      function getNodeLayer(node) {
+        if (!node) return 'lithospheric';
+        if (node.category === 'intraterrena') return 'etheric';
+        return 'lithospheric';
+      }
+
+      // Algoritmo de Propagación de Pulso Sincrónico
+      function propagatePulse(originId = 'volc_ojo_del_salado', initialEnergy = 1.0, decayRadiusKm = 3500) {
+        buildTopology();
+        const originNode = findEntity(originId);
+        if (!originNode) {
+          return { error: `Nodo ${originId} no encontrado.` };
+        }
+
+        const visited = {};
+        const wavefronts = [];
+        const queue = [{
+          nodeId: originId,
+          energy: initialEnergy,
+          depth: 0,
+          path: [originId],
+          flowType: 'cristic'
+        }];
+
+        visited[originId] = {
+          nodeId: originId,
+          energy: initialEnergy,
+          depth: 0,
+          path: [originId],
+          flowType: 'cristic',
+          multiplier: getNodeMultiplier(originNode),
+          layer: getNodeLayer(originNode),
+          distanceFromPrevKm: 0,
+          node: originNode
+        };
+
+        let maxDepth = 0;
+
+        while (queue.length > 0) {
+          queue.sort((a, b) => b.energy - a.energy);
+          const current = queue.shift();
+
+          if (current.depth >= 6) continue;
+          if (current.energy < 0.01) continue;
+
+          const outgoing = EDGES.filter(e => e.source === current.nodeId);
+
+          for (const edge of outgoing) {
+            // Evitar ciclos en el camino actual
+            if (current.path.includes(edge.target)) continue;
+
+            const targetNode = findEntity(edge.target);
+            if (!targetNode) continue;
+
+            const mult = getNodeMultiplier(targetNode);
+            const geoAttenuation = 1 / (1 + edge.distanceKm / decayRadiusKm);
+            const gain = 0.5 + (mult * 0.35);
+            const propagatedEnergy = Number(Math.min(1.5, current.energy * edge.intensity * gain * geoAttenuation).toFixed(4));
+
+            if (!visited[edge.target] || visited[edge.target].energy < propagatedEnergy) {
+              const nextDepth = current.depth + 1;
+              const nextPath = [...current.path, edge.target];
+              if (nextDepth > maxDepth) maxDepth = nextDepth;
+
+              const record = {
+                nodeId: edge.target,
+                energy: propagatedEnergy,
+                depth: nextDepth,
+                path: nextPath,
+                flowType: edge.flowType,
+                multiplier: mult,
+                layer: getNodeLayer(targetNode),
+                distanceFromPrevKm: edge.distanceKm,
+                node: targetNode
+              };
+
+              visited[edge.target] = record;
+              queue.push(record);
+            }
+          }
+        }
+
+        for (let d = 0; d <= maxDepth; d++) {
+          const wave = Object.values(visited).filter(v => v.depth === d);
+          if (wave.length > 0) {
+            wavefronts.push(wave.sort((a, b) => b.energy - a.energy));
+          }
+        }
+
+        return {
+          originId,
+          originNode,
+          initialEnergy,
+          totalNodesReached: Object.keys(visited).length,
+          maxDepth,
+          wavefronts,
+          nodes: visited,
+          edges: EDGES,
+          jasukaReceipt: visited['site_jasuka_venda']
+        };
+      }
+
+      function generatePulseReport(result) {
+        const { originNode, wavefronts, totalNodesReached, maxDepth, jasukaReceipt } = result;
+        const flowIcons = { telluric: '🔥 Litosférico Telúrico', etheric: '💠 Etérico Sutil', cristic: '✨ Crístico Sincrónico' };
+
+        let html = `
+          <div style="border-left:3px solid #ff4422; padding-left:10px; margin-bottom:8px;">
+            <div style="font-size:12.5px; font-weight:700; color:#ff4422; letter-spacing:0.5px;">
+              ⚛️ PROPAGACIÓN DE PULSO TELÚRICO MULTICAPA
+            </div>
+            <div style="font-size:10px; color:var(--text-muted); margin-top:3px; line-height:1.4;">
+              Epicentro: <strong style="color:#ffd32a">${originNode.shortName || originNode.name}</strong><br>
+              Alcance Cuántico: <strong>${totalNodesReached} vórtices activos</strong> en <strong>${maxDepth} frentes de onda</strong>.<br>
+              Atenuación Geodésica: <em>Att(d) = 1 / (1 + d / 3500 km)</em> | Ganancia de Custodia: <em>×1.4 a ×3.0</em>
+            </div>
+          </div>
+        `;
+
+        wavefronts.forEach((wave, idx) => {
+          const bgOpacity = 0.08 + idx * 0.025;
+          html += `
+            <div style="margin-top:6px; padding:6px 8px; background:rgba(255,68,34,${bgOpacity}); border-radius:6px; border:1px solid rgba(255,68,34,0.18);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span style="font-size:10px; font-weight:700; color:#ff9f43;">🌊 Frente de Onda #${idx} ${idx === 0 ? '(Epicentro)' : ''}</span>
+                <span style="font-size:9px; color:var(--text-muted);">${wave.length} nodos</span>
+              </div>
+          `;
+
+          wave.forEach(item => {
+            const ent = item.node;
+            const pct = (item.energy * 100).toFixed(1);
+            const barWidth = Math.min(100, Math.max(8, item.energy * 90));
+            const flowLabel = flowIcons[item.flowType] || item.flowType;
+            const layerIcon = item.layer === 'etheric' ? '🏛️' : '🌋';
+            const distInfo = item.distanceFromPrevKm > 0 ? ` · ${item.distanceFromPrevKm} km` : '';
+
+            html += `
+              <div style="margin:3px 0; font-size:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1px;">
+                  <span style="color:#ffffff; font-weight:600;">${layerIcon} ${ent.shortName || ent.name}</span>
+                  <span style="color:#ffd32a; font-family:monospace; font-weight:700;">${pct}%</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <div style="flex:1; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
+                    <div style="width:${barWidth}%; height:100%; background:linear-gradient(90deg, #ff4422, #ffd32a); border-radius:3px;"></div>
+                  </div>
+                  <span style="font-size:8.5px; color:var(--text-muted); min-width:110px; text-align:right;">${flowLabel}${distInfo}</span>
+                </div>
+              </div>
+            `;
+          });
+
+          html += `</div>`;
+        });
+
+        if (jasukaReceipt) {
+          html += `
+            <div style="margin-top:8px; padding:8px; background:rgba(16,185,129,0.14); border-radius:8px; border:1px solid rgba(16,185,129,0.4);">
+              <div style="font-size:11px; font-weight:700; color:#10b981; margin-bottom:3px;">
+                🌿 RECEPCIÓN & TRANSMUTACIÓN EN JASUKA VENDA
+              </div>
+              <div style="font-size:9.5px; color:#e2e8f0; line-height:1.4;">
+                • Frecuencia Resonante Recibida: <strong style="color:#ffd32a;">${(jasukaReceipt.energy * 100).toFixed(1)}%</strong><br>
+                • Vector de Activación: <em>${jasukaReceipt.path.map(id => { const e = findEntity(id); return e ? (e.shortName || e.name) : id; }).join(' ➔ ')}</em><br>
+                • Transmutación: La chispa ígnea del Ojo de Fuego es recibida por la custodia Paĩ Tavyterã, activando la sustancia creadora (Jasuka) que se vierte como humedad y código de vida hacia los <strong>ríos voladores de la Cuenca del Plata y el Acuífero Guaraní</strong>.
+              </div>
+            </div>
+          `;
+        }
+
+        html += `
+          <div style="margin-top:8px; font-size:9px; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.08); padding-top:5px;">
+            💡 <em>Visualización en vivo: Observa en el globo los vectores luminosos de flujo y las partículas de fuego viajando en tiempo real entre la litosfera y el plano intraterreno.</em>
+          </div>
+        `;
+
+        return html;
+      }
+
+      function startPulseAnimation(originId = 'volc_ojo_del_salado') {
+        const result = propagatePulse(originId, 1.0, 3500);
+        if (result.error) {
+          appendAstMessage('assistant', `⚠️ ${result.error}`);
+          return;
+        }
+
+        pulseAnimation = {
+          result,
+          startTime: performance.now(),
+          duration: 9000 // 9 segundos de animación fluida
+        };
+
+        // Enfocar la cámara hacia el nodo de origen
+        if (result.originNode) {
+          flyTo(result.originNode);
+          selectEntity(result.originNode);
+        }
+
+        // Acorde polifónico sagrado de ignición (396Hz fuego, 528Hz agua, 777Hz ERKS, 963Hz corona)
+        playPolyphonicChord([396, 528, 777, 963]);
+
+        // Desplegar reporte en el Asistente Sincrónico
+        openAssistant();
+        const report = generatePulseReport(result);
+        appendAstMessage('assistant', report, result.originNode);
+
+        return result;
+      }
+
+      return {
+        buildTopology,
+        propagatePulse,
+        startPulseAnimation,
+        generatePulseReport,
+        getPulseAnimation: () => pulseAnimation,
+        clearPulseAnimation: () => { pulseAnimation = null; },
+        getEdges: () => EDGES
+      };
+    })();
+
+    // Inicializar la topología del hipergrafo al arrancar
+    HyperGraphEngine.buildTopology();
 
     // Cargar puntos previos guardados en localStorage al iniciar
     loadCustomSites();
